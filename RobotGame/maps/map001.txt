@@ -1,0 +1,585 @@
+#Player
+1 0  0 15 4 -1.57 0
+
+#Walls
+2 0  -20 0 4  -10 17.32 4  -10 17.32 10  -20 0 10  0  0 4  20 4  20 10  0 10
+2 0  -10 -17.32 4  -20 0 4  -20 0 10  -10 -17.32 10  0  0 4  20 4  20 10  0 10
+2 0  20 0 10  10 17.32 10  10 17.32 4  20 0 4  0  0 4  20 4  20 10  0 10
+2 0  10 -17.32 10  20 0 10  20 0 4  10 -17.32 4  0  0 4  20 4  20 10  0 10
+2 0  -10 17.32 4  10 17.32 4  10 17.32 10  -10 17.32 10  0  0 4  20 4  20 10  0 10
+2 0  10 -17.32 4  -10 -17.32 4  -10 -17.32 10  10 -17.32 10  0  0 4  20 4  20 10  0 10
+
+#Ramps
+2 0  2.5 8 0  2.5 12.99 4  -2.5 12.99 4  -2.5 8 0  0  5 0  5 6  0 6  0 0
+2 1  2.5 8 0  2.5 12.99 0  2.5 12.99 4  0  0 0  6 0  6 5
+2 1  -2.5 8 0  -2.5 12.99 4  -2.5 12.99 0  0  0 0  6 5  6 0
+
+2 0  -2.5 -8 0  -2.5 -12.99 4  2.5 -12.99 4  2.5 -8 0  0  5 0  5 6  0 6  0 0
+2 1  -2.5 -8 0  -2.5 -12.99 0  -2.5 -12.99 4  0  0 0  6 0  6 5
+2 1  2.5 -8 0  2.5 -12.99 4  2.5 -12.99 0  0  0 0  6 5  6 0
+
+#Lower Walls
+2 0  -15 0 0  -7.5 12.99 0  -7.5 12.99 4  -15 0 4  0  0 0  15 0  15 4  0 4
+2 0  -7.5 -12.99 0  -15 0 0  -15 0 4  -7.5 -12.99 4  0  0 0  15 0  15 4  0 4
+2 0  15 0 4  7.5 12.99 4  7.5 12.99 0  15 0 0  0  0 0  15 0  15 4  0 4
+2 0  7.5 -12.99 4  15 0 4  15 0 0  7.5 -12.99 0  0  0 0  15 0  15 4  0 4
+2 0  -7.5 12.99 0  7.5 12.99 0  7.5 12.99 4  -7.5 12.99 4  0  0 0  15 0  15 4  0 4
+2 0  7.5 -12.99 0  -7.5 -12.99 0  -7.5 -12.99 4  7.5 -12.99 4  0  0 0  15 0  15 4  0 4
+
+#Lower Floor
+2 0  -7.5 12.99 0  -7.5 -12.99 0  7.5 -12.99 0  7.5 12.99 0  0  -7.5 13  -7.5 -13  7.5 -13  7.5 13
+2 1  -7.5 12.99 0  -15 0 0  -7.5 -12.99 0  0  -7.5 13  -15 0  -7.5 -13
+2 1  7.5 -12.99 0  15 0 0  7.5 12.99 0  0  7.5 -13  15 0  7.5 13
+
+#Upper Floor
+2 0  15 0 4  20 0 4  10 17.32 4  7.5 12.99 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+2 0  7.5 12.99 4  10 17.32  4  -10 17.32 4  -7.5 12.99 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+2 0  -7.5 12.99 4  -10 17.32 4  -20 0 4  -15 0 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+2 0  -15 0 4  -20 0 4  -10 -17.32 4  -7.5 -12.99 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+2 0  -7.5 -12.99 4  -10 -17.32  4  10 -17.32 4  7.5 -12.99 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+2 0  7.5 -12.99 4  10 -17.32 4  20 0 4  15 0 4  0  7.5 12.99  10 17.32  -10 17.32  -7.5 12.99
+
+#Middle Hexagon
+2 0  -2.5 4.33 4  -2.5 -4.33 4  2.5 -4.33 4  2.5 4.33 4  0  -2.5 4.33  -2.5 -4.33  2.5 -4.33  2.5 4.33
+2 1  -2.5 4.33 4  -5 0 4  -2.5 -4.33 4  0  -2.5 4.33  -5 0  -2.5 -4.33
+2 1  2.5 -4.33 4  5 0 4  2.5 4.33 4  0  2.5 -4.33  5 0  2.5 4.33
+
+2 0  2.5 4.33 3  2.5 -4.33 3  -2.5 -4.33 3  -2.5 4.33 3  0  -2.5 4.33  -2.5 -4.33  2.5 -4.33  2.5 4.33
+2 1  -2.5 4.33 3  -2.5 -4.33 3  -5 0 3  0  -2.5 4.33  -2.5 -4.33  -5 0
+2 1  2.5 -4.33 3  2.5 4.33 3  5 0 3  0  2.5 -4.33  2.5 4.33  5 0
+
+2 0  2.5 4.33 4  2.5 4.33 3  -2.5 4.33 3  -2.5 4.33 4  0  0 1  0 0  5 0  5 1
+2 0  -2.5 -4.33 4  -2.5 -4.33 3  2.5 -4.33 3  2.5 -4.33 4  0  0 1  0 0  5 0  5 1
+
+#Middle access walkways
+2 0  5 0 4  12.5 4.33 4  10 8.66 4  2.5 4.33 4  0  0 0  10 0  10 5  0 5
+2 0  5 0 3  2.5 4.33 3  10 8.66 3  12.5 4.33 3  0  0 0  0 5  10 5  10 0
+2 0  5 0 3  12.5 4.33 3  12.5 4.33 4  5 0 4  0  0 0  10 0  10 1  0 1
+2 0  2.5 4.33 4  10 8.66 4  10 8.66 3  2.5 4.33 3  0  0 0  10 0  10 1  0 1
+
+2 0  -5 0 4  -2.5 4.33 4  -10 8.66 4  -12.5 4.33 4  0  0 0  0 5  10 5  10 0
+2 0  -5 0 3  -12.5 4.33 3  -10 8.66 3  -2.5 4.33 3  0  0 0  10 0  10 5  0 5
+2 0  -5 0 4  -12.5 4.33 4  -12.5 4.33 3  -5 0 3  0  0 0  10 0  10 1  0 1
+2 0  -2.5 4.33 3  -10 8.66 3  -10 8.66 4  -2.5 4.33 4  0  0 0  10 0  10 1  0 1
+
+2 0  -5 0 4  -12.5 -4.33 4  -10 -8.66 4  -2.5 -4.33 4  0  0 0  10 0  10 5  0 5
+2 0  -5 0 3  -2.5 -4.33 3  -10 -8.66 3  -12.5 -4.33 3  0  0 0  0 5  10 5  10 0
+2 0  -5 0 3  -12.5 -4.33 3  -12.5 -4.33 4  -5 0 4  0  0 0  10 0  10 1  0 1
+2 0  -2.5 -4.33 4  -10 -8.66 4  -10 -8.66 3  -2.5 -4.33 3  0  0 0  10 0  10 1  0 1
+
+2 0  5 0 4  2.5 -4.33 4  10 -8.66 4  12.5 -4.33 4  0  0 0  0 5  10 5  10 0
+2 0  5 0 3  12.5 -4.33 3  10 -8.66 3  2.5 -4.33 3  0  0 0  10 0  10 5  0 5
+2 0  5 0 4  12.5 -4.33 4  12.5 -4.33 3  5 0 3  0  0 0  10 0  10 1  0 1
+2 0  2.5 -4.33 3  10 -8.66 3  10 -8.66 4  2.5 -4.33 4  0  0 0  10 0  10 1  0 1
+
+#Roof
+2 1  -20 0 10  0 0 15  -10 -17.32 10  0  0 0  10 20  20 0
+2 1  -10 -17.32 10  0 0 15  10 -17.32 10  0  0 0  10 20  20 0
+2 1  10 -17.32 10  0 0 15  20 0 10  0  0 0  10 20  20 0
+2 1  20 0 10  0 0 15  10 17.32 10  0  0 0  10 20  20 0
+2 1  10 17.32 10  0 0 15  -10 17.32 10  0  0 0  10 20  20 0
+2 1  -10 17.32 10  0 0 15  -20 0 10  0  0 0  10 20  20 0
+
+#Turrets
+#1 1  -8 0 0
+#1 1  -6 0 0
+#1 1  -4 0 0
+#1 3  -2 0 0
+#1 3  0 0 0
+#1 3  2 0 0
+#1 3  4 0 0
+#1 3  6 0 0
+#1 3  8 0 0
+
+#Spawn points
+#Around the edges of the pit (0, 1, 2, 3, 4, 5)
+3  -8 0 1
+3  -4 7 1
+3  4 7 1
+3  8 0 1
+3  4 -7 1
+3  -4 -7 1
+#Above center platform (6)
+3  0 0 4
+#Around the edge walkways (7, 8, 9, 10, 11, 12)
+3  -17.5 0 4
+3  -8.6 14.85 4
+3  8.6 14.85 4
+3  17.5 0 4
+3  8.6 -14.85 4
+3  -8.6 -14.85 4
+#At the utmost top of the arena (13)
+3 0 0 13
+
+#Spawn points
+#Around the edges of the pit (0, 1, 2, 3, 4, 5)
+3  -8 0 1
+3  -4 7 1
+3  4 7 1
+3  8 0 1
+3  4 -7 1
+3  -4 -7 1
+#Above center platform (6)
+3  0 0 4
+#Around the edge walkways (7, 8, 9, 10, 11, 12)
+3  -17.5 0 4
+3  -8.6 14.85 4
+3  8.6 14.85 4
+3  17.5 0 4
+3  8.6 -14.85 4
+3  -8.6 -14.85 4
+#At the utmost top of the arena (13)
+3 0 0 13
+
+#Spawn Waves
+#Stage Zero: Tutorial stage. Should be defeatable by anyone. Allows you to get used to moving enemies.
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 0
+0
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 1
+0
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 2
+0
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 3
+0
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 4
+0
+
+#Single EnemyShocking in pit
+4 0
+2 2
+1 3 5
+0
+
+#Single EnemyShocking above the pit
+4 0
+2 2
+1 3 6
+0 
+#Stage 1: Slowly ramps up difficulty. Anyone who understands the controls should have no trouble.
+
+#Single EnemyTracking From the top point of the arena
+4 1
+2 2
+1 4 13
+0
+
+#Two EnemyShockings from opposite sides of the pit
+4 1
+2 2
+1 3 0
+1 3 3
+0
+
+#Two EnemyShockings from opposite sides of the pit
+4 1
+2 2
+1 3 1
+1 3 4
+0
+
+#Two EnemyShockings from opposite sides of the pit
+4 1
+2 2
+1 3 2
+1 3 5
+0
+
+#Three EnemyShockings from the pit
+4 1
+2 2
+1 3 0
+1 3 2
+1 3 4
+0
+
+ 
+#Stage 2 Anyone used to the game should be able to deal with this easily with only taking a few hits. Less experienced players might be in trouble.
+
+#Six EnemyShockings rapid fire in the pit, different spawns
+4 2
+2 2
+1 3 0
+2 .5
+1 3 1
+2 .5
+1 3 2
+2 .5
+1 3 3
+2 .5
+1 3 4
+2 .5
+1 3 5
+0
+
+#Twelve EnemyShockings total. Spawn two at a time in pit with delay
+4 2
+2 2
+1 3 0
+1 3 3
+2 2
+1 3 1
+1 3 4
+2 2
+1 3 2
+1 3 5
+2 2
+1 3 0
+1 3 3
+2 2
+1 3 1
+1 3 4
+2 2
+1 3 2
+1 3 5
+0
+
+#Four EnemyShockings with an EnemyTracking supporting them
+4 2
+2 2
+1 3 0
+1 3 1
+1 3 3
+1 3 4
+1 4 6
+0
+
+#Two EnemyTrackings At various spawn points out of the pit
+4 2
+2 2
+1 4 7
+1 4 10
+0
+
+#Two EnemyTrackings At various spawn points out of the pit
+4 2
+2 2
+1 4 8
+1 4 11
+0 
+#Stage 3 Someone who has not seen the wave before, or something like it, will have to be lucky to survive. Can be dealt with handily by someone who knows what they are doing.
+
+#A single EnemySplitting at the arena center
+4 3
+2 2
+1 5 6
+0
+
+#Two waves of 6 EnemyShockings in rapid succession
+4 3
+2 2
+1 3 0
+1 3 1
+1 3 2
+1 3 3
+1 3 4
+1 3 5
+2 1
+1 3 0
+1 3 1
+1 3 2
+1 3 3
+1 3 4
+1 3 5
+0
+
+#A pattern of turrets around the edge, supporting four EnemyShockings from the ceiling.
+4 3
+2 2
+1 2 7
+2 .1
+1 2 8
+2 .1
+1 2 9
+2 .1
+1 2 10
+2 .1
+1 2 11
+2 .1
+1 2 12
+2 1
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+0
+
+#Three EnemyTrackings at various spawn points outside the pit
+4 3
+2 2
+1 4 6
+1 4 8
+1 4 11
+0
+
+#Three EnemyTrackings at various spawn points outside the pit
+4 3
+2 2
+1 4 7
+1 4 10
+1 4 13
+0
+
+#Two EnemyTrackings with three EnemyTurrets, all outside the pit
+4 3
+2 2
+1 2 7
+2 .5
+1 2 6
+2 .5
+1 2 10
+2 .5
+1 4 13
+2 .5
+1 4 13
+0 
+#Stage 4 Hard. Should be a challenge for any player. Even an experienced player might be taken down if they are unlucky.
+
+#One EnemyFortress at center of the stage
+4 4
+2 2
+1 6 6
+0
+
+#Two EnemySplittings on the ledge around the pit, opposite sides
+4 4
+2 2
+1 5 7
+1 5 10
+0
+
+#Three waves of six EnemyShockings in the pit, in rapid succession
+4 4
+2 2
+1 3 0
+1 3 1
+1 3 2
+1 3 3
+1 3 4
+1 3 5
+2 1
+1 3 0
+1 3 1
+1 3 2
+1 3 3
+1 3 4
+1 3 5
+2 1
+1 3 0
+1 3 1
+1 3 2
+1 3 3
+1 3 4
+1 3 5
+0
+
+#Turrets around the ledge with a swarm of 10 EnemyShockings
+4 4
+2 2
+1 2 7
+2 .1
+1 2 8
+2 .1
+1 2 9
+2 .1
+1 2 10
+2 .1
+1 2 11
+2 .1
+1 2 12
+2 1
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+0
+
+#Six Shockings and three Trackings from spawn zero in the pit
+4 4
+2 2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 4 0
+2 .2
+1 4 0
+2 .2
+1 4 0
+0
+
+#One Splitting with Two EnemyTrackings as ranged support, with a long delay on their spawn
+4 4
+2 2
+1 5 6
+2 10
+1 4 13
+2 5
+1 4 13
+0 
+#Stage 5: Almost impossible. Surviving these waves requires a lot of skill and not a little luck. You are annoying the makers with your existence, and they want you dead.
+
+#One EnemyFortress from the top of the arena supporting and EnemySplitting from the center spawn
+4 5
+2 2
+1 5 6
+1 6 13
+0
+
+#One EnemyFortress from the center supported by two EnemyTrackings from the upper edge spawns
+4 5
+2 2
+1 6 6
+1 4 7
+1 4 10
+0
+
+#Three EnemySplittings at equidistant spawn points around the upper edge
+4 5
+2 2
+1 5 12
+1 5 10
+1 5 8
+0
+
+
+
+#A wave of 24 Shockings from the top
+4 5
+2 2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+2 .2
+1 3 13
+0
+
+#Six EnemyTrackings from around the upper edge
+4 5
+2 2
+1 4 7
+1 4 8
+1 4 9
+1 4 10
+1 4 11
+1 4 12
+0
+
+#Mass spawn of 8 Shockings and 4 Trackings from spawn zero
+4 5
+2 2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 3 0
+2 .2
+1 4 0
+2 .2
+1 4 0
+2 .2
+1 4 0
+2 .2
+1 4 0
+0
+
+
