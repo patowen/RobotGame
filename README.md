@@ -4,7 +4,7 @@ All necessary java files are included. They require the following plugin(s):
 
 Java (TM) Binding for the OpenGL (r) API, version 2.1
 
-This can be downloaded at jogamp.org.
+This can be downloaded at http://jogamp.org.
 
 Also needed are the following directories:
 
