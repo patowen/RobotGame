@@ -98,16 +98,17 @@ public class MainMenu extends Menu
 		gl.glBegin(GL2.GL_POLYGON);
 		
 		gl.glTexCoord2f(0f, 1f);
-		gl.glVertex2d(0f, 0f);
-		
-		gl.glTexCoord2f(1f, 1f);
-		gl.glVertex2d(width, 0f);
-		
-		gl.glTexCoord2f(1f, 0f);
-		gl.glVertex2d(width, height);
+		gl.glVertex2d(0f, height);
 		
 		gl.glTexCoord2f(0f, 0f);
-		gl.glVertex2d(0f, height);
+		gl.glVertex2d(0f, 0f);
+		
+		gl.glTexCoord2f(1f, 0f);
+		gl.glVertex2d(width, 0f);
+		
+		gl.glTexCoord2f(1f, 1f);
+		gl.glVertex2d(width, height);
+		
 		gl.glEnd();
 		
 		menuSplash.disable(gl);

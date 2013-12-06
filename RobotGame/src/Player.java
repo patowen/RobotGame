@@ -56,7 +56,7 @@ public class Player extends Entity implements Damageable
 		maxSpeed = 4;
 		jumpSpeed = 4;
 		stepDownHeight = 0.2;
-		maxHp = 100;
+		maxHp = 10;
 		
 		hp = maxHp;
 		isDead = false;

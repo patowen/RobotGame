@@ -207,6 +207,8 @@ public class ScoreMenu extends Menu
 			if (data.hasNextLine())
 				data.nextLine();
 		}
+		
+		data.close();
 	}
 	
 	/**
