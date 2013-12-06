@@ -13,6 +13,7 @@ sound/laser.wav
 sound/zap.wav
 textures/MenuTexture.jpg
 textures/metal.jpg
+data/scores.txt
 
 These files can be found through the following link:
 https://www.dropbox.com/sh/sd2wh5hrq9h5l6n/VyB1kGGz6V
