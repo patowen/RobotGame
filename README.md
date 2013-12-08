@@ -1,10 +1,10 @@
 RobotGame
 =========
-All necessary java files are included. They require the following plugin(s):
+All necessary java files are included.
 
-Java (TM) Binding for the OpenGL (r) API, version 2.1
+The JOGL and JOAL plugins (JogAmp version 2.1.2) are needed to run RobotGame.
 
-This can be downloaded at http://jogamp.org.
+These can be downloaded at http://jogamp.org.
 
 Also needed are the following directories:
 
