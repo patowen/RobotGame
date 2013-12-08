@@ -1,14 +1,9 @@
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.awt.GLCanvas;
-import javax.swing.JFrame;
+import javax.media.opengl.GLProfile;
 
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
 
@@ -16,9 +11,9 @@ import com.jogamp.opengl.util.FPSAnimator;
  * Creates a window that displays the game.
  * @author Patrick Owen
  */
-public class GameRenderer extends GLCanvas
-{
-	private static final long serialVersionUID = 711619000183783857L;
+public class GameRenderer implements GLEventListener
+{	
+	private GLWindow win;
 	
 	private Controller c;
 	private InputHandler input;
@@ -31,43 +26,46 @@ public class GameRenderer extends GLCanvas
 	 */
 	public GameRenderer()
 	{
-		setPreferredSize(new Dimension(800, 600));
-		c = new Controller(this);
+		GLProfile glp = GLProfile.getDefault();
+		GLCapabilities caps = new GLCapabilities(glp);
+		
+		win = GLWindow.create(caps);
+		win.setSize(800, 600);
+		win.setTitle("ARENA");
+		win.addGLEventListener(this);
+		
+		c = new Controller(win);
 		fps = 60;
 		
-		input = new InputHandler(this);
+		input = new InputHandler(win);
 		c.setInputHandler(input);
 		
-		addGLEventListener(new GLEventListener()
-		{
-			public void display(GLAutoDrawable drawable)
-			{
-				c.setPerspective(drawable.getGL().getGL2(), getWidth(), getHeight());
-				c.step(1.0/fps);
-				c.render(drawable.getGL().getGL2());
-			}
-			
-			public void init(GLAutoDrawable drawable)
-			{
-				c.init(drawable.getGL().getGL2());
-			}
-			
-			public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
-			{
-				c.setPerspective(drawable.getGL().getGL2(), width, height);
-			}
-			
-			public void dispose(GLAutoDrawable drawable)
-			{
-				
-			}
-		});
-		
-		setFocusable(true);
-		requestFocus();
-		
-		FPSAnimator anim = new FPSAnimator(this, fps);
+		FPSAnimator anim = new FPSAnimator(win, fps);
 		anim.start();
+		
+		win.setVisible(true);
+	}
+	
+	public void display(GLAutoDrawable drawable)
+	{
+		c.setPerspective(drawable.getGL().getGL2(), win.getWidth(), win.getHeight());
+		c.step(1.0/fps);
+		c.render(drawable.getGL().getGL2());
+	}
+	
+	public void init(GLAutoDrawable drawable)
+	{
+		c.init(drawable.getGL().getGL2());
+	}
+	
+	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
+	{
+		c.setPerspective(drawable.getGL().getGL2(), width, height);
+	}
+	
+	public void dispose(GLAutoDrawable drawable)
+	{
+		
 	}
 	
 	/**
@@ -75,30 +73,6 @@ public class GameRenderer extends GLCanvas
 	 */
 	public static void main(String[] args)
 	{
-		/*
-		 * Within the code are 5 algorithms as required.
-		 * 
-		 * ALGORITHM 1 is located in Player.
-		 * ALGORITHM 2 is located in Collision.
-		 * ALGORITHM 3 is located in ModelTurret.
-		 * ALGORITHM 4 is located in AITracking.
-		 * ALGORITHM 5 is located in EnemyTracking.
-		 */
-		
-		JFrame frame = new JFrame("ARENA");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		//http://stackoverflow.com/questions/1984071/how-to-hide-cursor-in-a-swing-application
-		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor( 
-		    cursorImg, new Point(0, 0), "blank cursor"); 
-		frame.setCursor(blankCursor);
-		
-		GameRenderer game = new GameRenderer();
-		frame.add(game);
-		
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		new GameRenderer();
 	}
 }

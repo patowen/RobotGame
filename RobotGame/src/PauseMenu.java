@@ -80,8 +80,6 @@ public class PauseMenu extends Menu
 		gl.glEnd();
 		
 		super.draw(gl);
-		
-		drawCursor(gl);
 	}
 	
 	/**

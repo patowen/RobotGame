@@ -14,7 +14,6 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 public class MainMenu extends Menu
 {
-	
 	private MenuButton startButton;
 	private MenuButton scoreButton;
 	private MenuButton quitButton;
@@ -114,6 +113,5 @@ public class MainMenu extends Menu
 		menuSplash.disable(gl);
 		
 		super.draw(gl);
-		drawCursor(gl);
 	}
 }

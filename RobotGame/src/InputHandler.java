@@ -1,24 +1,25 @@
 import java.awt.AWTException;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseListener;
+import com.jogamp.newt.opengl.GLWindow;
 
 /**
  * Handles mouse grabbing and keyboard input.
  * @author Patrick Owen
  * @author Michael Ekstrom
  */
-public class InputHandler implements KeyListener, MouseListener, MouseMotionListener//Add MouseMotionListener, add methods at bottom
+public class InputHandler implements KeyListener, MouseListener //Add MouseMotionListener, add methods at bottom
 {
 	private Robot robot;
+	private GLWindow win;
 	
 	//Mouse controls
 	private int screenWidth, screenHeight;
@@ -82,7 +83,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	 * Initializes the inputs and sets up a Robot that controls the mouse.
 	 * @param comp The component that reads keyboard events.
 	 */
-	public InputHandler(Component comp)
+	public InputHandler(GLWindow window)
 	{
 		try
 		{
@@ -95,9 +96,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 			throw new RuntimeException("The program will not function properly with the current permissions");
 		}
 		
-		comp.addKeyListener(this);
-		comp.addMouseListener(this);
-		comp.addMouseMotionListener(this);//HEY
+		win = window;
+		win.addKeyListener(this);
+		win.addMouseListener(this);
 		
 		mouseSensitivity = 1.0/45/200;
 		
@@ -149,12 +150,20 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	 */
 	public void readMouse()
 	{
-		Point mousePos = MouseInfo.getPointerInfo().getLocation();
-		
-		mouseX = (mousePos.getX()-screenWidth/2)*mouseSensitivity;
-		mouseY = (mousePos.getY()-screenHeight/2)*mouseSensitivity;
-		
-		robot.mouseMove(screenWidth/2, screenHeight/2);
+		if (win.hasFocus())
+		{
+			Point mousePos = MouseInfo.getPointerInfo().getLocation();
+			
+			mouseX = (mousePos.getX()-screenWidth/2)*mouseSensitivity;
+			mouseY = (mousePos.getY()-screenHeight/2)*mouseSensitivity;
+			
+			robot.mouseMove(screenWidth/2, screenHeight/2);
+		}
+		else
+		{
+			mouseX = 0;
+			mouseY = 0;
+		}
 	}
 	
 	/**
@@ -308,6 +317,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	 */
 	public void keyPressed(KeyEvent e)
 	{
+		if (e.isAutoRepeat())
+			return;
+		
 		//Handle keys
 		for (int i=0; i<NUM_KEYS; i++)
 		{
@@ -324,6 +336,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	 */
 	public void keyReleased(KeyEvent e)
 	{
+		if (e.isAutoRepeat())
+			return;
+		
 		//Handle all keys
 		for (int i=0; i<NUM_KEYS; i++)
 		{
@@ -393,4 +408,6 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		mouseXPos = e.getX();
 		mouseYPos = e.getY();
 	}
+	
+	public void mouseWheelMoved(MouseEvent e) {}
 }

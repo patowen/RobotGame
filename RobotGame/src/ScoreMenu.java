@@ -1,5 +1,4 @@
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -8,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.media.opengl.GL2;
+
+import com.jogamp.newt.event.KeyAdapter;
+import com.jogamp.newt.event.KeyEvent;
 
 /**
  * This class handles the creation and storage of high score information, as well as rendering
@@ -49,23 +51,22 @@ public class ScoreMenu extends Menu
 					{
 						userInput = userInput.substring(0, userInput.length()-1);
 					}
-					if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					else if (e.getKeyCode() == KeyEvent.VK_ENTER)
 					{
 						if (reading)
 						{
 							finishUpdatingScore();
 						}
 					}
-				}
-			}
-			
-			public void keyTyped(KeyEvent e)
-			{
-				if (c.currentMenu == ScoreMenu.this)
-				{
-					char c = e.getKeyChar();
-					if (userInput.length() < 20 && c != 8 && c != 10 && c != 127)
-						userInput += c;
+					else
+					{
+						if (e.isPrintableKey())
+						{
+							char c = e.getKeyChar();
+							if (userInput.length() < 20 && c != 8 && c != 10 && c != 127)
+								userInput += c;
+						}
+					}
 				}
 			}
 		});
@@ -112,7 +113,6 @@ public class ScoreMenu extends Menu
 			
 			if (scores.size() < maxScores && newIndex == -1)
 			{
-				System.out.println("OHFESIOFJ");
 				scores.add(newScore);
 				players.add("");
 				newIndex = scores.size() -1;
@@ -159,7 +159,6 @@ public class ScoreMenu extends Menu
 	public void draw(GL2 gl)
 	{
 		super.draw(gl);
-		drawCursor(gl);
 	}
 	
 	/**

@@ -80,6 +80,5 @@ public class InstructionMenu extends Menu
 	public void draw(GL2 gl)
 	{
 		super.draw(gl);
-		drawCursor(gl);
 	}
 }

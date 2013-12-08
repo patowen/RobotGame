@@ -98,25 +98,6 @@ public class Menu
 	}
 	
 	/**
-	 * Draws the cursor with a GL object
-	 * @param gl
-	 */
-	protected void drawCursor(GL2 gl)
-	{
-		double x = input.getMouseXPos();
-		double y = height - input.getMouseYPos();
-		double cursorWidth = 32;
-		double cursorHeight = 32;
-		
-		gl.glColor3f(.8f, .8f, .7f);
-		gl.glBegin(GL2.GL_TRIANGLES);
-		gl.glVertex2d(x, y);
-		gl.glVertex2d(x, y-cursorHeight);
-		gl.glVertex2d(x+cursorWidth, y-cursorHeight);
-		gl.glEnd();
-	}
-	
-	/**
 	 * Performs an action called by one of the menu items.
 	 * @param item Object that called the method
 	 */

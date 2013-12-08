@@ -1,4 +1,3 @@
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,6 +6,8 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -17,7 +18,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
  */
 public class Controller
 {
-	private GameRenderer gameRenderer;
+	private GLWindow win;
 	private HashMap<Integer, Texture> textureInfo;
 	private GameMap currentLevel;
 	
@@ -70,9 +71,9 @@ public class Controller
 	/**
 	 * Constructs a Controller object given the object that renders it.
 	 */
-	public Controller(GameRenderer renderer)
+	public Controller(GLWindow window)
 	{
-		gameRenderer = renderer;
+		win = window;
 	}
 	
 	/**
@@ -80,7 +81,7 @@ public class Controller
 	 * @param gl
 	 */
 	public void init(GL2 gl)
-	{
+	{		
 		gl.glClearColor(0, 0, 0, 1);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glEnable(GL2.GL_CULL_FACE);
@@ -128,7 +129,7 @@ public class Controller
 	 */
 	public void addKeyListener(KeyListener listener)
 	{
-		gameRenderer.addKeyListener(listener);
+		win.addKeyListener(listener);
 	}
 	
 	/**
@@ -253,6 +254,7 @@ public class Controller
 				if (input.getKeyPressed(InputHandler.PAUSE))
 				{
 					paused = true;
+					win.setPointerVisible(true);
 					pauseMenu.pause();
 				}
 			}
@@ -266,10 +268,15 @@ public class Controller
 			if (input.getKeyPressed(InputHandler.PAUSE))
 			{
 				paused = false;
+				win.setPointerVisible(false);
 				pauseMenu.unPause();
 				input.readMouse();
 			}
-			paused = pauseMenu.isPaused();
+			if (!pauseMenu.isPaused())
+			{
+				paused = false;
+				win.setPointerVisible(false);
+			}
 			if(pauseMenu.quit())
 				System.exit(0);
 		}
@@ -319,6 +326,11 @@ public class Controller
 	 */
 	public void setCurrentMenu(Menu menu, boolean reset)
 	{
+		if (menu == null)
+			win.setPointerVisible(false);
+		else
+			win.setPointerVisible(true);
+		
 		currentMenu = menu;
 		
 		if (reset)
