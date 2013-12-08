@@ -117,6 +117,15 @@ public class Controller
 	}
 	
 	/**
+	 * Frees up resources and quits the game.
+	 */
+	public void quit()
+	{
+		soundHandler.destroy();
+		System.exit(0);
+	}
+	
+	/**
 	 * Returns the Heads Up Display
 	 */
 	public HUD getHUD()
@@ -275,13 +284,15 @@ public class Controller
 			if (!pauseMenu.isPaused())
 			{
 				paused = false;
-				win.setPointerVisible(false);
+				if (currentMenu == null)
+					win.setPointerVisible(false);
 			}
 			if(pauseMenu.quit())
-				System.exit(0);
+				quit();
 		}
 		
 		input.updatePressed();
+		soundHandler.step();
 	}
 	
 	/**

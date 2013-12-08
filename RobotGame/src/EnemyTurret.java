@@ -76,6 +76,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 			bullet.setColor(1, 0.8f, 0.6f);
 			bullet.setOwner(this);
 			
+			c.getSoundHandler().playSound(0, x, y, z);
 			map.create(bullet);
 			
 			charge = shotDelay;

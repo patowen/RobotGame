@@ -125,7 +125,7 @@ public class PauseMenu extends Menu
 		}
 		else if (item == buttonExit)
 		{
-			System.exit(0);
+			c.quit();
 		}
 		if (item == buttonMainMenu)
 		{

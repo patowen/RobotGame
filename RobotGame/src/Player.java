@@ -190,6 +190,10 @@ public class Player extends Entity implements Damageable
 			
 			handleWeapons(dt);
 			
+			c.getSoundHandler().setListenerPosition(x, y, z+eyeHeight);
+			c.getSoundHandler().setListenerOrientation(Math.cos(horizontalDir)*Math.cos(verticalDir), Math.sin(horizontalDir)*Math.cos(verticalDir), eyeHeight+Math.sin(verticalDir),
+					-Math.cos(horizontalDir)*Math.sin(verticalDir), -Math.sin(horizontalDir)*Math.sin(verticalDir), Math.cos(verticalDir));
+			
 			//Allow slow recovery
 			hp += dt*0.2;
 			if (hp > maxHp) hp = maxHp;

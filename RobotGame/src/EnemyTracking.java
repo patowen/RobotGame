@@ -101,6 +101,7 @@ public class EnemyTracking extends Enemy implements Damageable
 			bullet.setColor(1, 0.5f, 0f);
 			bullet.setOwner(this);
 			
+			c.getSoundHandler().playSound(0, x, y, z);
 			map.create(bullet);
 			
 			charge = shotDelay;

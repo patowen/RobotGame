@@ -1,14 +1,15 @@
-import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import com.jogamp.openal.UnsupportedAudioFileException;
+import com.jogamp.openal.sound3d.AudioSystem3D;
+import com.jogamp.openal.sound3d.Buffer;
+import com.jogamp.openal.sound3d.Context;
+import com.jogamp.openal.sound3d.Listener;
+import com.jogamp.openal.sound3d.Source;
+import com.jogamp.openal.sound3d.Vec3f;
 
 /**
  * Handles audio output in the game.
@@ -16,50 +17,62 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  */
 public class SoundHandler
 {
-	private double attenuationConstant = 6;//attenuation constant of sound based on distance
-	private double lx, ly, lz;//Listener coordinates
-	private static final String SOUND_DIR = "sound/";
-	private String[] fileList = {"laser.wav", "explosion.wav"};//Designated files to be loaded, in order
-	private Clip[] clipList;
+	private Context context;
+	private Buffer[] sounds;
+	private float[] attenuation;
+	private ArrayList<Source> sources;
+	private Listener l;
 	
 	/**
 	 * Constructs a SoundHandler object.
 	 */
 	public SoundHandler()
 	{
-		clipList = new Clip[fileList.length];
+		sounds = new Buffer[3];
+		attenuation = new float[3];
+		sources = new ArrayList<Source>();
+		
+		AudioSystem3D.init();
+		context = AudioSystem3D.createContext(AudioSystem3D.openDevice(null));
+		AudioSystem3D.makeContextCurrent(context);
+		l = AudioSystem3D.getListener();
+		
 		try
 		{
-			for (int i = 0; i < fileList.length; i++)
-			{				
-				FileInputStream fs = new FileInputStream(SOUND_DIR + fileList[i]); 
-				BufferedInputStream bufferStream = new BufferedInputStream(fs); 
-				AudioInputStream audioStream = AudioSystem.getAudioInputStream(bufferStream);
-				
-				Clip temp = AudioSystem.getClip();
-				temp.open(audioStream);
-				clipList[i] = temp;
+			sounds[0] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/laser.wav"))); attenuation[0] = 0.3f;
+			sounds[1] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/explosion.wav"))); attenuation[1] = 1f;
+			sounds[2] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/zap.wav"))); attenuation[2] = 0f;
+		}
+		catch (IOException | UnsupportedAudioFileException e)
+		{
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		l.setPosition(-2, 0, 0);
+		l.setVelocity(new Vec3f(0, 0, 0));
+		l.setOrientation(new float[] {0, 0, 1, 1, 0, 0});
+		l.setGain(0.3f);
+		
+	}
+	
+	public void step()
+	{
+		for (int i=0; i<sources.size(); i++)
+		{
+			if (!sources.get(i).isPlaying())
+			{
+				sources.get(i).delete();
+				sources.remove(i);
+				i--;
 			}
 		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		catch (UnsupportedAudioFileException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (LineUnavailableException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	}
+	
+	public void destroy()
+	{
+		context.getDevice().close();
+		context.destroy();
 	}
 	
 	/**
@@ -70,9 +83,18 @@ public class SoundHandler
 	 */
 	public void setListenerPosition(double x, double y, double z)
 	{
-		lx = x;
-		ly = y;
-		lz = z;
+		l.setPosition(-(float)x, (float)y, (float)z);
+	}
+	
+	/**
+	 * Updates the orientation of the ears
+	 * @param x
+	 * @param y
+	 * @param z Listener coordinates
+	 */
+	public void setListenerOrientation(double xTo, double yTo, double zTo, double xUp, double yUp, double zUp)
+	{
+		l.setOrientation(new float[] {-(float)xUp, (float)yUp, (float)zUp, -(float)xTo, (float)yTo, (float)zTo});
 	}
 	
 	/**
@@ -81,16 +103,17 @@ public class SoundHandler
 	 */
 	public void playSound(int i)
 	{
-		Clip sound = clipList[i];
-
-		if (sound.isRunning())
-			sound.stop();
-		sound.setFramePosition(0);
-		sound.start();
-		FloatControl gainControl = (FloatControl) sound.getControl(FloatControl.Type.MASTER_GAIN);
-		gainControl.setValue(-10f); 
+		Source s = AudioSystem3D.generateSource(sounds[i]);
 		
-		((FloatControl)sound.getControl(FloatControl.Type.PAN)).setValue(0);
+		s.setPosition(0, 1, 0);
+		s.setVelocity(new Vec3f(0, 0, 0));
+		s.setGain(attenuation[i]);
+		s.setSourceRelative(true);
+		s.setReferenceDistance(4);
+		s.setLooping(false);
+		s.play();
+		
+		sources.add(s);
 	}
 	
 	/**
@@ -102,19 +125,17 @@ public class SoundHandler
 	 */
 	public void playSound(int i, double x, double y, double z)
 	{
-		double sqrDistance = Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2);
-		double attenuation = attenuationConstant * Math.log10(sqrDistance);
+		Source s = AudioSystem3D.generateSource(sounds[i]);
 		
-		Clip sound = clipList[i];
-		if (sound.isRunning())
-			sound.stop();
-		sound.setFramePosition(0);
-		sound.start();
+		s.setPosition(-(float)x, (float)y, (float)z);
+		s.setVelocity(new Vec3f(0, 0, 0));
+		s.setGain(attenuation[i]);
+		s.setSourceRelative(false);
+		s.setReferenceDistance(4);
+		s.setLooping(false);
+		s.play();
 		
-		FloatControl gainControl = (FloatControl) sound.getControl(FloatControl.Type.MASTER_GAIN);
-		if (attenuation > -gainControl.getMinimum()) attenuation = gainControl.getMinimum();
-		if (attenuation < -gainControl.getMaximum()) attenuation = gainControl.getMaximum();
-		gainControl.setValue(-(float)attenuation);
+		sources.add(s);
 	}
 	
 }

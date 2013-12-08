@@ -125,7 +125,7 @@ public class DeathMenu extends Menu
 		}
 		else if (item == buttonExit)
 		{
-			System.exit(0);
+			c.quit();
 		}
 	}
 }

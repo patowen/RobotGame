@@ -1,9 +1,7 @@
 import java.awt.AWTException;
-import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Robot;
-import java.awt.Toolkit;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -22,7 +20,6 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	private GLWindow win;
 	
 	//Mouse controls
-	private int screenWidth, screenHeight;
 	private double mouseX, mouseY;
 	private double mouseSensitivity;
 	private double mouseXPos, mouseYPos;
@@ -88,8 +85,6 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		try
 		{
 			robot = new Robot();
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			screenWidth = (int)screenSize.getWidth(); screenHeight = (int)screenSize.getHeight();
 		}
 		catch (AWTException e)
 		{
@@ -153,11 +148,13 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		if (win.hasFocus())
 		{
 			Point mousePos = MouseInfo.getPointerInfo().getLocation();
+			int centerX = win.getX() + win.getWidth()/2;
+			int centerY = win.getY() + win.getHeight()/2;
 			
-			mouseX = (mousePos.getX()-screenWidth/2)*mouseSensitivity;
-			mouseY = (mousePos.getY()-screenHeight/2)*mouseSensitivity;
+			mouseX = (mousePos.getX()-centerX)*mouseSensitivity;
+			mouseY = (mousePos.getY()-centerY)*mouseSensitivity;
 			
-			robot.mouseMove(screenWidth/2, screenHeight/2);
+			robot.mouseMove(centerX, centerY);
 		}
 		else
 		{

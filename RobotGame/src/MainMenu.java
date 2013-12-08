@@ -81,7 +81,7 @@ public class MainMenu extends Menu
 		if (item == scoreButton)
 			c.setCurrentMenu(c.scoreMenu);
 		if (item == quitButton)
-			System.exit(0);
+			c.quit();
 	}
 	
 	/**

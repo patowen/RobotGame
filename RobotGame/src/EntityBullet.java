@@ -130,6 +130,7 @@ public class EntityBullet extends Entity
 		blast.setDuration(.1);
 		blast.setColor(color[0], color[1], color[2]);
 		map.create(blast);
+		c.getSoundHandler().playSound(2, x, y, z);
 	}
 	
 	//Creates a larger explosion to make it look like an entity was damaged.
