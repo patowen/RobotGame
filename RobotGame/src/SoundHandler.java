@@ -137,5 +137,4 @@ public class SoundHandler
 		
 		sources.add(s);
 	}
-	
 }

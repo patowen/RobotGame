@@ -97,6 +97,4 @@ public class MenuLabel extends MenuItem
 			drawStringRight(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
 		textRenderer.endRendering();
 	}
-	
-
 }
