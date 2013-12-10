@@ -1,11 +1,3 @@
-import java.io.File;
-import java.io.IOException;
-
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLException;
-
-import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * This class will deal with the options and rendering of the game's main menu
@@ -15,28 +7,19 @@ import com.jogamp.opengl.util.texture.TextureIO;
 public class MainMenu extends Menu
 {
 	private MenuButton startButton;
+	private MenuButton multiplayerButton;
 	private MenuButton scoreButton;
 	private MenuButton quitButton;
 	private MenuButton instructionButton;
 	private MenuButton practiceButton;
 	
-	private Texture menuSplash;
-	
 	/**
 	 * Creates a new MainMenu object
 	 */
-	public MainMenu(Controller c, double w, double h)
+	public MainMenu(Controller c)
 	{
-		super(c, w, h);
+		super(c);
 		loadText();
-		
-		try {
-			menuSplash = TextureIO.newTexture(new File("textures/MenuTexture.jpg"), true);
-		} catch (GLException e) {
-			System.out.println("GLException at MainMenu's constructor");
-		} catch (IOException e) {
-			System.out.println("IOException at MainMenu's constructor");
-		}
 	}
 	
 	/**
@@ -45,13 +28,15 @@ public class MainMenu extends Menu
 	public void loadText()
 	{
 		items.add(new MenuLabel(this, "ARENA", "ImprintMT-Shadow", .25, .9, 9));
-		startButton = new MenuButton(this, "Play", "Impact", .1, .4, 4);
-		instructionButton = new MenuButton(this, "Instructions", "Impact", .15, .325, 4);
+		startButton = new MenuButton(this, "Play", "Impact", .1, .475, 4);
+		multiplayerButton = new MenuButton(this, "Multiplayer", "Impact", .15, .4, 4);
+		instructionButton = new MenuButton(this, "Instructions", "Impact", .2, .325, 4);
 		practiceButton = new MenuButton(this, "Practice", "Impact", .3, .25, 4);
 		scoreButton = new MenuButton(this, "High Scores", "Impact", .4, .175, 4);
 		quitButton = new MenuButton(this, "Quit", "Impact", .5, .1, 4);
 		
 		items.add(startButton);
+		items.add(multiplayerButton);
 		items.add(instructionButton);
 		items.add(practiceButton);
 		items.add(scoreButton);
@@ -70,48 +55,19 @@ public class MainMenu extends Menu
 			c.setCurrentMenu(null);
 			input.readMouse();
 		}
-		if (item == instructionButton)
-			c.setCurrentMenu(c.instructionMenu);
-		if (item == practiceButton)
+		else if (item == multiplayerButton)
+			c.setCurrentMenu(new MultiplayerMenu(c));
+		else if (item == instructionButton)
+			c.setCurrentMenu(new InstructionMenu(c));
+		else if (item == practiceButton)
 		{
 			c.setCurrentLevel(c.practice);
 			c.setCurrentMenu(null);
 			input.readMouse();
 		}
-		if (item == scoreButton)
-			c.setCurrentMenu(c.scoreMenu);
-		if (item == quitButton)
+		else if (item == scoreButton)
+			c.setCurrentMenu(new ScoreMenu(c));
+		else if (item == quitButton)
 			c.quit();
-	}
-	
-	/**
-	 * Overrides but calls super.draw so that the cursor is drawn on the ScoreMenu
-	 * @param gl JOGL gl object
-	 */
-	public void draw(GL2 gl)
-	{
-		menuSplash.enable(gl);
-		menuSplash.bind(gl);
-		
-		gl.glColor3d(1, 1, 1);
-		gl.glBegin(GL2.GL_POLYGON);
-		
-		gl.glTexCoord2f(0f, 1f);
-		gl.glVertex2d(0f, height);
-		
-		gl.glTexCoord2f(0f, 0f);
-		gl.glVertex2d(0f, 0f);
-		
-		gl.glTexCoord2f(1f, 0f);
-		gl.glVertex2d(width, 0f);
-		
-		gl.glTexCoord2f(1f, 1f);
-		gl.glVertex2d(width, height);
-		
-		gl.glEnd();
-		
-		menuSplash.disable(gl);
-		
-		super.draw(gl);
 	}
 }

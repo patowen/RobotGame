@@ -18,6 +18,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 {
 	private Robot robot;
 	private GLWindow win;
+	private KeyListener listener;
 	
 	//Mouse controls
 	private double mouseX, mouseY;
@@ -34,7 +35,6 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 * Number of keys held by the InputHandler
 	 */
 	public static final int NUM_KEYS = 7;
-	
 	
 	/**
 	 * Index for the specified mouse control, used for reference.
@@ -94,6 +94,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		win = window;
 		win.addKeyListener(this);
 		win.addMouseListener(this);
+		listener = null;
 		
 		mouseSensitivity = 1.0/45/200;
 		
@@ -161,6 +162,17 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 			mouseX = 0;
 			mouseY = 0;
 		}
+	}
+	
+	/**
+	 * Adds a KeyListener to listen for the same key events that the InputHandler
+	 * receives. This is useful for when the keyboard is used for something other
+	 * than keyboard controls.
+	 * @param keyListener The KeyListener to use. Set to null for no key listener.
+	 */
+	public void setKeyListener(KeyListener keyListener)
+	{
+		listener = keyListener;
 	}
 	
 	/**
@@ -314,6 +326,9 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public void keyPressed(KeyEvent e)
 	{
+		if (listener != null)
+			listener.keyPressed(e);
+		
 		if (e.isAutoRepeat())
 			return;
 		
@@ -333,6 +348,9 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public void keyReleased(KeyEvent e)
 	{
+		if (listener != null)
+			listener.keyReleased(e);
+		
 		if (e.isAutoRepeat())
 			return;
 		
@@ -346,8 +364,6 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 			}
 		}
 	}
-	
-	public void keyTyped(KeyEvent e) {}
 	
 	public void mouseClicked(MouseEvent e) {}
 	

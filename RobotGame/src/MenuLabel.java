@@ -42,6 +42,8 @@ public class MenuLabel extends MenuItem
 		size = textSize;
 		
 		color = new float[]{1, 1, 1};
+		
+		updateText();
 	}
 	
 	
@@ -51,10 +53,10 @@ public class MenuLabel extends MenuItem
 	 * @param width
 	 * @param height Window dimensions
 	 */
-	public void updateText(int width, int height)
+	public void updateText()
 	{
-		double smallest = Math.min(width, height);
-		double equivalent12 = smallest/55;//Equivalent of 12 point font on base dimensions
+		double smallest = Math.min(menu.getController().getWidth(), menu.getController().getHeight());
+		double equivalent12 = smallest/55; //Equivalent of 12 point font on base dimensions
 		
 		textRenderer = new TextRenderer(new Font(fontName, Font.PLAIN, (int)(equivalent12*size)), true, true);
 	}
@@ -86,15 +88,16 @@ public class MenuLabel extends MenuItem
 	 * @param gl
 	 */
 	public void draw(GL2 gl)
-	{		
-		textRenderer.beginRendering((int)menu.getWidth(), (int)menu.getHeight());
+	{
+		double width = menu.getController().getWidth(), height = menu.getController().getHeight();
+		textRenderer.beginRendering((int)width, (int)height);
 		textRenderer.setColor(color[0], color[1], color[2], 1f);
 		if (align == 0)
-			drawStringLeft(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringLeft(textRenderer, message, (int)(width*x), (int)(height*y));
 		if (align == 1)
-			drawStringCenter(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringCenter(textRenderer, message, (int)(width*x), (int)(height*y));
 		if (align == 2)
-			drawStringRight(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringRight(textRenderer, message, (int)(width*x), (int)(height*y));
 		textRenderer.endRendering();
 	}
 }

@@ -17,9 +17,9 @@ public class DeathMenu extends Menu
 	 * Initializes the pause menu.	
 	 * @param controller
 	 */
-	public DeathMenu(Controller controller, double width, double height)
+	public DeathMenu(Controller controller)
 	{
-		super(controller, width, height);
+		super(controller);
 		
 		buttonResume = new MenuButton(this, "Resume", "Gulim", 0.5, 0.5, 3);
 		buttonOptions = new MenuButton(this, "Options", "Gulim", 0.5, 0.375, 3);
@@ -30,21 +30,8 @@ public class DeathMenu extends Menu
 		items.add(buttonOptions);
 		items.add(buttonExit);
 		
-		setSize(width, height);
-		
 		quit = false;
 	}
-	
-	/**
-	 * Updates the PauseMenu to reflect new height and width values.
-	 * @param w Width
-	 * @param h Height
-	 */
-	protected void setSize(double w, double h)
-	{
-		super.setSize(w, h);
-	}
-
 	
 	/**
 	 * Tells the pause menu that it should be running
@@ -73,9 +60,9 @@ public class DeathMenu extends Menu
 		gl.glBegin(GL2.GL_QUADS);
 		
 		gl.glVertex2d(0, 0);
-		gl.glVertex2d(width, 0);
-		gl.glVertex2d(width, height);
-		gl.glVertex2d(0, height);
+		gl.glVertex2d(c.getWidth(), 0);
+		gl.glVertex2d(c.getWidth(), c.getHeight());
+		gl.glVertex2d(0, c.getHeight());
 		
 		gl.glEnd();
 		

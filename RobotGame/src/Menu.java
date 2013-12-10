@@ -11,8 +11,7 @@ public class Menu
 {
 	protected Controller c;
 	protected InputHandler input;
-	
-	protected double width, height;
+	private double width, height;
 	
 	protected double cursorX, cursorY;
 	
@@ -24,27 +23,24 @@ public class Menu
 	 * @param width
 	 * @param height
 	 */
-	public Menu(Controller controller, double width, double height)
+	public Menu(Controller controller)
 	{
 		c = controller;
 		input = c.getInputHandler();
 		
 		items = new ArrayList<MenuItem>();
+		
+		width = c.getWidth();
+		height = c.getHeight();
 	}
 	
-	/**
-	 * Sets the size of the window.
-	 * @param w Width
-	 * @param h Height
-	 */
-	protected void setSize(double w, double h)
+	private void updateSize()
 	{
-		width = w;
-		height = h;
-		
-		for (MenuItem item : items)
+		if (width != c.getWidth() || height != c.getHeight())
 		{
-			item.updateText((int)w, (int)h);
+			width = c.getWidth();
+			height = c.getHeight();
+			updateItems();
 		}
 	}
 	
@@ -55,19 +51,8 @@ public class Menu
 	{
 		for (MenuItem item : items)
 		{
-			item.updateText((int)width, (int)height);
+			item.updateText();
 		}
-	}
-	
-	/**
-	 * Sets the size of the window if the new size is different from the old size
-	 * @param w Width
-	 * @param h Height
-	 */
-	public void resize(double w, double h)
-	{
-		if (width != w || height != h)
-			setSize(w, h);
 	}
 	
 	/**
@@ -75,8 +60,10 @@ public class Menu
 	 */
 	public void step(double dt)
 	{
+		updateSize();
+		
 		cursorX = input.getMouseXPos();
-		cursorY = height - input.getMouseYPos();
+		cursorY = c.getHeight() - input.getMouseYPos();
 		
 		for (MenuItem item : items)
 		{
@@ -107,22 +94,6 @@ public class Menu
 	}
 	
 	/**
-	 * Returns the width of the menu
-	 */
-	public double getWidth()
-	{
-		return width;
-	}
-	
-	/**
-	 * Returns the height of the menu
-	 */
-	public double getHeight()
-	{
-		return height;
-	}
-	
-	/**
 	 * Returns the cursor's x-position
 	 */
 	public double getCursorX()
@@ -136,6 +107,14 @@ public class Menu
 	public double getCursorY()
 	{
 		return cursorY;
+	}
+	
+	/**
+	 * Returns the parent controller object
+	 */
+	public Controller getController()
+	{
+		return c;
 	}
 	
 	/**

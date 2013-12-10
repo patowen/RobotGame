@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.media.opengl.GL2;
-
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 
@@ -35,14 +33,15 @@ public class ScoreMenu extends Menu
 	 * @param width The width of the screen
 	 * @param height The height of the screen
 	 */
-	public ScoreMenu(Controller controller, double width, double height)
+	public ScoreMenu(Controller controller)
 	{
-		super(controller, width, height);
+		super(controller);
 		readFile();
 		loadLabels();
 		reading = false;
 
-		c.addKeyListener(new KeyAdapter(){
+		input.setKeyListener(new KeyAdapter()
+		{
 			public void keyPressed(KeyEvent e)
 			{
 				if (c.currentMenu == ScoreMenu.this)
@@ -70,7 +69,6 @@ public class ScoreMenu extends Menu
 				}
 			}
 		});
-		
 	}
 	
 	/**
@@ -153,15 +151,6 @@ public class ScoreMenu extends Menu
 	}
 	
 	/**
-	 * Overrides but calls super.draw so that the cursor is drawn on the ScoreMenu
-	 * @param gl JOGL gl object
-	 */
-	public void draw(GL2 gl)
-	{
-		super.draw(gl);
-	}
-	
-	/**
 	 * Performs an action called by one of the menu items.
 	 * @param item Object that called the method
 	 */
@@ -173,7 +162,8 @@ public class ScoreMenu extends Menu
 			{
 				finishUpdatingScore();
 			}
-			c.setCurrentMenu(c.mainMenu);
+			input.setKeyListener(null);
+			c.setCurrentMenu(new MainMenu(c));
 			c.resetScore();
 		}
 	}

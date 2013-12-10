@@ -3,6 +3,8 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -30,6 +32,15 @@ public class GameRenderer implements GLEventListener
 		GLCapabilities caps = new GLCapabilities(glp);
 		
 		win = GLWindow.create(caps);
+		
+		win.addWindowListener(new WindowAdapter()
+		{
+			public void windowDestroyed(WindowEvent e)
+			{
+				c.quit();
+			}
+		});
+		
 		win.setSize(800, 600);
 		win.setTitle("ARENA");
 		win.addGLEventListener(this);

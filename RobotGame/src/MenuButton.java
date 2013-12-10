@@ -37,6 +37,8 @@ public class MenuButton extends MenuItem
 		x = xLoc;
 		y = yLoc;
 		size = textSize;
+		
+		updateText();
 	}
 	
 	/**
@@ -45,9 +47,9 @@ public class MenuButton extends MenuItem
 	 * @param width
 	 * @param height Window dimensions
 	 */
-	public void updateText(int width, int height)
+	public void updateText()
 	{
-		double smallest = Math.min(width, height);
+		double smallest = Math.min(menu.getController().getWidth(), menu.getController().getHeight());
 		double equivalent12 = smallest/55;//Equivalent of 12 point font on base dimensions
 		
 		textRenderer = new TextRenderer(new Font(fontName, Font.PLAIN, (int)(equivalent12*size)), true, true);
@@ -57,10 +59,11 @@ public class MenuButton extends MenuItem
 	{
 		Rectangle2D b = textRenderer.getBounds(message);
 		
-		if (menu.getCursorX() > x*menu.getWidth()+b.getWidth()/2 ||
-				menu.getCursorX() < x*menu.getWidth()-b.getWidth()/2) return false;
-		if (menu.getCursorY() > y*menu.getHeight()+b.getHeight()/2 ||
-				menu.getCursorY() < y*menu.getHeight()-b.getHeight()/2) return false;
+		if (menu.getCursorX() > x*menu.getController().getWidth()+b.getWidth()/2 ||
+				menu.getCursorX() < x*menu.getController().getWidth()-b.getWidth()/2) return false;
+		if (menu.getCursorY() > y*menu.getController().getHeight()+b.getHeight()/2 ||
+				menu.getCursorY() < y*menu.getController().getHeight()-b.getHeight()/2) return false;
+		
 		return true;
 	}
 	
@@ -81,18 +84,19 @@ public class MenuButton extends MenuItem
 	 * @param gl
 	 */
 	public void draw(GL2 gl)
-	{		
-		textRenderer.beginRendering((int)menu.getWidth(), (int)menu.getHeight());
+	{
+		double width = menu.getController().getWidth(), height = menu.getController().getHeight();
+		textRenderer.beginRendering((int)width, (int)height);
 		if (mouseInBounds())
 			textRenderer.setColor(1f, 1f, 0f, 1f);
 		else
 			textRenderer.setColor(1f, 1f, 1f, 1f);
 		if (align == 0)
-			drawStringLeft(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringLeft(textRenderer, message, (int)(width*x), (int)(height*y));
 		if (align == 1)
-			drawStringCenter(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringCenter(textRenderer, message, (int)(width*x), (int)(height*y));
 		if (align == 2)
-			drawStringRight(textRenderer, message, (int)(menu.getWidth()*x), (int)(menu.getHeight()*y));
+			drawStringRight(textRenderer, message, (int)(width*x), (int)(height*y));
 		textRenderer.endRendering();
 	}
 }

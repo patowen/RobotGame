@@ -19,7 +19,7 @@ public class SoundHandler
 {
 	private Context context;
 	private Buffer[] sounds;
-	private float[] attenuation;
+	private float[] gain;
 	private ArrayList<Source> sources;
 	private Listener l;
 	
@@ -29,7 +29,7 @@ public class SoundHandler
 	public SoundHandler()
 	{
 		sounds = new Buffer[3];
-		attenuation = new float[3];
+		gain = new float[3];
 		sources = new ArrayList<Source>();
 		
 		AudioSystem3D.init();
@@ -39,9 +39,9 @@ public class SoundHandler
 		
 		try
 		{
-			sounds[0] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/laser.wav"))); attenuation[0] = 0.3f;
-			sounds[1] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/explosion.wav"))); attenuation[1] = 1f;
-			sounds[2] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/zap.wav"))); attenuation[2] = 0f;
+			sounds[0] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/laser.wav"))); gain[0] = 0.3f;
+			sounds[1] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/explosion.wav"))); gain[1] = 1f;
+			sounds[2] = AudioSystem3D.loadBuffer(new FileInputStream(new File("sound/zap.wav"))); gain[2] = 0f;
 		}
 		catch (IOException | UnsupportedAudioFileException e)
 		{
@@ -107,7 +107,7 @@ public class SoundHandler
 		
 		s.setPosition(0, 1, 0);
 		s.setVelocity(new Vec3f(0, 0, 0));
-		s.setGain(attenuation[i]);
+		s.setGain(gain[i]);
 		s.setSourceRelative(true);
 		s.setReferenceDistance(4);
 		s.setLooping(false);
@@ -129,7 +129,7 @@ public class SoundHandler
 		
 		s.setPosition(-(float)x, (float)y, (float)z);
 		s.setVelocity(new Vec3f(0, 0, 0));
-		s.setGain(attenuation[i]);
+		s.setGain(gain[i]);
 		s.setSourceRelative(false);
 		s.setReferenceDistance(4);
 		s.setLooping(false);

@@ -1,4 +1,3 @@
-import javax.media.opengl.GL2;
 
 /**
  * This class will deal with the rendering of a list of control instructions
@@ -7,15 +6,14 @@ import javax.media.opengl.GL2;
 
 public class InstructionMenu extends Menu
 {
-	
 	private MenuButton backButton;
 	
 	/**
-	 * Creates a new MainMenu object
+	 * Creates a new InstructionMenu object
 	 */
-	public InstructionMenu(Controller c, double w, double h)
+	public InstructionMenu(Controller c)
 	{
-		super(c, w, h);
+		super(c);
 		loadText();
 	}
 	
@@ -70,15 +68,6 @@ public class InstructionMenu extends Menu
 	public void handleAction(MenuItem item)
 	{
 		if (item == backButton)
-			c.setCurrentMenu(c.mainMenu);
-	}
-	
-	/**
-	 * Overrides but calls super.draw so that the cursor is drawn on the ScoreMenu
-	 * @param gl JOGL gl object
-	 */
-	public void draw(GL2 gl)
-	{
-		super.draw(gl);
+			c.setCurrentMenu(new MainMenu(c));
 	}
 }

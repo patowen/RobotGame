@@ -37,7 +37,7 @@ public class MenuItem
 	 * @param width
 	 * @param height Window dimensions
 	 */
-	public void updateText(int width, int height)
+	public void updateText()
 	{
 		
 	}

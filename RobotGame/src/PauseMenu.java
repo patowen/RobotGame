@@ -17,9 +17,9 @@ public class PauseMenu extends Menu
 	 * Initializes the pause menu.	
 	 * @param controller
 	 */
-	public PauseMenu(Controller controller, double width, double height)
+	public PauseMenu(Controller controller)
 	{
-		super(controller, width, height);
+		super(controller);
 		
 		buttonResume = new MenuButton(this, "Resume", "Impact", 0.5, 0.5, 3);
 		buttonExit = new MenuButton(this, "Exit Game", "Impact", 0.5, 0.3, 3);
@@ -30,21 +30,8 @@ public class PauseMenu extends Menu
 		items.add(buttonMainMenu);
 		items.add(buttonExit);
 		
-		setSize(width, height);
-		
 		quit = false;
 	}
-	
-	/**
-	 * Updates the PauseMenu to reflect new height and width values.
-	 * @param w Width
-	 * @param h Height
-	 */
-	protected void setSize(double w, double h)
-	{
-		super.setSize(w, h);
-	}
-
 	
 	/**
 	 * Tells the pause menu that it should be running
@@ -73,9 +60,9 @@ public class PauseMenu extends Menu
 		gl.glBegin(GL2.GL_QUADS);
 		
 		gl.glVertex2d(0, 0);
-		gl.glVertex2d(width, 0);
-		gl.glVertex2d(width, height);
-		gl.glVertex2d(0, height);
+		gl.glVertex2d(c.getWidth(), 0);
+		gl.glVertex2d(c.getWidth(), c.getHeight());
+		gl.glVertex2d(0, c.getHeight());
 		
 		gl.glEnd();
 		
@@ -130,7 +117,7 @@ public class PauseMenu extends Menu
 		if (item == buttonMainMenu)
 		{
 			paused = false;
-			c.setCurrentMenu(c.mainMenu, true);
+			c.setCurrentMenu(new MainMenu(c), true);
 			c.resetScore();
 		}
 	}

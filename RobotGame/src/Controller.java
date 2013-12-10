@@ -6,7 +6,6 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
-import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -42,21 +41,6 @@ public class Controller
 	 * The Menu that appears when the game is paused.
 	 */
 	public PauseMenu pauseMenu;
-	
-	/**
-	 * The Menu that shows the high score table
-	 */
-	public ScoreMenu scoreMenu;
-	
-	/**
-	 * The Menu that appears when the game starts
-	 */
-	public MainMenu mainMenu;
-	
-	/**
-	 * The Menu that shows the user instructions for playing the game.
-	 */
-	public InstructionMenu instructionMenu;
 	
 	/**
 	 * Stores a reference to which menu is currently being displayed.
@@ -105,13 +89,9 @@ public class Controller
 		width = 800; height = 600;
 		
 		hud = new HUD(this);
-		pauseMenu = new PauseMenu(this, width, height);
-		scoreMenu = new ScoreMenu(this, width, height);
-		mainMenu = new MainMenu(this, width, height);
-		instructionMenu = new InstructionMenu(this, width, height);
+		pauseMenu = new PauseMenu(this);
+		currentMenu = new MainMenu(this);
 		paused = false;
-		
-		currentMenu = mainMenu;
 		
 		score = 0;
 	}
@@ -131,14 +111,6 @@ public class Controller
 	public HUD getHUD()
 	{
 		return hud;
-	}
-	
-	/**
-	 * Adds a key listener to the Controller object.
-	 */
-	public void addKeyListener(KeyListener listener)
-	{
-		win.addKeyListener(listener);
 	}
 	
 	/**
@@ -189,11 +161,6 @@ public class Controller
 		
 		width = w;
 		height = h;
-		
-		pauseMenu.resize(width, height);
-		scoreMenu.resize(width, height);
-		mainMenu.resize(width,  height);
-		instructionMenu.resize(width, height);
 	}
 	
 	/**
@@ -304,11 +271,12 @@ public class Controller
 		{
 			if (currentLevel == arena)
 			{
+				ScoreMenu scoreMenu = new ScoreMenu(this);
 				setCurrentMenu(scoreMenu, true);
 				scoreMenu.updateScore(score);
 			}
 			if (currentLevel == practice)
-				setCurrentMenu(mainMenu, true);
+				setCurrentMenu(new MainMenu(this), true);
 		}
 	}
 	
@@ -356,6 +324,22 @@ public class Controller
 	public int getScore()
 	{
 		return score;
+	}
+	
+	/**
+	 * Returns the width of the window
+	 */
+	public double getWidth()
+	{
+		return width;
+	}
+	
+	/**
+	 * Returns the height of the window
+	 */
+	public double getHeight()
+	{
+		return height;
 	}
 	
 	/**
