@@ -28,7 +28,7 @@ public class Player extends Entity implements Damageable
 	private double stepDownHeight;
 	private double maxHp;
 	
-	private PlasmaRifle gun;
+	private Weapon weapon;
 	
 	/**
 	 * Initializes the player with default parameters.
@@ -43,7 +43,7 @@ public class Player extends Entity implements Damageable
 		map = gameMap;
 		inAir = true;
 		
-		gun = new PlasmaRifle(c, map, this);
+		weapon = new PlasmaSword(c, map, this);
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;
@@ -236,8 +236,8 @@ public class Player extends Entity implements Damageable
 	//Handles using all the player's weapons.
 	private void handleWeapons(double dt)
 	{
-		gun.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
-		gun.step(dt);		
+		weapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
+		weapon.step(dt);		
 	}
 	
 	
