@@ -72,7 +72,7 @@ public class SoundHandler
 	public void destroy()
 	{
 		context.getDevice().close();
-		context.destroy();
+		//context.destroy();
 	}
 	
 	/**

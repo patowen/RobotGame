@@ -84,6 +84,7 @@ public class GameRenderer implements GLEventListener
 	 */
 	public static void main(String[] args)
 	{
+		GLProfile.initSingleton();
 		new GameRenderer();
 	}
 }
