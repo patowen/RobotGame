@@ -1,4 +1,5 @@
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 
 /**
@@ -29,6 +30,8 @@ public class Player extends Entity implements Damageable
 	private double maxHp;
 	
 	private Weapon weapon;
+	private PlasmaSword sword;
+	private PlasmaRifle rifle;
 	
 	/**
 	 * Initializes the player with default parameters.
@@ -43,7 +46,9 @@ public class Player extends Entity implements Damageable
 		map = gameMap;
 		inAir = true;
 		
-		weapon = new PlasmaSword(c, map, this);
+		rifle = new PlasmaRifle(c, map, this);
+		sword = new PlasmaSword(c, map, this);
+		weapon = sword;
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;
@@ -60,6 +65,25 @@ public class Player extends Entity implements Damageable
 		
 		hp = maxHp;
 		isDead = false;
+	}
+	
+	/**
+	 * Draws the player
+	 * @param gl
+	 */
+	public void draw(GL2 gl)
+	{
+		weapon.draw(gl);
+	}
+	
+	/**
+	 * Draws transparent parts of the player, called after
+	 * all draw methods are called
+	 * @param gl
+	 */
+	public void draw2(GL2 gl)
+	{
+		weapon.draw2(gl);
 	}
 	
 	/**
