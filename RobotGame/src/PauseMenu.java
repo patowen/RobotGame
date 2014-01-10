@@ -9,9 +9,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
  */
 public class PauseMenu extends Menu
 {	
-	private boolean paused, quit;
-	
-	private MenuButton buttonResume, buttonExit, buttonMainMenu;
+	private MenuButton buttonResume, buttonMainMenu;
 	
 	/**
 	 * Initializes the pause menu.	
@@ -22,31 +20,18 @@ public class PauseMenu extends Menu
 		super(controller);
 		
 		buttonResume = new MenuButton(this, "Resume", "Impact", 0.5, 0.5, 3);
-		buttonExit = new MenuButton(this, "Exit Game", "Impact", 0.5, 0.3, 3);
 		buttonMainMenu = new MenuButton(this, "Return to Main Menu", "Impact", .5, .4, 3);
 		
 		items.add(new MenuLabel(this, "You have paused the game", "Impact", 0.5, 0.75, 5));
 		items.add(buttonResume);
 		items.add(buttonMainMenu);
-		items.add(buttonExit);
-		
-		quit = false;
 	}
 	
-	/**
-	 * Tells the pause menu that it should be running
-	 */
-	public void pause()
+	public void step(double dt)
 	{
-		paused = true;
-	}
-	
-	/**
-	 * Tells the pause menu that it should not be running
-	 */
-	public void unPause()
-	{
-		paused = false;
+		super.step(dt);
+		if (input.getKeyPressed(InputHandler.PAUSE))
+			c.setPaused(false);
 	}
 	
 	/**
@@ -84,22 +69,6 @@ public class PauseMenu extends Menu
 	}
 	
 	/**
-	 * Returns whether or not the game should be paused
-	 */
-	public boolean isPaused()
-	{
-		return paused;
-	}
-	
-	/**
-	 * Returns whether or not the game should be exited
-	 */
-	public boolean quit()
-	{
-		return quit;
-	}
-	
-	/**
 	 * Performs an action called by one of the menu items.
 	 * @param item Object that called the method
 	 */
@@ -107,17 +76,11 @@ public class PauseMenu extends Menu
 	{
 		if (item == buttonResume)
 		{
-			paused = false;
-			input.readMouse();
+			c.setPaused(false);
 		}
-		else if (item == buttonExit)
+		else if (item == buttonMainMenu)
 		{
-			c.quit();
-		}
-		if (item == buttonMainMenu)
-		{
-			paused = false;
-			c.setCurrentMenu(new MainMenu(c), true);
+			c.setCurrentMenu(new MainMenu(c));
 			c.resetScore();
 		}
 	}

@@ -20,7 +20,7 @@ public class GameMap
 	private Collision collision;
 	
 	//File data
-	private String mapFile;
+	private File mapFile;
 	
 	//Entity data
 	private Player player;
@@ -57,7 +57,7 @@ public class GameMap
 	 * @param controller The active Controller object
 	 * @param fName The name of the file containing the data.
 	 */
-	public GameMap(Controller controller, String fName)
+	public GameMap(Controller controller, File fName)
 	{
 		c = controller;
 		mapFile = fName;
@@ -107,7 +107,7 @@ public class GameMap
 	 * all data.
 	 */
 	public void resetLevel()
-	{		
+	{
 		collision = new Collision(this);
 		
 		//Initialize all data arrays		
@@ -252,7 +252,6 @@ public class GameMap
 			if (deathDuration >= deathWait)
 			{
 				c.handleDeath();
-				resetLevel();
 			}
 		}
 	}
@@ -389,11 +388,8 @@ public class GameMap
 		private String fileInfo;
 		
 		//Reads a file for map data and creates the map out of it.
-		public void readData(String fName)
-		{
-			//This is a field to allow reading methods to modify it.
-			File file = new File(fName);
-			
+		public void readData(File file)
+		{			
 			//Open and start reading the file
 			try
 			{

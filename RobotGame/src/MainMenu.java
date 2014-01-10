@@ -51,9 +51,7 @@ public class MainMenu extends Menu
 	{
 		if (item == startButton)
 		{
-			c.setCurrentLevel(c.arena);
-			c.setCurrentMenu(null);
-			input.readMouse();
+			c.setCurrentLevel("arena.txt");
 		}
 		else if (item == multiplayerButton)
 			c.setCurrentMenu(new MultiplayerMenu(c));
@@ -61,9 +59,7 @@ public class MainMenu extends Menu
 			c.setCurrentMenu(new InstructionMenu(c));
 		else if (item == practiceButton)
 		{
-			c.setCurrentLevel(c.practice);
-			c.setCurrentMenu(null);
-			input.readMouse();
+			c.setCurrentLevel("practice.txt");
 		}
 		else if (item == scoreButton)
 			c.setCurrentMenu(new ScoreMenu(c));

@@ -7,6 +7,7 @@ import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -18,21 +19,18 @@ import com.jogamp.opengl.util.texture.TextureIO;
 public class Controller
 {
 	private GLWindow win;
+	private FPSAnimator anim;
 	private HashMap<Integer, Texture> textureInfo;
 	private GameMap currentLevel;
-	
-	/**
-	 * The main map in the game where all the fun takes place.
-	 */
-	public GameMap arena;
-	
-	/**
-	 * A practice map to help the user gain movement skills while not being chased.
-	 */
-	public GameMap practice;
+	private int levelType; //0=no score, 1=score
 	
 	private InputHandler input;
 	private SoundHandler soundHandler;
+	
+	private boolean isMultiplayer;
+	private boolean isServer;
+	private Server server;
+	private Client client;
 	
 	private HUD hud;
 	private boolean paused;
@@ -40,7 +38,7 @@ public class Controller
 	/**
 	 * The Menu that appears when the game is paused.
 	 */
-	public PauseMenu pauseMenu;
+	private PauseMenu pauseMenu;
 	
 	/**
 	 * Stores a reference to which menu is currently being displayed.
@@ -55,9 +53,10 @@ public class Controller
 	/**
 	 * Constructs a Controller object given the object that renders it.
 	 */
-	public Controller(GLWindow window)
+	public Controller(GLWindow window, FPSAnimator animator)
 	{
 		win = window;
+		anim = animator;
 	}
 	
 	/**
@@ -82,14 +81,10 @@ public class Controller
 		
 		soundHandler = new SoundHandler();
 		
-		arena = new GameMap(this, "maps/map001.txt");
-		practice = new GameMap(this, "maps/map000.txt");
-		currentLevel = arena;
-		
 		width = 800; height = 600;
 		
-		hud = new HUD(this);
-		pauseMenu = new PauseMenu(this);
+		isMultiplayer = false;
+		
 		currentMenu = new MainMenu(this);
 		paused = false;
 		
@@ -102,7 +97,11 @@ public class Controller
 	public void quit()
 	{
 		soundHandler.destroy();
-		System.exit(0);
+		if (server != null)
+			server.destroy();
+		if (client != null)
+			client.destroy();
+		anim.stop();
 	}
 	
 	/**
@@ -135,6 +134,56 @@ public class Controller
 	public InputHandler getInputHandler()
 	{
 		return input;
+	}
+	
+	/**
+	 * Returns whether the network is being utilized for multiplayer gaming.
+	 */
+	public boolean isMultiplayer()
+	{
+		return isMultiplayer;
+	}
+	
+	/**
+	 * Sets whether the network is being utilized for multiplayer gaming.
+	 */
+	public void setMultiplayer(boolean multiplayer)
+	{
+		isMultiplayer = multiplayer;
+	}
+	
+	/**
+	 * Returns whether the current computer is hosting the game.
+	 */
+	public boolean isServer()
+	{
+		return isServer;
+	}
+	
+	/**
+	 * Returns the Server object if the current computer is hosting the game.
+	 */
+	public Server getServer()
+	{
+		return server;
+	}
+	
+	public void startServer()
+	{
+		server = new Server(5);
+	}
+	
+	/**
+	 * Returns the Client object if the current computer is hosting the game.
+	 */
+	public Client getClient()
+	{
+		return client;
+	}
+	
+	public void startClient()
+	{
+		client = new Client();
 	}
 	
 	/**
@@ -220,46 +269,46 @@ public class Controller
 	 */
 	public void step(double dt)
 	{
-		if (!paused)
+		if (client != null)
+			client.step(dt);
+		
+		if (currentMenu != null)
 		{
-			if (currentMenu == null)
+			currentMenu.step(dt);
+		}
+		else if (paused && !isMultiplayer)
+		{
+			pauseMenu.step(dt);
+		}
+		else
+		{
+			if (paused && isMultiplayer)
+				pauseMenu.step(dt);
+			
+			currentLevel.step(dt);
+			
+			if (currentLevel != null)
 			{
-				currentLevel.step(dt);
 				hud.step(dt);
 				
 				if (input.getKeyPressed(InputHandler.PAUSE))
 				{
-					paused = true;
-					win.setPointerVisible(true);
-					pauseMenu.pause();
+					setPaused(true);
 				}
 			}
-			else
-				currentMenu.step(dt);
-		}
-		else
-		{
-			pauseMenu.step(dt);
-			
-			if (input.getKeyPressed(InputHandler.PAUSE))
-			{
-				paused = false;
-				win.setPointerVisible(false);
-				pauseMenu.unPause();
-				input.readMouse();
-			}
-			if (!pauseMenu.isPaused())
-			{
-				paused = false;
-				if (currentMenu == null)
-					win.setPointerVisible(false);
-			}
-			if(pauseMenu.quit())
-				quit();
 		}
 		
 		input.updatePressed();
 		soundHandler.step();
+	}
+	
+	public void setPaused(boolean paused)
+	{
+		this.paused = paused;
+		win.setPointerVisible(paused);
+		
+		if (!paused)
+			input.readMouse();
 	}
 	
 	/**
@@ -267,26 +316,33 @@ public class Controller
 	 */
 	public void handleDeath()
 	{
-		if (currentMenu == null)
+		if (levelType == 1)
 		{
-			if (currentLevel == arena)
-			{
-				ScoreMenu scoreMenu = new ScoreMenu(this);
-				setCurrentMenu(scoreMenu, true);
-				scoreMenu.updateScore(score);
-			}
-			if (currentLevel == practice)
-				setCurrentMenu(new MainMenu(this), true);
+			ScoreMenu scoreMenu = new ScoreMenu(this);
+			setCurrentMenu(scoreMenu);
+			scoreMenu.updateScore(score);
 		}
+		else if (levelType == 0)
+			setCurrentMenu(new MainMenu(this));
 	}
 	
 	/**
 	 * Sets the current game level to the desired input
 	 * @param gm The GameMap to be set as the current level
 	 */
-	public void setCurrentLevel(GameMap gm)
+	public void setCurrentLevel(String levelName)
 	{
-		currentLevel = gm;
+		if (levelName.equals("practice.txt"))
+			levelType = 0;
+		else
+			levelType = 1;
+		pauseMenu = new PauseMenu(this);
+		paused = false;
+		hud = new HUD(this);
+		currentLevel = new GameMap(this, new File("maps" + File.separator + levelName)); //levelName
+		currentMenu = null;
+		win.setPointerVisible(false);
+		input.readMouse();
 	}
 	
 	/**
@@ -295,27 +351,12 @@ public class Controller
 	 */
 	public void setCurrentMenu(Menu menu)
 	{
-		setCurrentMenu(menu, false);
-	}
-	
-	/**
-	 * Sets the current menu to display to the input GameMenu
-	 * @param menu The menu to display
-	 * @param reset Whether the level should be reset.
-	 */
-	public void setCurrentMenu(Menu menu, boolean reset)
-	{
-		if (menu == null)
-			win.setPointerVisible(false);
-		else
-			win.setPointerVisible(true);
+		pauseMenu = null;
+		hud = null;
+		currentLevel = null;
 		
+		win.setPointerVisible(true);
 		currentMenu = menu;
-		
-		if (reset)
-		{
-			currentLevel.resetLevel();
-		}
 	}
 	
 	/**

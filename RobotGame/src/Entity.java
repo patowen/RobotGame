@@ -7,6 +7,8 @@ import javax.media.opengl.GL2;
 public class Entity
 {
 	protected Controller c;
+	
+	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
 	protected double xV, yV, zV;
 	protected double xPrevious, yPrevious, zPrevious;
@@ -18,7 +20,7 @@ public class Entity
 	 * @param gameMap The map where the Entity is placed.
 	 */
 	public Entity(Controller controller, GameMap gameMap)
-	{
+	{		
 		c = controller;
 		map = gameMap;
 		
@@ -51,6 +53,40 @@ public class Entity
 		xV = xVel;
 		yV = yVel;
 		zV = zVel;
+	}
+	
+	/**
+	 * Handles changes to the entity based on signals received by it.
+	 * @param signalType The kind of signal being sent.
+	 * @param data A byte array holding the data of the signal.
+	 * @param offset Where the array should start being read.
+	 */
+	public void signalReceived(int signalType, NetworkPacket data)
+	{
+		switch (signalType)
+		{
+		case 0:
+			double[] p = data.getDoubles(3);
+			double[] v = data.getDoubles(3);
+			setPosition(p[0], p[1], p[2]);
+			setVelocity(v[0], v[1], v[2]);
+			
+			break;
+		}
+	}
+	
+	public void stepSendSignals()
+	{
+		NetworkPacket packet = new NetworkPacket(6*8);
+		
+		packet.addDoubles(x, y, z, xV, yV, zV);
+		
+		sendSignal(false, 0, packet);
+	}
+	
+	protected void sendSignal(boolean guaranteed, int signalType, NetworkPacket data)
+	{
+		
 	}
 	
 	/**

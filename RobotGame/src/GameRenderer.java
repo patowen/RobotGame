@@ -1,3 +1,4 @@
+import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -17,6 +18,7 @@ public class GameRenderer implements GLEventListener
 {	
 	private GLWindow win;
 	
+	private FPSAnimator anim;
 	private Controller c;
 	private InputHandler input;
 	
@@ -32,10 +34,11 @@ public class GameRenderer implements GLEventListener
 		GLCapabilities caps = new GLCapabilities(glp);
 		
 		win = GLWindow.create(caps);
+		win.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 		
 		win.addWindowListener(new WindowAdapter()
 		{
-			public void windowDestroyed(WindowEvent e)
+			public void windowDestroyNotify(WindowEvent e)
 			{
 				c.quit();
 			}
@@ -45,14 +48,15 @@ public class GameRenderer implements GLEventListener
 		win.setTitle("ARENA");
 		win.addGLEventListener(this);
 		
-		c = new Controller(win);
 		fps = 60;
+		
+		anim = new FPSAnimator(win, fps);
+		anim.start();
+		
+		c = new Controller(win, anim);
 		
 		input = new InputHandler(win);
 		c.setInputHandler(input);
-		
-		FPSAnimator anim = new FPSAnimator(win, fps);
-		anim.start();
 		
 		win.setVisible(true);
 	}
@@ -84,6 +88,7 @@ public class GameRenderer implements GLEventListener
 	 */
 	public static void main(String[] args)
 	{
+		GLProfile.initSingleton();
 		new GameRenderer();
 	}
 }
