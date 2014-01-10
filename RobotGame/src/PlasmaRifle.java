@@ -3,20 +3,12 @@
  * Handles the controls and the firing of the main game weapon, the plasma
  * rifle, which fires standard-strength bullets four times per second
  * @author Patrick Owen
+ * @author Michael Ekstrom
  */
-public class PlasmaRifle
+public class PlasmaRifle extends Weapon
 {
-	private Controller c;
-	private GameMap map;
-	private Player player;
-	private InputHandler input;
 	
-	private double shotDelay;
 	private double shotX, shotY, shotZ; //Location of shot relative to player
-	private double charge; //How much time before the next shot
-	
-	private double x, y, z;
-	private double horizontalDir, verticalDir;
 	
 	/**
 	 * Constructs a PlasmaRifle object.
@@ -26,10 +18,7 @@ public class PlasmaRifle
 	 */
 	public PlasmaRifle(Controller controller, GameMap gameMap, Player p)
 	{
-		c = controller;
-		map = gameMap;
-		player = p;
-		input = c.getInputHandler();
+		super(controller, gameMap, p);
 		
 		shotDelay = 0.25;
 		shotX = 0.8; shotY = 0.04; shotZ = -0.03;
@@ -42,25 +31,12 @@ public class PlasmaRifle
 	 */
 	public void step(double dt)
 	{
-		handleShooting(dt);
+		handleFiring(dt);
 	}
 	
-	/**
-	 * Sets the position of the player's eye according to the plasma rifle.
-	 * @param xPos x
-	 * @param yPos y
-	 * @param zPos z
-	 * @param hDir Horizontal direction
-	 * @param vDir Vertical direction
-	 */
-	public void setPosition(double xPos, double yPos, double zPos, double hDir, double vDir)
-	{
-		x = xPos; y = yPos; z = zPos;
-		horizontalDir = hDir; verticalDir = vDir;
-	}
 	
 	//Handles firing the rifle. 
-	private void handleShooting(double dt)
+	private void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
 		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0)
