@@ -30,8 +30,9 @@ public class Player extends Entity implements Damageable
 	private double maxHp;
 	
 	private Weapon weapon;
-	private PlasmaSword sword;
 	private PlasmaRifle rifle;
+	private PlasmaSword sword;
+	private PlasmaLauncher launcher;
 	
 	/**
 	 * Initializes the player with default parameters.
@@ -48,7 +49,8 @@ public class Player extends Entity implements Damageable
 		
 		rifle = new PlasmaRifle(c, map, this);
 		sword = new PlasmaSword(c, map, this);
-		weapon = sword;
+		launcher = new PlasmaLauncher(c, map, this);
+		weapon = rifle;
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;
@@ -260,6 +262,12 @@ public class Player extends Entity implements Damageable
 	//Handles using all the player's weapons.
 	private void handleWeapons(double dt)
 	{
+		if (input.getKey(InputHandler.WEAPON1) && weapon != rifle)
+			weapon = rifle;
+		if (input.getKey(InputHandler.WEAPON2) && weapon != sword)
+			weapon = sword;
+		if (input.getKey(InputHandler.WEAPON3) && weapon != launcher)
+			weapon = launcher;
 		weapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
 		weapon.step(dt);		
 	}

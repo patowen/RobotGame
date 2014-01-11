@@ -29,12 +29,13 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	/**
 	 * Index for the specified key control, used for reference.
 	 */
-	public static final int UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3, JUMP = 4, PAUSE = 5, CHARGE = 6; //Keyboard
+	public static final int UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3, JUMP = 4, PAUSE = 5, CHARGE = 6,
+			WEAPON1 = 7, WEAPON2 = 8, WEAPON3 = 9; //Keyboard
 	
 	/**
 	 * Number of keys held by the InputHandler
 	 */
-	public static final int NUM_KEYS = 7;
+	public static final int NUM_KEYS = 10;
 	
 	/**
 	 * Index for the specified mouse control, used for reference.
@@ -107,6 +108,9 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		keyCode[4] = KeyEvent.VK_SPACE;
 		keyCode[5] = KeyEvent.VK_ESCAPE;
 		keyCode[6] = KeyEvent.VK_SHIFT;
+		keyCode[7] = KeyEvent.VK_1;
+		keyCode[8] = KeyEvent.VK_2;
+		keyCode[9] = KeyEvent.VK_3;
 		
 		mouseButton = new int[NUM_MOUSE_BUTTONS];
 		mouseButton[0] = MouseEvent.BUTTON1;

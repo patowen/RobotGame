@@ -40,7 +40,7 @@ public class PlasmaSword extends Weapon
 		shotDelay = .4;
 		charge = 0;
 		steps = 15;
-		bladelength = 2;
+		bladelength = 3;
 		knockback = 10;
 		damage = 2;
 		arclength = .4;
