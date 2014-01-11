@@ -20,6 +20,8 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	private GLWindow win;
 	private KeyListener listener;
 	
+	private boolean inputEnabled;
+	
 	//Mouse controls
 	private double mouseX, mouseY;
 	private double mouseSensitivity;
@@ -95,6 +97,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		win.addKeyListener(this);
 		win.addMouseListener(this);
 		listener = null;
+		inputEnabled = true;
 		
 		mouseSensitivity = 1.0/45/200;
 		
@@ -138,6 +141,11 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 		}
 	}
 	
+	public void setInputEnabled(boolean enabled)
+	{
+		inputEnabled = enabled;
+	}
+	
 	/**
 	 * Determines how far the mouse moved from the center and resets the mouse to the center.
 	 * The information can be retrieved with getMouseX and getMouseY
@@ -146,7 +154,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public void readMouse()
 	{
-		if (win.hasFocus())
+		if (win.hasFocus() && inputEnabled)
 		{
 			Point mousePos = MouseInfo.getPointerInfo().getLocation();
 			int centerX = win.getX() + win.getWidth()/2;
@@ -287,7 +295,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public boolean getKey(int key)
 	{
-		if (keyCanceled[key]) return false;
+		if (keyCanceled[key] || !inputEnabled) return false;
 		return keyDown[key];
 	}
 	
@@ -297,7 +305,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public boolean getMouseButton(int button)
 	{
-		if (mouseCanceled[button]) return false;
+		if (mouseCanceled[button] || !inputEnabled) return false;
 		return mouseDown[button];
 	}
 	
@@ -307,7 +315,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public boolean getKeyPressed(int key)
 	{
-		if (keyCanceled[key]) return false;
+		if (keyCanceled[key] || !inputEnabled) return false;
 		return keyPressed[key];
 	}
 	
@@ -317,7 +325,7 @@ public class InputHandler implements KeyListener, MouseListener //Add MouseMotio
 	 */
 	public boolean getMouseButtonPressed(int button)
 	{
-		if (mouseCanceled[button]) return false;
+		if (mouseCanceled[button] || !inputEnabled) return false;
 		return mousePressed[button];
 	}
 	

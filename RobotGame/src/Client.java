@@ -1,5 +1,3 @@
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -24,11 +22,8 @@ import java.net.UnknownHostException;
  * clients.
  * @author Patrick Owen
  */
-public class Client
+public class Client extends Network
 {
-	private DatagramSocket socket;
-	private ClientThread thread;
-	
 	private InetAddress serverIP;
 	private int serverPort;
 	
@@ -54,21 +49,15 @@ public class Client
 		
 		try
 		{
-			thread = new ClientThread(4445);
-			thread.start();
+			socket = new DatagramSocket();
 		}
 		catch (SocketException e)
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
-	}
-	
-	public void destroy()
-	{
-		if (thread != null && thread.isAlive())
-			thread.interrupt();
-		socket.close();
+		
+		startThread();
 	}
 	
 	public boolean isConnected()
@@ -136,73 +125,49 @@ public class Client
 	
 	public void send(NetworkPacket packet)
 	{
-		try
-		{
-			socket.send(new DatagramPacket(packet.array(), packet.length(), serverIP, serverPort));
-		}
-		catch (IOException e) {} //Just act like a failed signal send
+		send(packet, serverIP, serverPort);
 	}
 	
-	/**
-	 * Handles the loop of receiving signals from clients.
-	 */
-	private class ClientThread extends Thread
-	{		
-		public ClientThread(int port) throws SocketException
-		{
-			socket = new DatagramSocket();
-		}
+	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
+	{
+		NetworkPacket ret = new NetworkPacket(256);
 		
-		public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort) throws IOException
+		if (!sender.equals(serverIP) || senderPort != serverPort)
+			return;
+		
+		byte signalType = packet.getByte();
+		if (signalType == 0) //Signal reply from server
 		{
-			NetworkPacket ret = new NetworkPacket(256);
-			
-			byte signalType = packet.getByte();
-			if (signalType == 0) //Signal reply from server
+			byte typeRelayed = packet.getByte();
+			if (typeRelayed == 1)
 			{
-				byte typeRelayed = packet.getByte();
-				if (typeRelayed == 1)
+				byte subtype = packet.getByte();
+				if (subtype == 1)
 				{
-					byte subtype = packet.getByte();
-					if (subtype == 1)
+					byte id = packet.getByte();
+					loggingIn = false;
+					if (id < 0)
 					{
-						byte id = packet.getByte();
-						loggingIn = false;
-						if (id < 0)
-						{
-							connected = false;
-						}
-						else
-						{
-							connected = true;
-						}
+						connected = false;
+					}
+					else
+					{
+						connected = true;
 					}
 				}
 			}
-			else if (signalType == 1) //Standard client signal (not a relay)
-			{
-				byte subtype = packet.getByte();
-				
-			}
 		}
-		
-		public void run()
+		else if (signalType == 1) //Standard client signal (not a relay)
 		{
-			byte[] buf = new byte[256];
-			
-			while (true)
+			byte subtype = packet.getByte();
+			if (subtype == 2)
 			{
-				//Receive data
-				if (socket.isClosed())
-					return;
+				loggingIn = false;
+				loggingOut = false;
+				connected = false;
 				
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				try
-				{
-					socket.receive(packet);
-					interpretSignal(new NetworkPacket(buf), packet.getAddress(), packet.getPort());
-				}
-				catch (IOException e) {}
+				ret.addBytes(0, 1, 2);
+				send(ret, sender, senderPort);
 			}
 		}
 	}

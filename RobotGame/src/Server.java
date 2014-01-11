@@ -1,5 +1,3 @@
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -47,11 +45,8 @@ import java.net.SocketException;
  * clients.
  * @author Patrick Owen
  */
-public class Server
-{
-	private DatagramSocket socket;
-	private ServerThread thread;
-	
+public class Server extends Network
+{	
 	private int capacity, numPlayers;
 	private String[] clientIP;
 	private int[] clientPort;
@@ -68,23 +63,20 @@ public class Server
 		
 		try
 		{
-			thread = new ServerThread(4445);
-			thread.start();
+			socket = new DatagramSocket(4445);
 		}
 		catch (SocketException e)
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
+		startThread();
 	}
 	
-	public void destroy()
+	public void step(double dt)
 	{
-		if (thread != null && thread.isAlive())
-		{
-			thread.interrupt();
-		}
-		socket.close();
+		
 	}
 	
 	//Returns the client index for the specified data, or -1 if none exists.
@@ -112,83 +104,51 @@ public class Server
 		numPlayers--;
 	}
 	
-	/**
-	 * Handles the loop of receiving signals from clients.
-	 */
-	private class ServerThread extends Thread
+	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
-		public ServerThread(int port) throws SocketException
-		{
-			socket = new DatagramSocket(port);
-		}
+		NetworkPacket ret = new NetworkPacket(256);
 		
-		public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort) throws IOException
+		byte signalType = packet.getByte();
+		if (signalType == 1) //Standard client signal (not a relay)
 		{
-			NetworkPacket ret = new NetworkPacket(256);
-			
-			byte signalType = packet.getByte();
-			if (signalType == 1) //Standard client signal (not a relay)
+			byte subtype = packet.getByte();
+			if (subtype == 0) //Log out
 			{
-				byte subtype = packet.getByte();
-				if (subtype == 0) //Log out
+				//Handle request
+				removeClient(getClient(sender.getHostAddress(), senderPort));
+				//Send confirmation
+				ret.addBytes(0, 1, 0);
+				send(ret, sender, senderPort);
+			}
+			else if (subtype == 1) //Log in request
+			{
+				//Check if already logged in
+				int id = getClient(sender.getHostAddress(), senderPort);
+				if (id != -1)
 				{
-					//Handle request
-					removeClient(getClient(sender.getHostAddress(), senderPort));
-					//Send confirmation
-					ret.addBytes(0, 1, 0);
-					socket.send(new DatagramPacket(ret.array(), ret.length(), sender, senderPort));
+					//Resend granted signal
+					ret.addBytes(0, 1, 1, 0);
+					send(ret, sender, senderPort);
 				}
-				else if (subtype == 1) //Log in request
+				else
 				{
-					//Check if already logged in
-					int id = getClient(sender.getHostAddress(), senderPort);
-					if (id != -1)
+					if (numPlayers < capacity)
 					{
-						//Resend granted signal
+						//Granted
 						ret.addBytes(0, 1, 1, 0);
-						socket.send(new DatagramPacket(ret.array(), ret.length(), sender, senderPort));
+						send(ret, sender, senderPort);
+						clientIP[numPlayers] = sender.getHostAddress();
+						clientPort[numPlayers] = senderPort;
+						clientName[numPlayers] = packet.getString();
+						numPlayers++;
 					}
 					else
 					{
-						if (numPlayers < capacity)
-						{
-							//Granted
-							ret.addBytes(0, 1, 1, 0);
-							socket.send(new DatagramPacket(ret.array(), ret.length(), sender, senderPort));
-							clientIP[numPlayers] = sender.getHostAddress();
-							clientPort[numPlayers] = senderPort;
-							clientName[numPlayers] = packet.getString();
-							numPlayers++;
-							System.out.println(numPlayers);
-						}
-						else
-						{
-							//Denied
-							ret.addBytes(0, 1, 1, -1);
-							socket.send(new DatagramPacket(ret.array(), ret.length(), sender, senderPort));
-						}
+						//Denied
+						ret.addBytes(0, 1, 1, -1);
+						send(ret, sender, senderPort);
 					}
 				}
-			}
-		}
-		
-		public void run()
-		{
-			byte[] buf = new byte[256];
-			
-			while (true)
-			{
-				//Receive data
-				if (socket.isClosed())
-					return;
-				
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				try
-				{
-					socket.receive(packet);
-					interpretSignal(new NetworkPacket(buf), packet.getAddress(), packet.getPort());
-				}
-				catch (IOException e) {}
 			}
 		}
 	}

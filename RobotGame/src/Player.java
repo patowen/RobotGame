@@ -48,7 +48,7 @@ public class Player extends Entity implements Damageable
 		
 		rifle = new PlasmaRifle(c, map, this);
 		sword = new PlasmaSword(c, map, this);
-		weapon = sword;
+		weapon = rifle;
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;

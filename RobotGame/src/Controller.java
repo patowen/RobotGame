@@ -263,6 +263,8 @@ public class Controller
 	{
 		if (client != null)
 			client.step(dt);
+		if (server != null)
+			server.step(dt);
 		
 		if (currentMenu != null)
 		{
@@ -277,7 +279,14 @@ public class Controller
 			if (paused && isMultiplayer)
 				pauseMenu.step(dt);
 			
-			currentLevel.step(dt);
+			if (paused)
+				input.setInputEnabled(false);
+			
+			if (currentLevel != null)
+				currentLevel.step(dt);
+			
+			if (paused)
+				input.setInputEnabled(true);
 			
 			if (currentLevel != null)
 			{

@@ -251,7 +251,13 @@ public class GameMap
 			deathDuration += dt;
 			if (deathDuration >= deathWait)
 			{
-				c.handleDeath();
+				if (c.isMultiplayer())
+					resetLevel();
+				else
+				{
+					c.setCurrentMenu(new MainMenu(c));
+					c.resetScore();
+				}
 			}
 		}
 	}

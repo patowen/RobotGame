@@ -25,6 +25,11 @@ public class NetworkPacket
 		return buf.position();
 	}
 	
+	public void append(NetworkPacket packet)
+	{
+		buf.put(packet.array(), 0, packet.length());
+	}
+	
 	public NetworkPacket(int numBytes)
 	{
 		buf = ByteBuffer.allocate(numBytes).order(ByteOrder.LITTLE_ENDIAN);

@@ -31,7 +31,10 @@ public class PauseMenu extends Menu
 	{
 		super.step(dt);
 		if (input.getKeyPressed(InputHandler.PAUSE))
+		{
+			input.cancelKey(InputHandler.PAUSE);
 			c.setPaused(false);
+		}
 	}
 	
 	/**
