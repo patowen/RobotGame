@@ -88,7 +88,7 @@ public class EnemyTracking extends Enemy implements Damageable
 	{
 		charge -= dt;
 		
-		if (c.getPlayer().isDead()) return;
+		if (map.getPlayer().isDead()) return;
 		
 		if (charge < 0 && noFriendlyFire())
 		{

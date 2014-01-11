@@ -57,7 +57,7 @@ public class EnemySplitting extends EnemyShocking
 			EnemySplitting temp2 = new EnemySplitting(c, map, stage*.7);
 			temp1.setPosition(x, y, z);
 			temp2.setPosition(x, y, z);
-			Player target = c.getPlayer();
+			Player target = map.getPlayer();
 			double xDir = target.getX() - x;
 			double yDir = target.getY() - y;
 			double mag = Math.sqrt(xDir*xDir + yDir*yDir);

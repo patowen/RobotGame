@@ -187,14 +187,6 @@ public class Controller
 	}
 	
 	/**
-	 * Returns the player object in the map
-	 */
-	public Player getPlayer()
-	{
-		return currentLevel.getPlayer();
-	}
-	
-	/**
 	 * Sets the projection matrix to the proper type.
 	 * @param gl
 	 * @param w
@@ -338,8 +330,8 @@ public class Controller
 			levelType = 1;
 		pauseMenu = new PauseMenu(this);
 		paused = false;
-		hud = new HUD(this);
 		currentLevel = new GameMap(this, new File("maps" + File.separator + levelName)); //levelName
+		hud = new HUD(this, currentLevel);
 		currentMenu = null;
 		win.setPointerVisible(false);
 		input.readMouse();

@@ -13,6 +13,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 public class HUD
 {
 	private Controller c;
+	private GameMap map;
 	
 	private TextRenderer scoreRenderer;
 	
@@ -26,9 +27,10 @@ public class HUD
 	 * Initializes the HUD.
 	 * @param controller
 	 */
-	public HUD(Controller controller)
+	public HUD(Controller controller, GameMap gameMap)
 	{
 		c = controller;
+		map = gameMap;
 		
 		scoreRenderer = new TextRenderer(new Font("Time New Roman", Font.PLAIN, 24), true, true);
 		
@@ -80,7 +82,7 @@ public class HUD
 			hitMark.step(dt);
 		}
 		
-		if (c.getPlayer().isDead() && !hitMarks.isEmpty())
+		if (map.getPlayer().isDead() && !hitMarks.isEmpty())
 			clearHitMarks();
 		
 		for (HitMark hitMark : deletionQueue)
@@ -96,7 +98,7 @@ public class HUD
 		deletionQueue.clear();
 		creationQueue.clear();
 		
-		double hp = c.getPlayer().getHP();
+		double hp = map.getPlayer().getHP();
 		if (slowHP < hp)
 			slowHP = Math.min(hp, slowHP+8*dt);
 		else if (slowHP > hp)
@@ -136,7 +138,7 @@ public class HUD
 	//Displays the health in the upper left-hand corner of the screen
 	private void drawHealthbar(GL2 gl, double width, double height)
 	{
-		double hp = c.getPlayer().getHP(), maxHP = c.getPlayer().getMaxHP();
+		double hp = map.getPlayer().getHP(), maxHP = map.getPlayer().getMaxHP();
 		
 		double barWidth = 100;
 		double barHeight = 20;

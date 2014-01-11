@@ -91,7 +91,7 @@ public class EnemyFortress extends Enemy implements Damageable
 	{
 		charge -= dt;
 		
-		if (c.getPlayer().isDead()) return;
+		if (map.getPlayer().isDead()) return;
 		
 		if (charge < 0)
 		{
@@ -110,7 +110,7 @@ public class EnemyFortress extends Enemy implements Damageable
 			{
 				rocket.setPosition(x+xDir*shotDistance, y+yDir*shotDistance, z+zDir*shotDistance+shotHeight);
 				rocket.setVelocity(shotSpeed*xDir, shotSpeed*yDir, shotSpeed*zDir);
-				rocket.setTarget(c.getPlayer());
+				rocket.setTarget(map.getPlayer());
 				rocket.setOwner(this);
 				
 				map.create(rocket);
