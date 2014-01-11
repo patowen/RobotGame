@@ -29,10 +29,8 @@ public class Player extends Entity implements Damageable
 	private double stepDownHeight;
 	private double maxHp;
 	
-	private Weapon weapon;
-	private PlasmaRifle rifle;
-	private PlasmaSword sword;
-	private PlasmaLauncher launcher;
+	private Weapon currentWeapon;
+	private Weapon[] weapons;
 	
 	/**
 	 * Initializes the player with default parameters.
@@ -47,10 +45,11 @@ public class Player extends Entity implements Damageable
 		map = gameMap;
 		inAir = true;
 		
-		rifle = new PlasmaRifle(c, map, this);
-		sword = new PlasmaSword(c, map, this);
-		launcher = new PlasmaLauncher(c, map, this);
-		weapon = rifle;
+		weapons = new Weapon[3];
+		weapons[0] = new PlasmaRifle(c, map, this);
+		weapons[1] = new PlasmaSword(c, map, this);
+		weapons[2] = new PlasmaLauncher(c, map, this);
+		currentWeapon = weapons[0];
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;
@@ -75,7 +74,8 @@ public class Player extends Entity implements Damageable
 	 */
 	public void draw(GL2 gl)
 	{
-		weapon.draw(gl);
+		if (!isDead)
+			currentWeapon.draw(gl);
 	}
 	
 	/**
@@ -85,7 +85,8 @@ public class Player extends Entity implements Damageable
 	 */
 	public void draw2(GL2 gl)
 	{
-		weapon.draw2(gl);
+		if(!isDead)
+			currentWeapon.draw2(gl);
 	}
 	
 	/**
@@ -168,6 +169,14 @@ public class Player extends Entity implements Damageable
 	public double getHeight()
 	{
 		return height;
+	}
+	
+	/**
+	 * Returns the currently equipped weapon
+	 */
+	public Weapon getCurrentWeapon()
+	{
+		return currentWeapon;
 	}
 	
 	/**
@@ -262,14 +271,16 @@ public class Player extends Entity implements Damageable
 	//Handles using all the player's weapons.
 	private void handleWeapons(double dt)
 	{
-		if (input.getKey(InputHandler.WEAPON1) && weapon != rifle)
-			weapon = rifle;
-		if (input.getKey(InputHandler.WEAPON2) && weapon != sword)
-			weapon = sword;
-		if (input.getKey(InputHandler.WEAPON3) && weapon != launcher)
-			weapon = launcher;
-		weapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
-		weapon.step(dt);		
+		if (input.getKey(InputHandler.WEAPON1) && currentWeapon != weapons[0])
+			currentWeapon = weapons[0];
+		if (input.getKey(InputHandler.WEAPON2) && currentWeapon != weapons[1])
+			currentWeapon = weapons[1];
+		if (input.getKey(InputHandler.WEAPON3) && currentWeapon != weapons[2])
+			currentWeapon = weapons[2];
+		for(Weapon w : weapons)
+			w.recharge(dt);
+		currentWeapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
+		currentWeapon.step(dt);
 	}
 	
 	

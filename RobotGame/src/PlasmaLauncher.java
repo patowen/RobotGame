@@ -1,7 +1,7 @@
 
 /**
- * Handles the controls and the firing of the main game weapon, the plasma
- * rifle, which fires standard-strength bullets four times per second
+ * Handles the controls and the firing of the plasma launcher, a 
+ * powerful AoE attack that deals heavy damage
  * @author Patrick Owen
  * @author Michael Ekstrom
  */
@@ -20,9 +20,10 @@ public class PlasmaLauncher extends Weapon
 	{
 		super(controller, gameMap, p);
 		
-		shotDelay = 2.5;
+		shotDelay = .5;
 		shotX = 0.8; shotY = 0.04; shotZ = -0.03;
 		charge = 0;
+		energyUse = 33;
 	}
 	
 	/**
@@ -39,7 +40,7 @@ public class PlasmaLauncher extends Weapon
 	private void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
-		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0)
+		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)
 		{
 			EntityPlasmaBolt bolt = new EntityPlasmaBolt(c, map);
 			bolt.setColor(.2f, .8f, 1f);
@@ -59,11 +60,11 @@ public class PlasmaLauncher extends Weapon
 			if (t == 1)
 			{
 				//Create the bullet
+				energy -= energyUse;
 				bolt.setPosition(x+xDisp, y+yDisp, z+zDisp);
 				int vel = 30;
 				
 				bolt.setVelocity(vel*xDir, vel*yDir, vel*zDir);
-				
 				bolt.setOwner(player);
 				
 				map.create(bolt);
