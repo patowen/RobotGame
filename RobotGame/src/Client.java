@@ -3,20 +3,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-/*
- * Multiplayer notes:
- * 
- * Log in/out signals:
- * [1, 0]: Log out (Relayed with [0, 1, 0])
- * [1, 1, name]: Log in request (Relayed with [0, 1, 1, id] for granted; [0, 1, 1, reason (negative)] for denied)
- * [1, 2]: Server closed (Relayed with [0, 1, 2])
- * 
- * Entity signals:
- * [3, 0, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 0, 1, entity_id]: Remove entity (Relayed with [0, 3, 0, 1, entity_type])
- * [3, 0, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
- */
-
 /**
  * Handles the sending and receiving of network data server-side and holds a list of
  * clients.

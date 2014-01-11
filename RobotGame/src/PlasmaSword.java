@@ -40,11 +40,12 @@ public class PlasmaSword extends Weapon
 		shotDelay = .4;
 		charge = 0;
 		steps = 15;
+		currentstep = steps;
 		bladelength = 3;
 		knockback = 10;
 		damage = 2;
 		arclength = .4;
-		
+		energyUse = 5;
 	}
 	
 	/**
@@ -70,8 +71,9 @@ public class PlasmaSword extends Weapon
 	private void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
-		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0)
+		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)
 		{
+			energy -= energyUse;
 			double randtheta = 6.2831 * Math.random();//6.2831 = 2*pi
 			currentstep = 0;
 			ht = Math.cos(randtheta);
@@ -161,7 +163,7 @@ public class PlasmaSword extends Weapon
 	}
 	
 	/**
-	 * Draws the interior of the sword
+	 * Draws the interior and handle of the sword
 	 * @param gl
 	 */
 	public void draw(GL2 gl)

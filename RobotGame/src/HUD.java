@@ -121,6 +121,7 @@ public class HUD
 		
 		drawCrosshairs(gl, width, height);
 		drawHealthbar(gl, width, height);
+		drawEnergyBar(gl, width, height);
 		drawScore(gl, width, height);
 	}
 	
@@ -139,10 +140,9 @@ public class HUD
 	private void drawHealthbar(GL2 gl, double width, double height)
 	{
 		double hp = map.getPlayer().getHP(), maxHP = map.getPlayer().getMaxHP();
-		
-		double barWidth = 100;
-		double barHeight = 20;
-		double barSpace = 5;
+		double barWidth = width/9;
+		double barHeight = height/40;
+		double barSpace = width/120;
 		
 		//Background
 		gl.glColor3d(0, 0, 0);
@@ -194,6 +194,50 @@ public class HUD
 		gl.glVertex2d(barSpace+barWidth, height-barSpace);
 		gl.glVertex2d(barSpace, height-barSpace);
 		gl.glEnd();
+	}
+	
+	//Draws the current weapon's energy storage
+	private void drawEnergyBar(GL2 gl, double width, double height)
+	{
+		Weapon weapon = map.getPlayer().getCurrentWeapon();
+		double energy = weapon.getEnergy();
+		double max = weapon.getMaxEnergy();
+		double shot = weapon.getEnergyUse();
+		double shotbuffer = 5;//Extra edge on shot box
+		
+		double barWidth = width/4;
+		double barHeight = height/16;
+		double barX = width/2 - barWidth/2;
+		double barY = height/16 - barHeight/2;
+		
+		//Bar
+		gl.glColor4f(.2f, .8f, 1f, .5f);
+		gl.glBegin(GL2.GL_QUADS);
+		gl.glVertex2d(barX, height-barHeight-barY);
+		gl.glVertex2d(barX+barWidth*energy/max, height-barHeight-barY);
+		gl.glVertex2d(barX+barWidth*energy/max, height-barY);
+		gl.glVertex2d(barX, height-barY);
+		gl.glEnd();
+		
+		
+		//Border
+		gl.glColor3d(0, 200, 255);
+		gl.glBegin(GL2.GL_LINE_LOOP);
+		gl.glVertex2d(barX, height-barHeight-barY);
+		gl.glVertex2d(barX+barWidth, height-barHeight-barY);
+		gl.glVertex2d(barX+barWidth, height-barY);
+		gl.glVertex2d(barX, height-barY);
+		gl.glEnd();
+		
+		//Shot of Energy Marker
+		gl.glColor4f(.2f, 1f, .8f, .25f);
+		gl.glBegin(GL2.GL_QUADS);
+		gl.glVertex2d(barX - shotbuffer, height-barHeight-barY - shotbuffer);
+		gl.glVertex2d(barX+barWidth*shot/max, height-barHeight-barY - shotbuffer);
+		gl.glVertex2d(barX+barWidth*shot/max, height-barY + shotbuffer);
+		gl.glVertex2d(barX - shotbuffer, height-barY + shotbuffer);
+		gl.glEnd();
+		
 	}
 	
 	//Draws the crosshairs in the center of the screen

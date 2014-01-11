@@ -1,7 +1,6 @@
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-
 /**
  * Wraps ByteBuffer in a more programmer-friendly way for use in sending network signals
  * @author Patrick Owen
@@ -30,6 +29,11 @@ public class NetworkPacket
 		buf.put(packet.array(), 0, packet.length());
 	}
 	
+	public NetworkPacket get()
+	{
+		return new NetworkPacket(getBytes(buf.remaining()));
+	}
+	
 	public NetworkPacket(int numBytes)
 	{
 		buf = ByteBuffer.allocate(numBytes).order(ByteOrder.LITTLE_ENDIAN);
@@ -37,7 +41,7 @@ public class NetworkPacket
 	
 	public NetworkPacket(byte[] values)
 	{
-		buf = ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);;
+		buf = ByteBuffer.wrap(values).order(ByteOrder.LITTLE_ENDIAN);
 	}
 	
 	public void addString(String value)

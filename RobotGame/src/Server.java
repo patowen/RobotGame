@@ -2,44 +2,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-/* Original stab at the dark:
- * First byte:
- * 0: Signal not to be guaranteed
- * Next 4 bytes is an integer that increments with each sent signal to make sure it
- * is the latest data that is processed.
- * 
- * 1: Signal to be guaranteed. The way the signal is guaranteed depends on what signal it is.
- * 
- * 2: Signal is relaying a guaranteed signal to confirm success.
- * 
- * Next bytes:
- * 0, 0: Log out
- * 0, 1: Log in request (followed by username)
- * 0, 2, 0: Log in granted
- * 0, 2, 1: Log in denied
- * 
- * 1: Game setup data
- * 
- * 2: Game data
- * 2, 0: Spawn entity (entity type id, location, velocity, extra data)
- * 2, 1: Remove entity (entity type id)
- * 2, 2: Move entity (entity type id, location, velocity, extra data) (not guaranteed)
- */
-
-/*
- * Multiplayer notes:
- * 
- * Log in/out signals:
- * [1, 0]: Log out (Relayed with [0, 1, 0])
- * [1, 1, name]: Log in request (Relayed with [0, 1, 1, id] for granted; [0, 1, 1, reason (negative)] for denied)
- * [1, 2]: Server closed (Relayed with [0, 1, 2])
- * 
- * Entity signals:
- * [3, 0, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 0, 1, entity_id]: Remove entity (Relayed with [0, 3, 0, 1, entity_type])
- * [3, 0, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
- */
-
 /**
  * Handles the sending and receiving of network data server-side and holds a list of
  * clients.

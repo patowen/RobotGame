@@ -21,6 +21,11 @@ public class Weapon
 	protected double x, y, z;
 	protected double horizontalDir, verticalDir;
 	
+	protected double maxEnergy;//Maximum energy of weapon. Default 100
+	protected double energy;//Current energy available to the weapon
+	protected double energyRegen;//Rate at which the energy regenerates per second, multiply by dt
+	protected double energyUse;//Amount of energy the weapon takes per shot
+	
 	/**
 	 * Constructs a Weapon object.
 	 * @param controller The Controller object.
@@ -33,7 +38,27 @@ public class Weapon
 		map = gameMap;
 		player = p;
 		input = c.getInputHandler();
-		
+		maxEnergy = 100;
+		energy = maxEnergy;
+		energyRegen = 2.5;
+	}
+	
+	//returns the current energy of the weapon
+	public double getEnergy()
+	{
+		return energy;
+	}
+
+	//returns the current energy of the weapon
+	public double getMaxEnergy()
+	{
+		return maxEnergy;
+	}
+	
+	//returns the current energy of the weapon
+	public double getEnergyUse()
+	{
+		return energyUse;
 	}
 	
 	/**
@@ -42,7 +67,19 @@ public class Weapon
 	 */
 	public void step(double dt)
 	{
-		handleFiring(dt);
+		
+	}
+	
+	//Recharges the energy of the weapon
+	public void recharge(double dt)
+	{
+		if (energy + energyRegen*dt < maxEnergy)
+		{
+			if (maxEnergy - energy < energyRegen * dt)
+				energy = maxEnergy;
+			else
+				energy+=energyRegen * dt;
+		}	
 	}
 	
 	/**
@@ -60,6 +97,7 @@ public class Weapon
 	}
 	
 	//Handles firing the weapon
+	@SuppressWarnings("unused")
 	private void handleFiring(double dt)
 	{
 		
