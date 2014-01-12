@@ -180,6 +180,14 @@ public class Player extends Entity implements Damageable
 	}
 	
 	/**
+	 * Returns the weapon list
+	 */
+	public Weapon[] getWeapons()
+	{
+		return weapons;
+	}
+	
+	/**
 	 * Initializes extra data for the player.<br/>
 	 * 0: Horizontal facing direction<br/>
 	 * 1: Vertical facing direction

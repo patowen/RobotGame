@@ -192,7 +192,10 @@ public class ScoreMenu extends Menu
 		while (data.hasNextLine())
 		{
 			players.add(data.nextLine());
-			scores.add(data.nextInt());
+			if(data.hasNextInt())
+				scores.add(data.nextInt());
+			else
+				break;
 			if (data.hasNextLine())
 				data.nextLine();
 		}
@@ -205,19 +208,22 @@ public class ScoreMenu extends Menu
 	 */
 	public void writeFile()
 	{
-		try
+		if (!userInput.equals(""))
 		{
-			FileWriter fw = new FileWriter(new File(fileName));
-			for (int i = 0; i < scores.size(); i++)
+			try
 			{
-				fw.write(players.get(i) + "\n");
-				fw.write(scores.get(i) + "\n");
+				FileWriter fw = new FileWriter(new File(fileName));
+				for (int i = 0; i < scores.size(); i++)
+				{
+					fw.write(players.get(i) + "\n");
+					fw.write(scores.get(i) + "\n");
+				}
+				fw.close();
 			}
-			fw.close();
-		}
-		catch (IOException e)
-		{
-			System.out.println("Failure to write to " + fileName + " in the ScoreMenu class");
+			catch (IOException e)
+			{
+				System.out.println("Failure to write to " + fileName + " in the ScoreMenu class");
+			}
 		}
 	}
 	

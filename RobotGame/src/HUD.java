@@ -16,6 +16,10 @@ public class HUD
 	private GameMap map;
 	
 	private TextRenderer scoreRenderer;
+	private TextRenderer[] weaponsRenderers;
+	
+	private String[] weaponsList;
+	private double equivalent12;//Approx. Equivalent of 12 point font for the current window size
 	
 	private ArrayList<HitMark> hitMarks;
 	private ArrayList<HitMark> deletionQueue;
@@ -32,13 +36,21 @@ public class HUD
 		c = controller;
 		map = gameMap;
 		
-		scoreRenderer = new TextRenderer(new Font("Time New Roman", Font.PLAIN, 24), true, true);
+		equivalent12 = Math.min(c.getWidth(), c.getHeight())/55;
+		
+		scoreRenderer = new TextRenderer(new Font("Time New Roman", Font.PLAIN, (int)(2*equivalent12)), true, true);
+		weaponsRenderers = new TextRenderer[map.getPlayer().getWeapons().length];
+		for(int i = 0; i < weaponsRenderers.length; i++)
+			weaponsRenderers[i] = new TextRenderer(new Font("Time New Roman", Font.PLAIN, (int)(2*equivalent12)), true, true);
 		
 		hitMarks = new ArrayList<HitMark>();
 		deletionQueue = new ArrayList<HitMark>();
 		creationQueue = new ArrayList<HitMark>();
 		
 		slowHP = 0;
+		
+		weaponsList = new String[weaponsRenderers.length];
+		loadWeaponsList();
 	}
 	
 	/**
@@ -114,6 +126,8 @@ public class HUD
 	 */
 	public void draw(GL2 gl, double width, double height)
 	{
+		equivalent12 = Math.min(width, height)/55;
+		
 		for (HitMark hitMark : hitMarks)
 		{
 			hitMark.draw(gl, width, height);
@@ -123,6 +137,7 @@ public class HUD
 		drawHealthbar(gl, width, height);
 		drawEnergyBar(gl, width, height);
 		drawScore(gl, width, height);
+		drawWeaponsList(gl, width, height);
 	}
 	
 	//Displays the score in the upper right-hand corner of the screen
@@ -262,6 +277,40 @@ public class HUD
 		gl.glVertex2d(width/2+size, height/2-thickness);
 		gl.glVertex2d(width/2+size, height/2+thickness);
 		gl.glEnd();
+	}
+	
+	//Loads the list of weapons into the weaponsList String
+	private void loadWeaponsList()
+	{
+		Weapon[] list = map.getPlayer().getWeapons();
+		for(int i = 0; i < list.length; i++)
+		{
+			weaponsList[i] = i+1 + " "  + list[i].getName() + " ";
+		}
+		
+	}
+	
+	//Draws the weapons list to the screen and highlights the current weapon
+	private void drawWeaponsList(GL2 gl, double width, double height)
+	{
+		Weapon[] list = map.getPlayer().getWeapons();
+		Weapon current = map.getPlayer().getCurrentWeapon();
+
+		
+		for(int i = 0; i < weaponsRenderers.length; i++)
+		{
+			weaponsRenderers[i].beginRendering((int)width, (int)height);
+			if(list[i] != current)
+				weaponsRenderers[i].setColor(1f, 1f, 1f, 1f);
+			else
+				weaponsRenderers[i].setColor(0f, 1f, 1f, 1f);
+			Rectangle2D bounds = weaponsRenderers[i].getBounds(weaponsList[i]);
+			int xVal = (int)(width/64);
+			int yVal = (int)(width/64 + bounds.getHeight()*weaponsRenderers.length - i*2*equivalent12);
+			weaponsRenderers[i].draw(weaponsList[i], xVal, yVal);
+			weaponsRenderers[i].endRendering();
+			
+		}
 	}
 	
 	//A hit mark class that handles timing and display of said hit mark.
