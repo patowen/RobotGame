@@ -14,13 +14,14 @@ public class Client extends Network
 	private int serverPort;
 	
 	private boolean connected, loggingIn, loggingOut;
-	private int loginTimer, logoutTimer;
 	
 //	private int capacity, numPlayers;
 //	private String[] clientName;
 	
 	public Client()
-	{		
+	{
+		super();
+		
 		try
 		{
 			serverIP = InetAddress.getByName("127.0.0.1");
@@ -54,59 +55,23 @@ public class Client extends Network
 	public void logout()
 	{
 		loggingOut = true;
-		logoutTimer = 600;
 		NetworkPacket packet = new NetworkPacket(2);
 		packet.addBytes(1, 0);
-		send(packet);
+		sendGuaranteed(packet);
 	}
 	
 	public void login()
 	{
 		loggingIn = true;
-		loginTimer = 600;
 		NetworkPacket packet = new NetworkPacket(256);
 		packet.addBytes(1, 1);
 		packet.addString("SuperLala");
-		send(packet);
+		sendGuaranteed(packet);
 	}
 	
-	public void step(double dt)
+	public void sendGuaranteed(NetworkPacket packet)
 	{
-		if (loggingIn)
-		{
-			loginTimer--;
-			if (loginTimer == 0)
-			{
-				//Connection time out
-				loggingIn = false;
-				logout();
-			}
-			else if (loginTimer%30 == 0)
-			{
-				//Resend login signal
-				NetworkPacket packet = new NetworkPacket(256);
-				packet.addBytes(1, 1);
-				packet.addString("SuperLala");
-				send(packet);
-			}
-		}
-		
-		if (loggingOut)
-		{
-			logoutTimer--;
-			if (logoutTimer == 0)
-			{
-				//Connection time out
-				loggingOut = false;
-			}
-			else if (loginTimer%30 == 0)
-			{
-				//Resend login signal
-				NetworkPacket packet = new NetworkPacket(2);
-				packet.addBytes(1, 0);
-				send(packet);
-			}
-		}
+		sendGuaranteed(packet, serverIP, serverPort);
 	}
 	
 	public void send(NetworkPacket packet)
@@ -151,9 +116,6 @@ public class Client extends Network
 				loggingIn = false;
 				loggingOut = false;
 				connected = false;
-				
-				ret.addBytes(0, 1, 2);
-				send(ret, sender, senderPort);
 			}
 		}
 	}

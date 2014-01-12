@@ -62,7 +62,7 @@ public class Player extends Entity implements Damageable
 		maxSpeed = 4;
 		jumpSpeed = 4;
 		stepDownHeight = 0.2;
-		maxHp = 10;
+		maxHp = 50;
 		
 		hp = maxHp;
 		isDead = false;
@@ -136,7 +136,7 @@ public class Player extends Entity implements Damageable
 	 */
 	public void heal()
 	{
-		hp = maxHp;
+		hp = Math.min(maxHp, hp+5);
 	}
 	
 	/**
@@ -230,8 +230,8 @@ public class Player extends Entity implements Damageable
 					-Math.cos(horizontalDir)*Math.sin(verticalDir), -Math.sin(horizontalDir)*Math.sin(verticalDir), Math.cos(verticalDir));
 			
 			//Allow slow recovery
-			hp += dt*0.2;
-			if (hp > maxHp) hp = maxHp;
+//			hp += dt*0.2;
+//			if (hp > maxHp) hp = maxHp;
 			
 			//Handle death
 			if (hp <= 0)

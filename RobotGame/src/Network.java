@@ -11,13 +11,13 @@ import java.net.InetAddress;
  * [2, timestamp, sub_timestamp]: relayed signal
  * 
  * Log in/out signals:
- * [1, 0]: Log out (Relayed with [0, 1, 0])
+ * [1, 0]: Log out
  * [1, 1, name]: Log in request (Relayed with [0, 1, 1, id] for granted; [0, 1, 1, reason (negative)] for denied)
- * [1, 2]: Server closed (Relayed with [0, 1, 2])
+ * [1, 2]: Server closed
  * 
  * Entity signals:
  * [3, 0, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 0, 1, entity_id]: Remove entity (Relayed with [0, 3, 0, 1, entity_type])
+ * [3, 0, 1, entity_id]: Remove entity
  * [3, 0, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
  */
 
@@ -25,6 +25,13 @@ public abstract class Network
 {
 	protected DatagramSocket socket;
 	protected NetworkThread thread;
+	
+	private GuaranteedSignalSender guaranteedSender;
+	
+	public Network()
+	{
+		guaranteedSender = new GuaranteedSignalSender(this);
+	}
 	
 	public void destroy()
 	{
@@ -39,6 +46,24 @@ public abstract class Network
 	{
 		thread = new NetworkThread();
 		thread.start();
+	}
+	
+	public void step(double dt)
+	{
+		guaranteedSender.step(dt);
+	}
+	
+	public void sendGuaranteed(NetworkPacket data, InetAddress ip, int port)
+	{
+		guaranteedSender.addGuaranteedSignal(data, ip, port);
+	}
+	
+	public void sendNormal(NetworkPacket data, InetAddress ip, int port)
+	{
+		NetworkPacket packet = new NetworkPacket(data.length()+1);
+		packet.addByte(0);
+		packet.append(data);
+		send(packet, ip, port);
 	}
 	
 	public void send(NetworkPacket packet, InetAddress ip, int port)
@@ -61,11 +86,16 @@ public abstract class Network
 		}
 		else if (flag == 1)
 		{
-			
+			NetworkPacket relayPacket = new NetworkPacket(17);
+			relayPacket.addByte(2);
+			relayPacket.addLong(packet.getLong());
+			relayPacket.addLong(packet.getLong());
+			send(relayPacket, sender, senderPort);
+			interpretSignal(packet, sender, senderPort); //Temporary. Ordering should matter.
 		}
 		else if (flag == 2)
 		{
-			
+			guaranteedSender.addRelayedSignal(sender, senderPort, packet);
 		}
 	}
 	

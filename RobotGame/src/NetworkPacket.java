@@ -14,6 +14,13 @@ public class NetworkPacket
 		return buf;
 	}
 	
+	public NetworkPacket duplicate()
+	{
+		NetworkPacket packet = new NetworkPacket();
+		packet.buf = buf.duplicate();
+		return packet;
+	}
+	
 	public byte[] array()
 	{
 		return buf.array();
@@ -29,9 +36,19 @@ public class NetworkPacket
 		buf.put(packet.array(), 0, packet.length());
 	}
 	
-	public NetworkPacket get()
+//	public void append(byte[] values, int length)
+//	{
+//		buf.put(values, 0, length);
+//	}
+	
+//	public NetworkPacket get()
+//	{
+//		return new NetworkPacket(getBytes(buf.remaining()));
+//	}
+	
+	private NetworkPacket()
 	{
-		return new NetworkPacket(getBytes(buf.remaining()));
+		
 	}
 	
 	public NetworkPacket(int numBytes)
@@ -93,6 +110,35 @@ public class NetworkPacket
 	public double getDouble()
 	{
 		return buf.getDouble();
+	}
+	
+	public void addLongs(long... values)
+	{
+		for (int i=0; i<values.length; i++)
+		{
+			buf.putLong(values[i]);
+		}
+	}
+	
+	public void addLong(long value)
+	{
+		buf.putLong(value);
+	}
+	
+	public long[] getLongs(int amount)
+	{
+		long[] output = new long[amount];
+		for (int i=0; i<amount; i++)
+		{
+			output[i] = buf.getLong();
+		}
+		
+		return output;
+	}
+	
+	public long getLong()
+	{
+		return buf.getLong();
 	}
 	
 	public void addInts(int... values)

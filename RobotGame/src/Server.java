@@ -16,6 +16,8 @@ public class Server extends Network
 	
 	public Server(int cap)
 	{
+		super();
+		
 		capacity = cap;
 		numPlayers = 0;
 		
@@ -34,11 +36,6 @@ public class Server extends Network
 		}
 		
 		startThread();
-	}
-	
-	public void step(double dt)
-	{
-		
 	}
 	
 	//Returns the client index for the specified data, or -1 if none exists.
@@ -86,19 +83,13 @@ public class Server extends Network
 			{
 				//Check if already logged in
 				int id = getClient(sender.getHostAddress(), senderPort);
-				if (id != -1)
-				{
-					//Resend granted signal
-					ret.addBytes(0, 1, 1, 0);
-					send(ret, sender, senderPort);
-				}
-				else
+				if (id == -1)
 				{
 					if (numPlayers < capacity)
 					{
 						//Granted
 						ret.addBytes(0, 1, 1, 0);
-						send(ret, sender, senderPort);
+						sendGuaranteed(ret, sender, senderPort);
 						clientIP[numPlayers] = sender.getHostAddress();
 						clientPort[numPlayers] = senderPort;
 						clientName[numPlayers] = packet.getString();
@@ -108,7 +99,7 @@ public class Server extends Network
 					{
 						//Denied
 						ret.addBytes(0, 1, 1, -1);
-						send(ret, sender, senderPort);
+						sendGuaranteed(ret, sender, senderPort);
 					}
 				}
 			}
