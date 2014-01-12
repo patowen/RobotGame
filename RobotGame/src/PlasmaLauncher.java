@@ -19,6 +19,7 @@ public class PlasmaLauncher extends Weapon
 	public PlasmaLauncher(Controller controller, GameMap gameMap, Player p)
 	{
 		super(controller, gameMap, p);
+		name = "Ion Cannon";
 		
 		shotDelay = .5;
 		shotX = 0.8; shotY = 0.04; shotZ = -0.03;

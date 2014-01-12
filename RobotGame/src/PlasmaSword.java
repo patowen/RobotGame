@@ -36,6 +36,7 @@ public class PlasmaSword extends Weapon
 	public PlasmaSword(Controller controller, GameMap gameMap, Player p)
 	{
 		super(controller, gameMap, p);
+		name = "Laser Sword";
 		
 		shotDelay = .4;
 		charge = 0;
@@ -97,11 +98,7 @@ public class PlasmaSword extends Weapon
 			ht-=hstep;
 			vt-=vstep;
 			
-			EntityExplosion boom = new EntityExplosion(c, map);
-			boom.setRadius(.045);
-			boom.setFinalRadius(.05);
-			boom.setDuration(.1);
-			boom.setColor(.25f, .5f, 1f);
+			
 			
 			
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
@@ -112,10 +109,17 @@ public class PlasmaSword extends Weapon
 			double t2 = 1; //Bullet distance traveled before first detected collision
 			Damageable entityToDamage = null;
 			
-			boom.setPosition(x+bladelength*xDir*t, y+bladelength*yDir*t, z+bladelength*zDir*t);
+			
 			
 			if (t < t2)
-				map.create(boom);
+			{
+				EntityFade spark = new EntityFade(c, map);
+				spark.setRadius(.045);
+				spark.setDuration(.25);
+				spark.setColor(.25f, .5f, 1f);
+				spark.setPosition(x+bladelength*xDir*t, y+bladelength*yDir*t, z+bladelength*zDir*t);
+				map.create(spark);
+			}
 			
 			double tTest = 1;
 			for (Entity entity : map.getEntities())
@@ -146,6 +150,7 @@ public class PlasmaSword extends Weapon
 					{
 						double totalVel = Math.sqrt(xDir*xDir + yDir*yDir + zDir*zDir);
 						entityToDamage.applyDamage(damage, -xDir/totalVel, -yDir/totalVel, -zDir/totalVel, knockback, false);
+						EntityExplosion boom = new EntityExplosion(c, map);
 						boom.setPosition(x+bladelength*xDir*tTest, y+bladelength*yDir*tTest, z+bladelength*zDir*tTest);
 						boom.setFinalRadius(.2);
 						boom.setDuration(.25);

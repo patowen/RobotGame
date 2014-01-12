@@ -15,6 +15,8 @@ public class Weapon
 	protected Player player;
 	protected InputHandler input;
 	
+	protected String name;
+	
 	protected double shotDelay;
 	protected double charge;
 	
@@ -61,6 +63,12 @@ public class Weapon
 		return energyUse;
 	}
 	
+	//returns the name of the weapon
+	public String getName()
+	{
+		return name;
+	}
+	
 	/**
 	 * Handles the operations of the weapon. This method should be called every frame.
 	 * @param dt
@@ -70,15 +78,14 @@ public class Weapon
 		
 	}
 	
-	//Recharges the energy of the weapon
+	//Recharges the energy of the weapon. This is handled entirely by the Player class
 	public void recharge(double dt)
 	{
-		if (energy + energyRegen*dt < maxEnergy)
+		if (energy < maxEnergy)
 		{
-			if (maxEnergy - energy < energyRegen * dt)
+			energy+=energyRegen * dt;
+			if (energy > maxEnergy)
 				energy = maxEnergy;
-			else
-				energy+=energyRegen * dt;
 		}	
 	}
 	
