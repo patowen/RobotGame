@@ -94,9 +94,7 @@ public class EntityPlasmaBolt extends Entity
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius(), e.getHeight());
+			double tTest = map.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
 			
 			if (tTest < t2)
 			{

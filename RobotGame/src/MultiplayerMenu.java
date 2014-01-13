@@ -43,40 +43,14 @@ public class MultiplayerMenu extends Menu
 		if (item == hostButton)
 		{
 			c.startServer();
-			c.setMultiplayer(true);
 			c.setCurrentLevel("arena.txt");
 		}
 		else if (item == joinButton)
 		{
 			c.startClient();
-			c.setMultiplayer(true);
 			Client client = c.getClient();
 			client.login();
-			new Thread()
-			{
-				public void run()
-				{
-					for (int i=0; i<300; i++)
-					{
-						if (c.getClient().isConnected())
-						{
-							c.setCurrentLevel("arena.txt");
-							return;
-						}
-						
-						try
-						{
-							Thread.sleep(10);
-						}
-						catch (InterruptedException e)
-						{
-							return;
-						}
-					}
-					c.setCurrentMenu(new MainMenu(c));
-				}
-			}.start();
-//			c.setCurrentMenu(new MainMenu(c));
+			c.setCurrentMenu(new ConnectingMenu(c));
 		}
 		else if (item == backButton)
 			c.setCurrentMenu(new MainMenu(c));

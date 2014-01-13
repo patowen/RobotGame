@@ -10,17 +10,16 @@ import java.net.UnknownHostException;
  */
 public class Client extends Network
 {
+	private int computerID;
+	
 	private InetAddress serverIP;
 	private int serverPort;
 	
-	private boolean connected, loggingIn, loggingOut;
+	private boolean connected;
 	
-//	private int capacity, numPlayers;
-//	private String[] clientName;
-	
-	public Client()
+	public Client(Controller controller)
 	{
-		super();
+		super(controller);
 		
 		try
 		{
@@ -54,7 +53,6 @@ public class Client extends Network
 	
 	public void logout()
 	{
-		loggingOut = true;
 		NetworkPacket packet = new NetworkPacket(2);
 		packet.addBytes(1, 0);
 		sendGuaranteed(packet);
@@ -62,7 +60,6 @@ public class Client extends Network
 	
 	public void login()
 	{
-		loggingIn = true;
 		NetworkPacket packet = new NetworkPacket(256);
 		packet.addBytes(1, 1);
 		packet.addString("SuperLala");
@@ -74,14 +71,19 @@ public class Client extends Network
 		sendGuaranteed(packet, serverIP, serverPort);
 	}
 	
-	public void send(NetworkPacket packet)
+	public void sendNormal(NetworkPacket packet)
 	{
-		send(packet, serverIP, serverPort);
+		sendNormal(packet, serverIP, serverPort);
+	}
+	
+	public int getComputerID()
+	{
+		return computerID;
 	}
 	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
-		NetworkPacket ret = new NetworkPacket(256);
+//		NetworkPacket ret = new NetworkPacket(256);
 		
 		if (!sender.equals(serverIP) || senderPort != serverPort)
 			return;
@@ -96,26 +98,27 @@ public class Client extends Network
 				if (subtype == 1)
 				{
 					byte id = packet.getByte();
-					loggingIn = false;
 					if (id < 0)
 					{
-						connected = false;
+						c.forceDisconnect();
+						c.setCurrentMenu(new DisconnectedMenu(c));
 					}
 					else
 					{
 						connected = true;
+						computerID = id;
 					}
 				}
 			}
 		}
-		else if (signalType == 1) //Standard client signal (not a relay)
+		else if (signalType == 1)
 		{
 			byte subtype = packet.getByte();
 			if (subtype == 2)
 			{
-				loggingIn = false;
-				loggingOut = false;
-				connected = false;
+				//Server closed
+				c.forceDisconnect();
+				c.setCurrentMenu(new DisconnectedMenu(c));
 			}
 		}
 	}

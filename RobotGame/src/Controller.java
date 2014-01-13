@@ -29,6 +29,9 @@ public class Controller
 	
 	private boolean isMultiplayer;
 	private boolean isServer;
+	private GuaranteedSignalSender guaranteedSender;
+	private GuaranteedSignalReceiver guaranteedReceiver;
+	private Network network;
 	private Server server;
 	private Client client;
 	
@@ -84,6 +87,8 @@ public class Controller
 		width = 800; height = 600;
 		
 		isMultiplayer = false;
+		guaranteedSender = new GuaranteedSignalSender(this);
+		guaranteedReceiver = new GuaranteedSignalReceiver(this);
 		
 		currentMenu = new MainMenu(this);
 		paused = false;
@@ -96,11 +101,8 @@ public class Controller
 	 */
 	public void quit()
 	{
+		forceDisconnect();
 		soundHandler.destroy();
-		if (server != null)
-			server.destroy();
-		if (client != null)
-			client.destroy();
 		anim.stop();
 	}
 	
@@ -145,14 +147,6 @@ public class Controller
 	}
 	
 	/**
-	 * Sets whether the network is being utilized for multiplayer gaming.
-	 */
-	public void setMultiplayer(boolean multiplayer)
-	{
-		isMultiplayer = multiplayer;
-	}
-	
-	/**
 	 * Returns whether the current computer is hosting the game.
 	 */
 	public boolean isServer()
@@ -170,7 +164,12 @@ public class Controller
 	
 	public void startServer()
 	{
-		server = new Server(5);
+		forceDisconnect();
+		
+		server = new Server(this, 5);
+		isMultiplayer = true;
+		isServer = true;
+		network = server;
 	}
 	
 	/**
@@ -183,7 +182,63 @@ public class Controller
 	
 	public void startClient()
 	{
-		client = new Client();
+		forceDisconnect();
+		
+		client = new Client(this);
+		isMultiplayer = true;
+		isServer = false;
+		network = client;
+	}
+	
+	public synchronized void disconnect()
+	{
+		if (client != null)
+		{
+			client.logout();
+		}
+		if (server != null)
+		{
+			server.closeServer();
+		}
+		
+		isMultiplayer = false;
+	}
+	
+	public synchronized void forceDisconnect()
+	{
+		if (network != null)
+		{
+			network.destroy();
+			network = null;
+			server = null;
+			client = null;
+			guaranteedSender.reset();
+			guaranteedReceiver.reset();
+		}
+	}
+	
+	/**
+	 * Returns the Network object if the current computer is involved in a network
+	 */
+	public Network getNetwork()
+	{
+		return network;
+	}
+	
+	/**
+	 * Returns the GuaranteedSignalSender object
+	 */
+	public GuaranteedSignalSender getGuaranteedSender()
+	{
+		return guaranteedSender;
+	}
+	
+	/**
+	 * Returns the GuaranteedSignalReceiver object
+	 */
+	public GuaranteedSignalReceiver getGuaranteedReceiver()
+	{
+		return guaranteedReceiver;
 	}
 	
 	/**
@@ -207,7 +262,7 @@ public class Controller
 	/**
 	 * Completes all rendering operations for the whole game.
 	 */
-	public void render(GL2 gl)
+	public synchronized void render(GL2 gl)
 	{
 		GLU glu = new GLU();
 		
@@ -259,12 +314,9 @@ public class Controller
 	 * Runs a step of the game.
 	 * @param dt The reciprocal of the framerate.
 	 */
-	public void step(double dt)
+	public synchronized void step(double dt)
 	{
-		if (client != null)
-			client.step(dt);
-		if (server != null)
-			server.step(dt);
+		guaranteedSender.step(dt);
 		
 		if (currentMenu != null)
 		{
@@ -331,7 +383,7 @@ public class Controller
 	 * Sets the current game level to the desired input
 	 * @param gm The GameMap to be set as the current level
 	 */
-	public void setCurrentLevel(String levelName)
+	public synchronized void setCurrentLevel(String levelName)
 	{
 		if (levelName.equals("practice.txt"))
 			levelType = 0;
@@ -350,7 +402,7 @@ public class Controller
 	 * Sets the current menu to display to the input GameMenu
 	 * @param menu The menu to display
 	 */
-	public void setCurrentMenu(Menu menu)
+	public synchronized void setCurrentMenu(Menu menu)
 	{
 		pauseMenu = null;
 		hud = null;

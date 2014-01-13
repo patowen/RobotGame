@@ -27,6 +27,7 @@ public class GameMap
 	private ArrayList<Entity> entities;
 	private ArrayList<Entity> deletionQueue;
 	private ArrayList<Entity> creationQueue;
+	private int nextEntityID;
 	
 	//Death
 	private double deathWait;
@@ -81,6 +82,7 @@ public class GameMap
 		entities = new ArrayList<Entity>();
 		deletionQueue = new ArrayList<Entity>();
 		creationQueue = new ArrayList<Entity>();
+		nextEntityID = 0;
 		
 		gravity = 10;
 		
@@ -186,6 +188,11 @@ public class GameMap
 	public void create(Entity e)
 	{
 		creationQueue.add(e);
+	}
+	
+	public int generateEntityID()
+	{
+		return nextEntityID++;
 	}
 	
 	/**

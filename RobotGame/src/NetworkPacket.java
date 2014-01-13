@@ -227,4 +227,14 @@ public class NetworkPacket
 	{
 		return buf.get();
 	}
+	
+	public String toString()
+	{
+		StringBuilder str = new StringBuilder();
+		for (int i=0; i<length(); i++)
+		{
+			str.append(buf.get(i) + ", ");
+		}
+		return str.toString();
+	}
 }

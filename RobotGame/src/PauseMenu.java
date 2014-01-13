@@ -20,7 +20,10 @@ public class PauseMenu extends Menu
 		super(controller);
 		
 		buttonResume = new MenuButton(this, "Resume", "Impact", 0.5, 0.5, 3);
-		buttonMainMenu = new MenuButton(this, "Return to Main Menu", "Impact", .5, .4, 3);
+		if (c.isMultiplayer())
+			buttonMainMenu = new MenuButton(this, "Disconnect", "Impact", .5, .4, 3);
+		else
+			buttonMainMenu = new MenuButton(this, "Return to Main Menu", "Impact", .5, .4, 3);
 		
 		items.add(new MenuLabel(this, "You have paused the game", "Impact", 0.5, 0.75, 5));
 		items.add(buttonResume);
@@ -83,8 +86,16 @@ public class PauseMenu extends Menu
 		}
 		else if (item == buttonMainMenu)
 		{
-			c.setCurrentMenu(new MainMenu(c));
-			c.resetScore();
+			if (c.isMultiplayer())
+			{
+				c.disconnect();
+				c.setCurrentMenu(new MainMenu(c));
+			}
+			else
+			{
+				c.setCurrentMenu(new MainMenu(c));
+				c.resetScore();
+			}
 		}
 	}
 }

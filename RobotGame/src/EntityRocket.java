@@ -92,7 +92,7 @@ public class EntityRocket extends Entity implements Damageable
 	/**
 	 * called to remove the EntityRocket. No score should be given.
 	 */
-	public void destroy()
+	public void destroy(boolean applyDamage)
 	{
 		if (isDestroyed) return;
 		
@@ -106,25 +106,28 @@ public class EntityRocket extends Entity implements Damageable
 		blast.setFinalRadius(range);
 		map.create(blast);
 		
-		for (Entity entity : map.getEntities())
+		if (applyDamage)
 		{
-			if (entity == owner || entity == this) continue;
-			if (!(entity instanceof Damageable)) continue;
-			
-			Damageable e = (Damageable) entity;
-			
-			double xDiff = x-e.getX();
-			double yDiff = y-e.getY();
-			double zDiff = z-e.getZ();
-			double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
-			
-			if (distSqr < range*range)
+			for (Entity entity : map.getEntities())
 			{
-				double dist = Math.sqrt(distSqr);
-				double totalDamage = damage/distSqr;
+				if (entity == owner || entity == this) continue;
+				if (!(entity instanceof Damageable)) continue;
 				
-				if (totalDamage > maxDamage) totalDamage = maxDamage;
-				e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, knockback/distSqr, false);
+				Damageable e = (Damageable) entity;
+				
+				double xDiff = x-e.getX();
+				double yDiff = y-e.getY();
+				double zDiff = z-e.getZ();
+				double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
+				
+				if (distSqr < range*range)
+				{
+					double dist = Math.sqrt(distSqr);
+					double totalDamage = damage/distSqr;
+					
+					if (totalDamage > maxDamage) totalDamage = maxDamage;
+					e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, knockback/distSqr, false);
+				}
 			}
 		}
 		
@@ -179,9 +182,7 @@ public class EntityRocket extends Entity implements Damageable
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = col.getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious()-height,
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius()+radius, e.getHeight()+height);
+			double tTest = col.getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
 			
 			if (tTest < t2)
 			{
@@ -204,7 +205,7 @@ public class EntityRocket extends Entity implements Damageable
 		
 		//Rocket hits anything
 		if (t2 < 1 || t < 1)
-			destroy();
+			destroy(true);
 	}
 	
 	public void draw(GL2 gl)
@@ -254,6 +255,6 @@ public class EntityRocket extends Entity implements Damageable
 
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
-		destroy();
+		destroy(false);
 	}
 }

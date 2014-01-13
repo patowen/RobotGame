@@ -5,22 +5,22 @@ import java.util.Set;
 
 public class GuaranteedSignalSender
 {
-	private Network network;
+	private Controller c;
 	
 	private Set<RelayedSignal> receivedSignals;
 	private Node previousSignal;
 	private Node currentSignal;
 	private int numSignals;
 	
-	private double pokesPerSecond;
-	private long timeout; //in milliseconds
+	private final double pokesPerSecond;
+	private final long timeout; //in milliseconds
 	
 	private double pokesRemaining;
 	private long currentSignalID;
 	
-	public GuaranteedSignalSender(Network net)
+	public GuaranteedSignalSender(Controller controller)
 	{
-		network = net;
+		c = controller;
 		
 		receivedSignals = new HashSet<RelayedSignal>(256);
 		previousSignal = null;
@@ -34,24 +34,40 @@ public class GuaranteedSignalSender
 		currentSignalID = 0;
 	}
 	
+	public void reset()
+	{
+		receivedSignals.clear();
+		previousSignal = null;
+		currentSignal = null;
+		numSignals = 0;
+		pokesRemaining = 0;
+		currentSignalID = 0;
+	}
+	
+	private void send(NetworkPacket data, InetAddress ip, int port)
+	{
+		Network net = c.getNetwork();
+		if (net != null)
+			net.send(data, ip, port);
+	}
+	
 	public void addGuaranteedSignal(NetworkPacket data, InetAddress ip, int port)
 	{
 		//This creates the beginning of the packet. It needs to be completed by the
 		//sender of the guaranteed signal
 		long timestamp = System.currentTimeMillis();
 		
-		NetworkPacket packet = new NetworkPacket(data.length() + 17);
+		NetworkPacket packet = new NetworkPacket(data.length() + 9);
 		packet.addByte(1);
-		packet.addLong(timestamp);
 		packet.addLong(currentSignalID);
 		packet.append(data);
 		
 		Node node = new Node();
 		PendingSignal signal = new PendingSignal();
-		signal.setData(new NetworkPacket(data.array()));
+		signal.setData(data);
 		signal.ip = ip;
-		signal.port = port;
 		signal.timestamp = timestamp;
+		signal.port = port;
 		signal.signalID = currentSignalID;
 		node.signal = signal;
 		
@@ -62,7 +78,7 @@ public class GuaranteedSignalSender
 		
 		currentSignalID++;
 		
-		network.send(packet, ip, port);
+		send(packet, ip, port);
 	}
 	
 	public void addRelayedSignal(InetAddress ip, int port, NetworkPacket data)
@@ -94,13 +110,20 @@ public class GuaranteedSignalSender
 				{
 					if (time - currentSignal.signal.timestamp > timeout)
 					{
-						System.err.println("Don't forget to add timeout disconnecting");
-						System.exit(1);
-						//TODO disconnect
+						if (!c.isServer())
+						{
+							reset();
+							c.forceDisconnect();
+							if (c.isMultiplayer())
+								c.setCurrentMenu(new DisconnectedMenu(c));
+						}
 					}
 					else
 						poke();
 				}
+				
+				if (currentSignal == null)
+					break;
 			}
 			synchronized (this)
 			{
@@ -116,11 +139,10 @@ public class GuaranteedSignalSender
 		NetworkPacket packet = new NetworkPacket(256);
 		
 		packet.addByte(1);
-		packet.addLong(s.timestamp);
 		packet.addLong(s.signalID);
 		packet.append(s.getData());
 		
-		network.send(packet, s.ip, s.port);
+		send(packet, s.ip, s.port);
 	}
 	
 	private void removePendingSignal()
@@ -133,6 +155,8 @@ public class GuaranteedSignalSender
 			currentSignal = currentSignal.next;
 		}
 		numSignals--;
+		if (!c.isServer())
+			System.out.println(numSignals);
 	}
 	
 	private void addPendingSignal(Node newSignal)
@@ -148,6 +172,8 @@ public class GuaranteedSignalSender
 			newSignal.next = currentSignal;
 		}
 		numSignals++;
+		if (!c.isServer())
+			System.out.println(numSignals);
 	}
 	
 	private class Node
@@ -179,14 +205,12 @@ public class GuaranteedSignalSender
 	{
 		private final InetAddress ip;
 		private final int port;
-		private final long timestamp;
 		private final long signalID;
 		
 		public RelayedSignal(InetAddress ip, int port, NetworkPacket data)
 		{
 			this.ip = ip;
 			this.port = port;
-			timestamp = data.getLong();
 			signalID = data.getLong();
 		}
 		
@@ -194,14 +218,13 @@ public class GuaranteedSignalSender
 		{
 			ip = signal.ip;
 			port = signal.port;
-			timestamp = signal.timestamp;
 			signalID = signal.signalID;
 		}
 		
 		public boolean equals(Object o)
 		{
 			RelayedSignal r = (RelayedSignal)o;
-			return (r.ip == ip && r.port == port && r.timestamp == timestamp && r.signalID == signalID);
+			return (r.ip.equals(ip) && r.port == port && r.signalID == signalID);
 		}
 		
 		public int hashCode()

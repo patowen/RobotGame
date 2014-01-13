@@ -42,10 +42,6 @@ public class ModelTurret
 		 * After a certain phiCutoff value, the ellipse ends and the model starts adding points in a concave sphere to create the turret's muzzle.
 		 */
 		
-		gl.glEnable(GL2.GL_DEPTH_TEST);
-		gl.glEnable(GL2.GL_CULL_FACE);
-		gl.glDepthFunc(GL2.GL_LEQUAL);
-		
 		stacks = 20; orbStacks = 10;
 		slices = 20; phiCutoff = 0.8;
 		

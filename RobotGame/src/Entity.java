@@ -8,7 +8,9 @@ public class Entity
 {
 	protected Controller c;
 	
-	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
+	protected boolean isLocal;
+	protected final int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
+	protected final int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
 	protected double xV, yV, zV;
 	protected double xPrevious, yPrevious, zPrevious;
@@ -27,6 +29,13 @@ public class Entity
 		xV = 0;
 		yV = 0;
 		zV = 0;
+		
+		isLocal = true;
+		if (c.isMultiplayer())
+			owner = c.getNetwork().getComputerID();
+		else
+			owner = 0;
+		id = map.generateEntityID();
 	}
 	
 	/**
@@ -53,6 +62,14 @@ public class Entity
 		xV = xVel;
 		yV = yVel;
 		zV = zVel;
+	}
+	
+	/**
+	 * Returns whether this entity should be ignored by other entities.
+	 */
+	public boolean isGhost()
+	{
+		return false;
 	}
 	
 	/**

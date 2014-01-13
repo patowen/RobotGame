@@ -29,21 +29,10 @@ public class PlasmaRifle extends Weapon
 		shotX = .8; shotY = .05; shotZ = -.05;
 		charge = 0;
 		energyUse = 2;
-	}
-	
-	/**
-	 * Handles the operations of the weapon. This method should be called every frame.
-	 * @param dt
-	 */
-	public void step(double dt)
-	{
-		handleFiring(dt);
-	}
-	
-	
+	}	
 	
 	//Handles firing the rifle. 
-	private void handleFiring(double dt)
+	protected void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
 		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)

@@ -7,8 +7,8 @@ import java.net.InetAddress;
  * Multiplayer notes:
  * 
  * [0, rest_of_signal]: normal signal
- * [1, timestamp, sub_timestamp, rest_of_signal]: guaranteed signal
- * [2, timestamp, sub_timestamp]: relayed signal
+ * [1, signal_id, rest_of_signal]: guaranteed signal
+ * [2, signal_id]: relayed signal
  * 
  * Log in/out signals:
  * [1, 0]: Log out
@@ -23,14 +23,14 @@ import java.net.InetAddress;
 
 public abstract class Network
 {
+	protected Controller c;
+	
 	protected DatagramSocket socket;
 	protected NetworkThread thread;
 	
-	private GuaranteedSignalSender guaranteedSender;
-	
-	public Network()
+	public Network(Controller controller)
 	{
-		guaranteedSender = new GuaranteedSignalSender(this);
+		c = controller;
 	}
 	
 	public void destroy()
@@ -48,14 +48,9 @@ public abstract class Network
 		thread.start();
 	}
 	
-	public void step(double dt)
-	{
-		guaranteedSender.step(dt);
-	}
-	
 	public void sendGuaranteed(NetworkPacket data, InetAddress ip, int port)
 	{
-		guaranteedSender.addGuaranteedSignal(data, ip, port);
+		c.getGuaranteedSender().addGuaranteedSignal(data, ip, port);
 	}
 	
 	public void sendNormal(NetworkPacket data, InetAddress ip, int port)
@@ -70,12 +65,16 @@ public abstract class Network
 	{
 		try
 		{
+//			if (!c.isServer())
+//				System.out.println(packet);
 			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
 		}
 		catch (IOException e) {} //Just act like a failed signal send
 	}
 	
-	protected abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
+	public abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
+	
+	public abstract int getComputerID();
 	
 	private void interpretSignalRaw(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
@@ -86,16 +85,15 @@ public abstract class Network
 		}
 		else if (flag == 1)
 		{
-			NetworkPacket relayPacket = new NetworkPacket(17);
+			NetworkPacket relayPacket = new NetworkPacket(9);
 			relayPacket.addByte(2);
 			relayPacket.addLong(packet.getLong());
-			relayPacket.addLong(packet.getLong());
 			send(relayPacket, sender, senderPort);
-			interpretSignal(packet, sender, senderPort); //Temporary. Ordering should matter.
+			interpretSignal(packet, sender, senderPort); //TODO Temporary. Ordering should matter.
 		}
 		else if (flag == 2)
 		{
-			guaranteedSender.addRelayedSignal(sender, senderPort, packet);
+			c.getGuaranteedSender().addRelayedSignal(sender, senderPort, packet);
 		}
 	}
 	

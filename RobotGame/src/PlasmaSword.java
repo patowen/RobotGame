@@ -59,17 +59,8 @@ public class PlasmaSword extends Weapon
 		verticalDir+=.05;
 	}
 	
-	/**
-	 * Handles the operations of the weapon. This method should be called every frame.
-	 * @param dt
-	 */
-	public void step(double dt)
-	{
-		handleFiring(dt);
-	}
-	
 	//Handles sword swing
-	private void handleFiring(double dt)
+	protected void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
 		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)
@@ -130,9 +121,7 @@ public class PlasmaSword extends Weapon
 				Damageable e = (Damageable) entity;
 				
 				//tTest must be less than t2 to update it.
-				tTest = map.getCollision().getEntityBulletCollision(x, y, z, bladelength*xDir*t, bladelength*yDir*t, bladelength*zDir*t,
-						e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
-						e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius(), e.getHeight());
+				tTest = map.getCollision().getEntityBulletCollision(x, y, z, bladelength*xDir*t, bladelength*yDir*t, bladelength*zDir*t, e);
 				
 				
 				if (tTest < 1)

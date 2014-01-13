@@ -2,6 +2,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.opengl.util.gl2.GLUT;
+
 /**
  * Handles the controls and situation of the player. This class represents the player of the game.
  * @author Patrick Owen
@@ -75,7 +77,17 @@ public class Player extends Entity implements Damageable
 	public void draw(GL2 gl)
 	{
 		if (!isDead)
+		{
+			if (!isLocal)
+			{
+				GLUT glut = new GLUT();
+				gl.glPushMatrix();
+				gl.glTranslated(x, y, z);
+				glut.glutSolidCylinder(radius, height, 12, 1);
+				gl.glPopMatrix();
+			}
 			currentWeapon.draw(gl);
+		}
 	}
 	
 	/**
@@ -87,6 +99,11 @@ public class Player extends Entity implements Damageable
 	{
 		if(!isDead)
 			currentWeapon.draw2(gl);
+	}
+	
+	public boolean isGhost()
+	{
+		return isDead;
 	}
 	
 	/**
@@ -127,7 +144,8 @@ public class Player extends Entity implements Damageable
 		z = -x*Math.sin(verticalDir) + z*Math.cos(verticalDir);
 		x = temp;
 		
-		c.getHUD().addHitMark(Math.atan2(z, -y));
+		if (isLocal)
+			c.getHUD().addHitMark(Math.atan2(z, -y));
 	}
 	
 	/**
@@ -279,12 +297,15 @@ public class Player extends Entity implements Damageable
 	//Handles using all the player's weapons.
 	private void handleWeapons(double dt)
 	{
-		if (input.getKey(InputHandler.WEAPON1) && currentWeapon != weapons[0])
-			currentWeapon = weapons[0];
-		if (input.getKey(InputHandler.WEAPON2) && currentWeapon != weapons[1])
-			currentWeapon = weapons[1];
-		if (input.getKey(InputHandler.WEAPON3) && currentWeapon != weapons[2])
-			currentWeapon = weapons[2];
+		if (isLocal)
+		{
+			if (input.getKey(InputHandler.WEAPON1) && currentWeapon != weapons[0])
+				currentWeapon = weapons[0];
+			if (input.getKey(InputHandler.WEAPON2) && currentWeapon != weapons[1])
+				currentWeapon = weapons[1];
+			if (input.getKey(InputHandler.WEAPON3) && currentWeapon != weapons[2])
+				currentWeapon = weapons[2];
+		}
 		for(Weapon w : weapons)
 			w.recharge(dt);
 		currentWeapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
@@ -295,18 +316,21 @@ public class Player extends Entity implements Damageable
 	//Adjusts the player's view angle with the mouse.
 	private void handleLooking()
 	{
-		input.readMouse();
-		
-		double mx = -input.getMouseX();
-		double my = -input.getMouseY();
-		mx = mx*45;
-		my = my*45;
-		
-		horizontalDir += mx;
-		verticalDir += my;
-		
-		if (verticalDir > Math.PI/2) verticalDir = Math.PI/2;
-		if (verticalDir < -Math.PI/2) verticalDir = -Math.PI/2;
+		if (this == map.getPlayer())
+		{
+			input.readMouse();
+			
+			double mx = -input.getMouseX();
+			double my = -input.getMouseY();
+			mx = mx*45;
+			my = my*45;
+			
+			horizontalDir += mx;
+			verticalDir += my;
+			
+			if (verticalDir > Math.PI/2) verticalDir = Math.PI/2;
+			if (verticalDir < -Math.PI/2) verticalDir = -Math.PI/2;
+		}
 	}
 	
 	//Handles the situations that can cause the player to leave the ground.
@@ -321,7 +345,7 @@ public class Player extends Entity implements Damageable
 		 *    Update vertical velocity by the gravity
 		 *    Leave the ground (updating the inAir variable)
 		 */
-		if (input.getKeyPressed(InputHandler.JUMP) && !inAir)
+		if (isLocal && input.getKeyPressed(InputHandler.JUMP) && !inAir)
 		{
 			inAir = true;
 			zV += jumpSpeed;
@@ -356,12 +380,19 @@ public class Player extends Entity implements Damageable
 		boolean moving;
 		
 		//Ignore keys that cancel each other out
-		if (upKey && downKey) {upKey = false; downKey = false;}
-		if (leftKey && rightKey) {leftKey = false; rightKey = false;}
-		
-		//Figure out whether the user is pressing any substantial keys.
-		if (leftKey || upKey || rightKey || downKey) moving = true;
-		else moving = false;
+		if (isLocal)
+		{
+			if (upKey && downKey) {upKey = false; downKey = false;}
+			if (leftKey && rightKey) {leftKey = false; rightKey = false;}
+			
+			//Figure out whether the user is pressing any substantial keys.
+			if (leftKey || upKey || rightKey || downKey) moving = true;
+			else moving = false;
+		}
+		else
+		{
+			moving = false;
+		}
 		
 		/*
 		 * ALGORITHM 1b:

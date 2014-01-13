@@ -8,7 +8,7 @@ import javax.media.opengl.GL2;
  */
 
 
-public class Weapon
+public class Weapon extends Entity
 {
 	protected Controller c;
 	protected GameMap map;
@@ -36,6 +36,8 @@ public class Weapon
 	 */
 	public Weapon(Controller controller, GameMap gameMap, Player p)
 	{
+		super(controller, gameMap);
+		
 		c = controller;
 		map = gameMap;
 		player = p;
@@ -75,7 +77,8 @@ public class Weapon
 	 */
 	public void step(double dt)
 	{
-		
+		super.step(dt);
+		handleFiring(dt);
 	}
 	
 	//Recharges the energy of the weapon. This is handled entirely by the Player class
@@ -104,8 +107,7 @@ public class Weapon
 	}
 	
 	//Handles firing the weapon
-	@SuppressWarnings("unused")
-	private void handleFiring(double dt)
+	protected void handleFiring(double dt)
 	{
 		
 	}

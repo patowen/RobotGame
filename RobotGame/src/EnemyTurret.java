@@ -130,9 +130,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius(), e.getHeight());
+			double tTest = map.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t, e);
 			
 			if (tTest < t2)
 			{

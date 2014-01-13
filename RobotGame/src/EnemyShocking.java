@@ -71,7 +71,7 @@ public class EnemyShocking extends Enemy implements Damageable
 	}
 	
 	/**
-	 * Shoots at the player if he is within range.
+	 * Shocks the player if he is within range.
 	 */
 	public void step(double dt)
 	{
@@ -103,16 +103,21 @@ public class EnemyShocking extends Enemy implements Damageable
 		
 		if (charge < 0)
 		{
-			Player player = map.getPlayer();
-			if (player.isDead()) return;
-			double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()+player.getHeight()/2 - z - height/2;
-			
-			if (xDiff*xDiff + yDiff*yDiff + zDiff*zDiff < radius+1)
+			for (Entity e : map.getEntities())
 			{
-				player.applyDamage(2, -xDiff, -yDiff, -zDiff, 8, false);
-				xV -= 16*xDiff; yV -= 16*yDiff; zV -= 16*zDiff;
-				charge = shotDelay;
-				anger = 1;
+				if (!(e instanceof Player))
+					continue;
+				Player player = (Player)e;
+				if (player.isGhost()) continue;
+				double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()+player.getHeight()/2 - z - height/2;
+				
+				if (xDiff*xDiff + yDiff*yDiff + zDiff*zDiff < radius+1)
+				{
+					player.applyDamage(2, -xDiff, -yDiff, -zDiff, 8, false);
+					xV -= 16*xDiff; yV -= 16*yDiff; zV -= 16*zDiff;
+					charge = shotDelay;
+					anger = 1;
+				}
 			}
 		}
 	}
