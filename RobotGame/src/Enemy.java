@@ -9,11 +9,11 @@ public class Enemy extends Entity
 	/**
 	 * Creates a new Enemy
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the Enemy is placed.
+	 * @param world The world where the Enemy is placed.
 	 */
-	public Enemy(Controller controller, GameMap gameMap)
+	public Enemy(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 	}
 	
 	/**

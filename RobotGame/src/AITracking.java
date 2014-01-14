@@ -30,12 +30,12 @@ public class AITracking extends AIBasic
 	/**
 	 * Constructs and AITracking object.
 	 * @param controller The controller object.
-	 * @param gameMap The map where the enemy is.
+	 * @param world The world where the enemy is.
 	 * @param e The parent enemy.
 	 */
-	public AITracking(Controller controller, GameMap gameMap, Enemy e)
+	public AITracking(Controller controller, World world, Enemy e)
 	{
-		super(controller, gameMap, e);
+		super(controller, world, e);
 		
 		preferredDistance = minPreferredDistance;
 		strafeSpeed = 0;
@@ -90,7 +90,7 @@ public class AITracking extends AIBasic
 	//Handles the AI-decided movement of the turret; pays no attention to terrain
 	private void handleMovement(double dt)
 	{
-		Player player = map.getPlayer();
+		Player player = w.getPlayer();
 		if (!player.isDead())
 		{
 			/*
@@ -158,7 +158,7 @@ public class AITracking extends AIBasic
 	
 	private boolean canGoToPlayer()
 	{
-		Player p = map.getPlayer();
+		Player p = w.getPlayer();
 		double px = (p.getX())-(x);
 		double py = (p.getY())-(y);
 		double pz = (p.getZ())-(z)+preferredHeight;
@@ -167,7 +167,7 @@ public class AITracking extends AIBasic
 		
 		px /= pdist; py /= pdist; pz /= pdist;
 		
-		Collision col = map.getCollision();
+		Collision col = w.getCollision();
 		
 		double t = col.getPlayerCollision(x,y,z,px,py,pz,radius,height);
 		if (t == 1) return true;
@@ -187,7 +187,7 @@ public class AITracking extends AIBasic
 		
 		for (int i=0; i<5; i++) //Cannot repeat this forever
 		{
-			double t = map.getCollision().getPlayerCollision(x,y,z,xV*dt*remaining,yV*dt*remaining,zV*dt*remaining,radius,height);
+			double t = w.getCollision().getPlayerCollision(x,y,z,xV*dt*remaining,yV*dt*remaining,zV*dt*remaining,radius,height);
 			boolean stopped = (t < 0.001);
 			
 			if (!stopped)
@@ -199,14 +199,14 @@ public class AITracking extends AIBasic
 			
 			if (t == 1) break;
 			
-			double m = -map.getCollision().getNormalX()*xV - map.getCollision().getNormalY()*yV - map.getCollision().getNormalZ()*zV;
-			xV += m*map.getCollision().getNormalX(); yV += m*map.getCollision().getNormalY(); zV += m*map.getCollision().getNormalZ();
+			double m = -w.getCollision().getNormalX()*xV - w.getCollision().getNormalY()*yV - w.getCollision().getNormalZ()*zV;
+			xV += m*w.getCollision().getNormalX(); yV += m*w.getCollision().getNormalY(); zV += m*w.getCollision().getNormalZ();
 			
 			//Deal with being in a corner of some sort
 			if (normalsReceived && stopped)
 			{
-				m = -map.getCollision().getNormalX()*nx - map.getCollision().getNormalY()*ny - map.getCollision().getNormalZ()*nz;
-				nx += m*map.getCollision().getNormalX(); ny += m*map.getCollision().getNormalY(); nz += m*map.getCollision().getNormalZ();
+				m = -w.getCollision().getNormalX()*nx - w.getCollision().getNormalY()*ny - w.getCollision().getNormalZ()*nz;
+				nx += m*w.getCollision().getNormalX(); ny += m*w.getCollision().getNormalY(); nz += m*w.getCollision().getNormalZ();
 				double dist = Math.sqrt(nx*nx + ny*ny + nz*nz);
 				if (dist != 0)
 				{
@@ -216,7 +216,7 @@ public class AITracking extends AIBasic
 				}
 			}
 			
-			nx = map.getCollision().getNormalX(); ny = map.getCollision().getNormalY(); nz = map.getCollision().getNormalZ(); normalsReceived = true;
+			nx = w.getCollision().getNormalX(); ny = w.getCollision().getNormalY(); nz = w.getCollision().getNormalZ(); normalsReceived = true;
 			
 			remaining *= 1-t;
 			

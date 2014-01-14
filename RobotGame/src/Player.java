@@ -37,20 +37,23 @@ public class Player extends Entity implements Damageable
 	/**
 	 * Initializes the player with default parameters.
 	 * @param controller The active Controller object.
-	 * @param gameMap Level where the player is placed.
+	 * @param world Level where the player is placed.
 	 */
-	public Player(Controller controller, GameMap gameMap)
+	public Player(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		input = c.getInputHandler();
-		map = gameMap;
+		w = world;
 		inAir = true;
 		
 		weapons = new Weapon[3];
-		weapons[0] = new PlasmaRifle(c, map, this);
-		weapons[1] = new PlasmaSword(c, map, this);
-		weapons[2] = new PlasmaLauncher(c, map, this);
+		weapons[0] = (Weapon)c.createEntity(w, EI.PlasmaRifle);
+		weapons[0].setPlayer(this);
+		weapons[1] = (Weapon)c.createEntity(w, EI.PlasmaSword);
+		weapons[1].setPlayer(this);
+		weapons[2] = (Weapon)c.createEntity(w, EI.PlasmaLauncher);
+		weapons[2].setPlayer(this);
 		currentWeapon = weapons[0];
 		
 		terrainTolerance = 0.5;
@@ -262,14 +265,15 @@ public class Player extends Entity implements Damageable
 			//Handle death
 			if (hp <= 0)
 			{
-				EntityExplosion explosion = new EntityExplosion(c, map);
+				EntityExplosion explosion = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+				explosion.init();
 				explosion.setPosition(x, y, z+height/2);
 				explosion.setDuration(1);
 				explosion.setRadius(0.2f);
 				explosion.setFinalRadius(2);
 				explosion.setDuration(1);
 				explosion.setColor(1, 0.5f, 0.25f);
-				map.create(explosion);
+				w.create(explosion);
 				isDead = true;
 			}
 		}
@@ -316,7 +320,7 @@ public class Player extends Entity implements Damageable
 	//Adjusts the player's view angle with the mouse.
 	private void handleLooking()
 	{
-		if (this == map.getPlayer())
+		if (this == w.getPlayer())
 		{
 			input.readMouse();
 			
@@ -351,13 +355,13 @@ public class Player extends Entity implements Damageable
 			zV += jumpSpeed;
 		}
 		
-		double t = map.getCollision().getPlayerCollision(x, y, z, 0, 0, -(zV+8)*dt, radius, height);
+		double t = w.getCollision().getPlayerCollision(x, y, z, 0, 0, -(zV+8)*dt, radius, height);
 		double zLand = z-(zV+8)*dt*t;
-		floorNormX = map.getCollision().getNormalX(); floorNormY = map.getCollision().getNormalY(); floorNormZ = map.getCollision().getNormalZ();
+		floorNormX = w.getCollision().getNormalX(); floorNormY = w.getCollision().getNormalY(); floorNormZ = w.getCollision().getNormalZ();
 		
 		if (inAir || z > zLand + 0.05 || floorNormZ < terrainTolerance)
 		{
-			zV -= map.getGravity()*dt;
+			zV -= w.getGravity()*dt;
 			inAir = true;
 		}
 		
@@ -458,7 +462,7 @@ public class Player extends Entity implements Damageable
 		 */
 		for (int i=0; i<5; i+=1) //Cannot repeat this forever
 		{
-			double t = map.getCollision().getPlayerCollision(x,y,z,xV*dt*remaining,yV*dt*remaining,zV*dt*remaining,radius,height);
+			double t = w.getCollision().getPlayerCollision(x,y,z,xV*dt*remaining,yV*dt*remaining,zV*dt*remaining,radius,height);
 			boolean stopped = (t < 0.001);
 			
 			if (!stopped)
@@ -470,14 +474,14 @@ public class Player extends Entity implements Damageable
 			
 			if (t == 1) break;
 			
-			double m = -map.getCollision().getNormalX()*xV - map.getCollision().getNormalY()*yV - map.getCollision().getNormalZ()*zV;
-			xV += m*map.getCollision().getNormalX(); yV += m*map.getCollision().getNormalY(); zV += m*map.getCollision().getNormalZ();
+			double m = -w.getCollision().getNormalX()*xV - w.getCollision().getNormalY()*yV - w.getCollision().getNormalZ()*zV;
+			xV += m*w.getCollision().getNormalX(); yV += m*w.getCollision().getNormalY(); zV += m*w.getCollision().getNormalZ();
 			
 			//Deal with being in an acute angled corner.
 			if (normalsReceived && stopped)
 			{
-				m = -map.getCollision().getNormalX()*nx - map.getCollision().getNormalY()*ny - map.getCollision().getNormalZ()*nz;
-				nx += m*map.getCollision().getNormalX(); ny += m*map.getCollision().getNormalY(); nz += m*map.getCollision().getNormalZ();
+				m = -w.getCollision().getNormalX()*nx - w.getCollision().getNormalY()*ny - w.getCollision().getNormalZ()*nz;
+				nx += m*w.getCollision().getNormalX(); ny += m*w.getCollision().getNormalY(); nz += m*w.getCollision().getNormalZ();
 				double dist = Math.sqrt(sqr(nx) + sqr(ny) + sqr(nz));
 				if (dist != 0)
 				{
@@ -487,7 +491,7 @@ public class Player extends Entity implements Damageable
 				}
 			}
 			
-			nx = map.getCollision().getNormalX(); ny = map.getCollision().getNormalY(); nz = map.getCollision().getNormalZ(); normalsReceived = true;
+			nx = w.getCollision().getNormalX(); ny = w.getCollision().getNormalY(); nz = w.getCollision().getNormalZ(); normalsReceived = true;
 			
 			//Landing
 			if (nz > terrainTolerance && inAir)
@@ -506,14 +510,14 @@ public class Player extends Entity implements Damageable
 		//Cling onto surfaces. If there is a floor under the player close enough to the player, set the player's ground to this surface.
 		if (!inAir)
 		{
-			double t = map.getCollision().getPlayerCollision(x,y,z,0,0,-stepDownHeight,radius,height);
+			double t = w.getCollision().getPlayerCollision(x,y,z,0,0,-stepDownHeight,radius,height);
 			if (t != 1)
-				if (map.getCollision().getNormalZ() >= terrainTolerance)
+				if (w.getCollision().getNormalZ() >= terrainTolerance)
 				{
 					z -= t*stepDownHeight;
-					floorNormX = map.getCollision().getNormalX();
-					floorNormY = map.getCollision().getNormalY();
-					floorNormZ = map.getCollision().getNormalZ();
+					floorNormX = w.getCollision().getNormalX();
+					floorNormY = w.getCollision().getNormalY();
+					floorNormZ = w.getCollision().getNormalZ();
 				}
 		}
 	}

@@ -11,7 +11,7 @@ import com.jogamp.opengl.util.texture.Texture;
  * Stores visual and physical data for a 3D level.
  * @author Patrick Owen
  */
-public class GameMap
+public class World
 {
 	//Allows data to be saved between levels
 	private Controller c;
@@ -58,7 +58,7 @@ public class GameMap
 	 * @param controller The active Controller object
 	 * @param fName The name of the file containing the data.
 	 */
-	public GameMap(Controller controller, File fName)
+	public World(Controller controller, File fName)
 	{
 		c = controller;
 		mapFile = fName;
@@ -156,7 +156,7 @@ public class GameMap
 	}
 	
 	/**
-	 * Returns an ArrayList of the entities held by the GameMap.
+	 * Returns an ArrayList of the entities held by the World.
 	 * Do not modify this ArrayList.
 	 */
 	public ArrayList<Entity> getEntities()
@@ -165,7 +165,7 @@ public class GameMap
 	}
 	
 	/**
-	 * Returns the current gravity of the map
+	 * Returns the current gravity of the world
 	 */
 	public double getGravity()
 	{
@@ -304,10 +304,10 @@ public class GameMap
 	}
 	
 	/**
-	 * Uses drawing data to draw the map
+	 * Uses drawing data to draw the world
 	 * @param gl
 	 */
-	public void drawMap(GL2 gl)
+	public void draw(GL2 gl)
 	{
 		//Set the view
 		if (player.isDead())
@@ -320,7 +320,7 @@ public class GameMap
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, new float[] {0.4f, 0.4f, 0.4f, 0}, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, new float[] {0.4f, 0.4f, 0.4f, 0}, 0);
 		
-		//Set material properties to what is set for the map
+		//Set material properties to what is set for the world
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {1, 1, 1, 1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, new float[] {0, 0, 0, 1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_EMISSION, new float[] {0, 0, 0, 1}, 0);
@@ -387,7 +387,7 @@ public class GameMap
 	}
 	
 	/**
-	 * Returns the Collision object that handles collisions in this map.
+	 * Returns the Collision object that handles collisions in this world.
 	 */
 	public Collision getCollision()
 	{
@@ -424,18 +424,22 @@ public class GameMap
 				//1- Entity placement (id, x, y, z)
 				if (command == 1)
 				{
-					Entity e = c.createEntity(GameMap.this, getInt());
+					Entity e = c.createEntity(World.this, getInt());
+					
 					if (e instanceof Player)
 						player = (Player)e;
 					
-					//Move the entity to the proper location.
-					e.setPosition(getDouble(), getDouble(), getDouble()+0.0001);
-					
-					int extra = e.getAmountExtraData();
-					for (int i=0; i<extra; i++)
-						e.initializeExtraData(i, getDouble());
-					
-					entities.add(e);
+					if (!c.isMultiplayer() || c.isServer() || e instanceof Player)
+					{						
+						//Move the entity to the proper location.
+						e.setPosition(getDouble(), getDouble(), getDouble()+0.0001);
+						
+						int extra = e.getAmountExtraData();
+						for (int i=0; i<extra; i++)
+							e.initializeExtraData(i, getDouble());
+						
+						entities.add(e);
+					}
 				}
 				
 				//2- Surface placement
@@ -539,7 +543,7 @@ public class GameMap
 		//Adds a spawning wave based on the file.
 		public void addWave(int difficulty)
 		{
-			SpawningWave wave = new SpawningWave(c, GameMap.this);
+			SpawningWave wave = new SpawningWave(c, World.this);
 			
 			//Parse the data
 			while (data.hasNextLine())

@@ -31,11 +31,11 @@ public class EntityRocket extends Entity implements Damageable
 	/**
 	 * Creates a new EnemyRocket object. 
 	 * @param c Controller object, passed to superclass
-	 * @param gm GameMap object, passed to superclass
+	 * @param world World object, passed to superclass
 	 */
-	public EntityRocket(Controller c, GameMap gm)
+	public EntityRocket(Controller c, World world)
 	{
-		super(c, gm);
+		super(c, world);
 		
 		radius = .15;
 		height = .3;
@@ -70,13 +70,14 @@ public class EntityRocket extends Entity implements Damageable
 		if (fireTime <=0)
 		{
 			fireTime = fireFrequency;
-			EntityExplosion exhaust = new EntityExplosion(c, map);
+			EntityExplosion exhaust = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+			exhaust.init();
 			exhaust.setPosition(x, y, z + height/2);
 			exhaust.setColor(.1f, 0f, 0f);
 			exhaust.setRadius(1.1*radius);
 			exhaust.setFinalRadius(2*radius);
 			exhaust.setDuration(.25);
-			map.create(exhaust);
+			w.create(exhaust);
 		}
 	}
 
@@ -98,17 +99,18 @@ public class EntityRocket extends Entity implements Damageable
 		
 		isDestroyed = true;
 		
-		EntityExplosion blast = new EntityExplosion(c, map);
+		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+		blast.init();
 		blast.setColor(.75f, .25f, .1f);
 		blast.setDuration(.5);
 		blast.setPosition(x, y, z + radius/2);
 		blast.setRadius(radius);
 		blast.setFinalRadius(range);
-		map.create(blast);
+		w.create(blast);
 		
 		if (applyDamage)
 		{
-			for (Entity entity : map.getEntities())
+			for (Entity entity : w.getEntities())
 			{
 				if (entity == owner || entity == this) continue;
 				if (!(entity instanceof Damageable)) continue;
@@ -168,13 +170,13 @@ public class EntityRocket extends Entity implements Damageable
 	private void handleCollision(double dt)
 	{
 		super.step(dt);
-		Collision col = map.getCollision();
+		Collision col = w.getCollision();
 		
 		double t = col.getPlayerCollision(x, y, z, xV*dt, yV*dt, zV*dt, radius, height);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == owner || entity == this) continue;
 			if (!(entity instanceof Damageable)) continue;

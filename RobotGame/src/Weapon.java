@@ -10,8 +10,6 @@ import javax.media.opengl.GL2;
 
 public class Weapon extends Entity
 {
-	protected Controller c;
-	protected GameMap map;
 	protected Player player;
 	protected InputHandler input;
 	
@@ -31,20 +29,22 @@ public class Weapon extends Entity
 	/**
 	 * Constructs a Weapon object.
 	 * @param controller The Controller object.
-	 * @param gameMap The map where the player is.
+	 * @param world The world where the player is.
 	 * @param p The owner player.
 	 */
-	public Weapon(Controller controller, GameMap gameMap, Player p)
+	public Weapon(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
-		c = controller;
-		map = gameMap;
-		player = p;
 		input = c.getInputHandler();
 		maxEnergy = 100;
 		energy = maxEnergy;
 		energyRegen = 2.5;
+	}
+	
+	public void setPlayer(Player p)
+	{
+		player = p;
 	}
 	
 	//returns the current energy of the weapon

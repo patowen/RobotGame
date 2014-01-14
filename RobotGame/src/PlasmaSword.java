@@ -30,12 +30,12 @@ public class PlasmaSword extends Weapon
 	/**
 	 * Constructs a PlasmaSword object.
 	 * @param controller The Controller object.
-	 * @param gameMap The map where the player is.
+	 * @param world The world where the player is.
 	 * @param p The owner player.
 	 */
-	public PlasmaSword(Controller controller, GameMap gameMap, Player p)
+	public PlasmaSword(Controller controller, World world)
 	{
-		super(controller, gameMap, p);
+		super(controller, world);
 		name = "Laser Sword";
 		
 		shotDelay = .4;
@@ -96,7 +96,7 @@ public class PlasmaSword extends Weapon
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
 			
 			
-			double t = map.getCollision().getBulletCollision(x, y, z, bladelength*xDir, bladelength*yDir, bladelength*zDir);
+			double t = w.getCollision().getBulletCollision(x, y, z, bladelength*xDir, bladelength*yDir, bladelength*zDir);
 			double t2 = 1; //Bullet distance traveled before first detected collision
 			Damageable entityToDamage = null;
 			
@@ -104,16 +104,16 @@ public class PlasmaSword extends Weapon
 			
 			if (t < t2)
 			{
-				EntityFade spark = new EntityFade(c, map);
+				EntityFade spark = (EntityFade)c.createEntity(w, EI.EntityFade);
 				spark.setRadius(.045);
 				spark.setDuration(.25);
 				spark.setColor(.25f, .5f, 1f);
 				spark.setPosition(x+bladelength*xDir*t, y+bladelength*yDir*t, z+bladelength*zDir*t);
-				map.create(spark);
+				w.create(spark);
 			}
 			
 			double tTest = 1;
-			for (Entity entity : map.getEntities())
+			for (Entity entity : w.getEntities())
 			{
 				if (entity == player) continue;
 				if (!(entity instanceof Damageable)) continue;
@@ -121,7 +121,7 @@ public class PlasmaSword extends Weapon
 				Damageable e = (Damageable) entity;
 				
 				//tTest must be less than t2 to update it.
-				tTest = map.getCollision().getEntityBulletCollision(x, y, z, bladelength*xDir*t, bladelength*yDir*t, bladelength*zDir*t, e);
+				tTest = w.getCollision().getEntityBulletCollision(x, y, z, bladelength*xDir*t, bladelength*yDir*t, bladelength*zDir*t, e);
 				
 				
 				if (tTest < 1)
@@ -139,13 +139,14 @@ public class PlasmaSword extends Weapon
 					{
 						double totalVel = Math.sqrt(xDir*xDir + yDir*yDir + zDir*zDir);
 						entityToDamage.applyDamage(damage, -xDir/totalVel, -yDir/totalVel, -zDir/totalVel, knockback, false);
-						EntityExplosion boom = new EntityExplosion(c, map);
+						EntityExplosion boom = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+						boom.init();
 						boom.setPosition(x+bladelength*xDir*tTest, y+bladelength*yDir*tTest, z+bladelength*zDir*tTest);
 						boom.setFinalRadius(.2);
 						boom.setDuration(.25);
 						boom.setColor(1f, .5f, .25f);
 						c.getSoundHandler().playSound(1, x+bladelength*xDir*tTest, y+bladelength*yDir*tTest, z+bladelength*zDir*tTest);
-						map.create(boom);
+						w.create(boom);
 					}
 					hit.add(e);
 				}

@@ -15,11 +15,11 @@ public class EnemyObstacle extends Enemy implements Damageable
 	/**
 	 * Creates a new EnemyObstacle.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EnemyObstacle is placed.
+	 * @param world The world where the EnemyObstacle is placed.
 	 */
-	public EnemyObstacle(Controller controller, GameMap gameMap)
+	public EnemyObstacle(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.3;
 		height = 0.8;
@@ -31,7 +31,7 @@ public class EnemyObstacle extends Enemy implements Damageable
 	{
 		super.step(dt);
 		
-		Player player = map.getPlayer();
+		Player player = w.getPlayer();
 		double pX = player.getX(), pY = player.getY(), pZ = player.getZ(), pR = player.getRadius(), pH = player.getHeight();
 		
 		if (z+height >= pZ && z <= pZ+pH) //Check for z being in bounds

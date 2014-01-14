@@ -26,11 +26,11 @@ public class EntityPlasmaBolt extends Entity
 	/**
 	 * Creates a new EntityBullet.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EntityBullet is placed.
+	 * @param world The world where the EntityBullet is placed.
 	 */
-	public EntityPlasmaBolt(Controller controller, GameMap gameMap)
+	public EntityPlasmaBolt(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.1; radius2 = 0.2;
 		damage = 5;
@@ -82,11 +82,11 @@ public class EntityPlasmaBolt extends Entity
 		super.step(dt);
 		handleExhaust(dt);
 		
-		double t = map.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
+		double t = w.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == owner) continue;
 			if (!(entity instanceof Damageable)) continue;
@@ -94,7 +94,7 @@ public class EntityPlasmaBolt extends Entity
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
+			double tTest = w.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
 			
 			if (tTest < t2)
 			{
@@ -131,14 +131,14 @@ public class EntityPlasmaBolt extends Entity
 		
 		isDestroyed = true;
 		
-		EntityFade blast = new EntityFade(c, map);
+		EntityFade blast = (EntityFade)c.createEntity(w, EI.EntityFade);
 		blast.setColor(.2f, .8f, 1f);
 		blast.setDuration(1);
 		blast.setPosition(x, y, z + radius/2);
 		blast.setRadius(range);
-		map.create(blast);
+		w.create(blast);
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == owner || entity == this) continue;
 			if (!(entity instanceof Damageable)) continue;
@@ -172,12 +172,13 @@ public class EntityPlasmaBolt extends Entity
 		if (fireTime <=0)
 		{
 			fireTime = fireFrequency;
-			EntityFade trail = new EntityFade(c, map);
+			EntityFade trail = (EntityFade)c.createEntity(w, EI.EntityFade);
+			trail.init();
 			trail.setPosition(x, y, z);
 			trail.setColor(color[0], color[1], color[2]);
 			trail.setRadius(radius2);
 			trail.setDuration(.25);
-			map.create(trail);
+			w.create(trail);
 		}
 	}
 	

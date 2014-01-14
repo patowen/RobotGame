@@ -9,33 +9,42 @@ public class Entity
 	protected Controller c;
 	
 	protected boolean isLocal;
-	protected final int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
-	protected final int id; //An identification of the entity that remains consistent throughout its lifetime.
+	protected int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
+	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
 	protected double xV, yV, zV;
 	protected double xPrevious, yPrevious, zPrevious;
-	protected GameMap map;
+	protected World w;
 	
 	/**
 	 * Creates a new Entity.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the Entity is placed.
+	 * @param world The world where the Entity is placed.
 	 */
-	public Entity(Controller controller, GameMap gameMap)
+	public Entity(Controller controller, World world)
 	{		
 		c = controller;
-		map = gameMap;
+		w = world;
 		
 		xV = 0;
 		yV = 0;
 		zV = 0;
-		
+	}
+	
+	public void init()
+	{
 		isLocal = true;
 		if (c.isMultiplayer())
 			owner = c.getNetwork().getComputerID();
 		else
 			owner = 0;
-		id = map.generateEntityID();
+		id = w.generateEntityID();
+	}
+	
+	public void init(int owner, int id)
+	{
+		this.owner = owner;
+		this.id = id;
 	}
 	
 	/**
@@ -159,7 +168,7 @@ public class Entity
 	 */
 	public void delete()
 	{
-		map.delete(this);
+		w.delete(this);
 	}
 	
 	/**

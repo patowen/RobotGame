@@ -21,7 +21,7 @@ public class Controller
 	private GLWindow win;
 	private FPSAnimator anim;
 	private HashMap<Integer, Texture> textureInfo;
-	private GameMap currentLevel;
+	private World currentLevel;
 	private int levelType; //0=no score, 1=score
 	
 	private InputHandler input;
@@ -273,7 +273,7 @@ public class Controller
 		gl.glLoadIdentity();
 		if (currentMenu == null)
 		{
-			currentLevel.drawMap(gl);
+			currentLevel.draw(gl);
 			
 			gl.glMatrixMode(GL2.GL_PROJECTION);
 			gl.glLoadIdentity();
@@ -365,7 +365,7 @@ public class Controller
 	}
 	
 	/**
-	 * Handle the death of the player and go to the highscore menu. Should be called by the corresponding GameMap
+	 * Handle the death of the player and go to the highscore menu. Should be called by the corresponding World
 	 */
 	public void handleDeath()
 	{
@@ -381,7 +381,7 @@ public class Controller
 	
 	/**
 	 * Sets the current game level to the desired input
-	 * @param gm The GameMap to be set as the current level
+	 * @param gm The World to be set as the current level
 	 */
 	public synchronized void setCurrentLevel(String levelName)
 	{
@@ -391,11 +391,16 @@ public class Controller
 			levelType = 1;
 		pauseMenu = new PauseMenu(this);
 		paused = false;
-		currentLevel = new GameMap(this, new File("maps" + File.separator + levelName)); //levelName
+		currentLevel = new World(this, new File("maps" + File.separator + levelName)); //levelName
 		hud = new HUD(this, currentLevel);
 		currentMenu = null;
 		win.setPointerVisible(false);
 		input.readMouse();
+	}
+	
+	public World getCurrentLevel()
+	{
+		return currentLevel;
 	}
 	
 	/**
@@ -500,34 +505,23 @@ public class Controller
 	
 	/**
 	 * Initializes an entity with the given id and returns it.<br/>
-	 * 0: Player<br/>
-	 * 1: EnemyObstacle<br/>
-	 * 2: EnemyTurret<br/>
-	 * 3: EnemyTracking
-	 * @param gameMap The map where the obstacle is being placed.
+	 * @param world The world where the obstacle is being placed.
 	 * @param id The index of the entity.
 	 * @return An object of the appropriate kind of Entity.
 	 */
-	public Entity createEntity(GameMap gameMap, int id)
+	public Entity createEntity(World world, int type)
 	{
-		switch (id)
-		{
-		case 0:
-			return new Player(this, gameMap);
-		case 1:
-			return new EnemyObstacle(this, gameMap);
-		case 2:
-			return new EnemyTurret(this, gameMap);
-		case 3:
-			return new EnemyShocking(this, gameMap);
-		case 4:
-			return new EnemyTracking(this, gameMap);
-		case 5:
-			return new EnemySplitting(this, gameMap);
-		case 6:
-			return new EnemyFortress(this, gameMap);
-		}
-		
-		return null;
+		return EI.createEntity(this, world, type);
+	}
+	
+	/**
+	 * Initializes an entity with the given id and returns it.<br/>
+	 * @param world The world where the obstacle is being placed.
+	 * @param id The index of the entity.
+	 * @return An object of the appropriate kind of Entity.
+	 */
+	public Entity createEntity(World world, int type, int owner, int id)
+	{
+		return EI.createEntity(this, world, type, owner, id);
 	}
 }

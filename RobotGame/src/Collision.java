@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class Collision
 {
-	private GameMap map;
+	private World w;
 	
 	private double normalX, normalY, normalZ;
 	private double normalXFinal, normalYFinal, normalZFinal;
@@ -19,7 +19,7 @@ public class Collision
 	/**
 	 * Initializes the Collision class.
 	 */
-	public Collision(GameMap gameMap)
+	public Collision(World world)
 	{
 		//Initialize all data arrays
 		colData = 0;
@@ -27,7 +27,7 @@ public class Collision
 		cX2 = new ArrayList<Double>(); cY2 = new ArrayList<Double>(); cZ2 = new ArrayList<Double>();
 		cX3 = new ArrayList<Double>(); cY3 = new ArrayList<Double>(); cZ3 = new ArrayList<Double>();
 		
-		map = gameMap;
+		w = world;
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class Collision
 		}
 		
 		//Check for collision with entities.
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			/*
 			 * ALGORITHM 2b:

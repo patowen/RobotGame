@@ -29,16 +29,16 @@ public class EnemyShocking extends Enemy implements Damageable
 	/**
 	 * Creates a new EnemyShocking.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EnemyTurret is placed.
+	 * @param world The world where the EnemyTurret is placed.
 	 */
-	public EnemyShocking(Controller controller, GameMap gameMap)
+	public EnemyShocking(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.2;
 		height = 0.4;
 		
-		ai = new AITracking(c, map, this);
+		ai = new AITracking(c, w, this);
 		ai.setControls(7, 2, 0, 0, 6, 1, 0.4, 1, 0, 0, 1);
 		
 		shotDelay = 1.0/2;
@@ -103,7 +103,7 @@ public class EnemyShocking extends Enemy implements Damageable
 		
 		if (charge < 0)
 		{
-			for (Entity e : map.getEntities())
+			for (Entity e : w.getEntities())
 			{
 				if (!(e instanceof Player))
 					continue;

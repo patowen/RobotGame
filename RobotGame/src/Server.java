@@ -13,6 +13,7 @@ public class Server extends Network
 	private InetAddress[] clientIP;
 	private int[] clientPort;
 	private String[] clientName;
+	private int[] clientID;
 	
 	public Server(Controller controller, int cap)
 	{
@@ -24,6 +25,7 @@ public class Server extends Network
 		clientIP = new InetAddress[capacity];
 		clientPort = new int[capacity];
 		clientName = new String[capacity];
+		clientID = new int[capacity];
 		
 		try
 		{
@@ -46,6 +48,26 @@ public class Server extends Network
 		{
 			sendGuaranteed(packet, clientIP[i], clientPort[i]);
 		}
+	}
+	
+	//Returns the next available Client ID to apply
+	private int getNextID()
+	{
+		int currentID;
+		boolean idFound = false, idTaken = false;
+		
+		for (currentID=1; !idFound; currentID++)
+		{
+			for (int j=0; j<numPlayers && !idTaken; j++)
+			{
+				if (clientID[j] == currentID)
+					idTaken = true;
+			}
+			if (!idTaken)
+				idFound = true;
+		}
+		
+		return currentID;
 	}
 	
 	//Returns the client index for the specified data, or -1 if none exists.
@@ -71,6 +93,7 @@ public class Server extends Network
 			clientIP[i-1] = clientIP[i];
 			clientPort[i-1] = clientPort[i];
 			clientName[i-1] = clientName[i];
+			clientID[i-1] = clientID[i];
 		}
 		
 		numPlayers--;
@@ -108,6 +131,7 @@ public class Server extends Network
 						clientIP[numPlayers] = sender;
 						clientPort[numPlayers] = senderPort;
 						clientName[numPlayers] = packet.getString();
+						clientID[numPlayers] = getNextID();
 						numPlayers++;
 					}
 					else
@@ -118,6 +142,10 @@ public class Server extends Network
 					}
 				}
 			}
+		}
+		else if (signalType == 3) //Entity information
+		{
+			handleEntities(packet, sender, senderPort);
 		}
 	}
 }

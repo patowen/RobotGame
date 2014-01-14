@@ -20,11 +20,11 @@ public class EntityBullet extends Entity
 	/**
 	 * Creates a new EntityBullet.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EntityBullet is placed.
+	 * @param world The world where the EntityBullet is placed.
 	 */
-	public EntityBullet(Controller controller, GameMap gameMap)
+	public EntityBullet(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.05; radius2 = 0.1;
 		damage = 0;
@@ -73,11 +73,11 @@ public class EntityBullet extends Entity
 	{
 		super.step(dt);
 		
-		double t = map.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
+		double t = w.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == owner) continue;
 			if (!(entity instanceof Damageable)) continue;
@@ -85,7 +85,7 @@ public class EntityBullet extends Entity
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
+			double tTest = w.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
 			
 			if (tTest < t2)
 			{
@@ -113,7 +113,7 @@ public class EntityBullet extends Entity
 			
 			if (entityToDamage == null)
 				explodeOnWall();
-			else if (!(entityToDamage == map.getPlayer()))
+			else if (!(entityToDamage == w.getPlayer()))
 				explodeOnEntity();
 		}
 	}
@@ -121,27 +121,29 @@ public class EntityBullet extends Entity
 	//Creates a small spark-like explosion to make it obvious that the bullet hit the wall.
 	private void explodeOnWall()
 	{
-		EntityExplosion blast = new EntityExplosion(c, map);
+		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+		blast.init();
 		blast.setPosition(x, y, z);
 		blast.setRadius(radius);
 		blast.setFinalRadius(radius*4);
 		blast.setDuration(.1);
 		blast.setColor(color[0], color[1], color[2]);
-		map.create(blast);
+		w.create(blast);
 		c.getSoundHandler().playSound(2, x, y, z);
 	}
 	
 	//Creates a larger explosion to make it look like an entity was damaged.
 	private void explodeOnEntity()
 	{
-		EntityExplosion blast = new EntityExplosion(c, map);
+		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+		blast.init();
 		blast.setPosition(x, y, z);
 		blast.setRadius(radius);
 		blast.setFinalRadius(radius*10);
 		blast.setDuration(.25);
 		blast.setColor(1, .5f, .25f);
 		c.getSoundHandler().playSound(1, x, y, z);
-		map.create(blast);
+		w.create(blast);
 	}
 	
 	public void draw(GL2 gl)

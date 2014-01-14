@@ -11,7 +11,7 @@ public class EnemySplitting extends EnemyShocking
 	 * @param c
 	 * @param gm
 	 */
-	public EnemySplitting(Controller c, GameMap gm)
+	public EnemySplitting(Controller c, World gm)
 	{
 		this(c, gm, 3.5);
 	}
@@ -19,12 +19,12 @@ public class EnemySplitting extends EnemyShocking
 	/**
 	 * Creates a new EnemySplitting object
 	 * @param c Controller controller object
-	 * @param gm GameMap object
+	 * @param world World object
 	 * @param s number of times the enemy and its heirs can split
 	 */
-	public EnemySplitting(Controller c, GameMap gm, double s)
+	public EnemySplitting(Controller c, World world, double s)
 	{
-		super(c, gm);
+		super(c, world);
 		stage = s;
 		setRadius(radius*s);
 		double maxSpeed;
@@ -53,11 +53,11 @@ public class EnemySplitting extends EnemyShocking
 	{
 		if (stage > 1)
 		{
-			EnemySplitting temp1 = new EnemySplitting(c, map, stage*.7);
-			EnemySplitting temp2 = new EnemySplitting(c, map, stage*.7);
+			EnemySplitting temp1 = new EnemySplitting(c, w, stage*.7);
+			EnemySplitting temp2 = new EnemySplitting(c, w, stage*.7);
 			temp1.setPosition(x, y, z);
 			temp2.setPosition(x, y, z);
-			Player target = map.getPlayer();
+			Player target = w.getPlayer();
 			double xDir = target.getX() - x;
 			double yDir = target.getY() - y;
 			double mag = Math.sqrt(xDir*xDir + yDir*yDir);
@@ -66,8 +66,8 @@ public class EnemySplitting extends EnemyShocking
 			temp1.setVelocity(xDir*vel, -yDir*vel, 0);
 			temp2.setVelocity(-xDir*vel, yDir*vel, 0);
 			
-			map.create(temp1);
-			map.create(temp2);
+			w.create(temp1);
+			w.create(temp2);
 		}
 		else
 		{

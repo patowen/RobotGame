@@ -121,5 +121,9 @@ public class Client extends Network
 				c.setCurrentMenu(new DisconnectedMenu(c));
 			}
 		}
+		else if (signalType == 3) //Entity information
+		{
+			handleEntities(packet, sender, senderPort);
+		}
 	}
 }

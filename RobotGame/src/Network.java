@@ -16,9 +16,9 @@ import java.net.InetAddress;
  * [1, 2]: Server closed
  * 
  * Entity signals:
- * [3, 0, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 0, 1, entity_id]: Remove entity
- * [3, 0, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
+ * [3, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
+ * [3, 1, entity_id]: Remove entity
+ * [3, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
  */
 
 public abstract class Network
@@ -70,6 +70,16 @@ public abstract class Network
 			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
 		}
 		catch (IOException e) {} //Just act like a failed signal send
+	}
+	
+	protected void handleEntities(NetworkPacket packet, InetAddress sender, int senderPort)
+	{
+		byte subtype = packet.getByte();
+		if (subtype == 0)
+		{
+			World world = c.getCurrentLevel();
+//			world.create();
+		}
 	}
 	
 	public abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
