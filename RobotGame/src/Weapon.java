@@ -8,8 +8,11 @@ import javax.media.opengl.GL2;
  */
 
 
-public class Weapon extends Entity
+public class Weapon
 {
+	protected Controller c;
+	protected World w;
+	
 	protected Player player;
 	protected InputHandler input;
 	
@@ -34,7 +37,8 @@ public class Weapon extends Entity
 	 */
 	public Weapon(Controller controller, World world)
 	{
-		super(controller, world);
+		c = controller;
+		w = world;
 		
 		input = c.getInputHandler();
 		maxEnergy = 100;
@@ -77,7 +81,6 @@ public class Weapon extends Entity
 	 */
 	public void step(double dt)
 	{
-		super.step(dt);
 		handleFiring(dt);
 	}
 	

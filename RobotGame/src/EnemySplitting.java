@@ -9,25 +9,20 @@ public class EnemySplitting extends EnemyShocking
 	/**
 	 * Standard constructor, uses 8 as a default size
 	 * @param c
-	 * @param gm
+	 * @param world
 	 */
-	public EnemySplitting(Controller c, World gm)
-	{
-		this(c, gm, 3.5);
-	}
-	
-	/**
-	 * Creates a new EnemySplitting object
-	 * @param c Controller controller object
-	 * @param world World object
-	 * @param s number of times the enemy and its heirs can split
-	 */
-	public EnemySplitting(Controller c, World world, double s)
+	public EnemySplitting(Controller c, World world)
 	{
 		super(c, world);
-		stage = s;
-		setRadius(radius*s);
+		setStage(3.5);
+	}
+	
+	public void setStage(double stage)
+	{
+		this.stage = stage;
+		setRadius(0.2*stage);
 		double maxSpeed;
+		
 		if (stage == 3.5)
 		{
 			maxSpeed = 3.9;
@@ -40,6 +35,7 @@ public class EnemySplitting extends EnemyShocking
 		{
 			maxSpeed = 4;
 		}
+		
 		ai.setControls(maxSpeed, 2, 0, 0, 6, 1, 0.4, 1, 0, 0, 1);
 	}
 	
@@ -53,10 +49,12 @@ public class EnemySplitting extends EnemyShocking
 	{
 		if (stage > 1)
 		{
-			EnemySplitting temp1 = new EnemySplitting(c, w, stage*.7);
-			EnemySplitting temp2 = new EnemySplitting(c, w, stage*.7);
+			EnemySplitting temp1 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
+			EnemySplitting temp2 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
 			temp1.setPosition(x, y, z);
 			temp2.setPosition(x, y, z);
+			temp1.setStage(stage*.7);
+			temp2.setStage(stage*.7);
 			Player target = w.getPlayer();
 			double xDir = target.getX() - x;
 			double yDir = target.getY() - y;

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 /*
  * Multiplayer notes:
@@ -16,9 +17,9 @@ import java.net.InetAddress;
  * [1, 2]: Server closed
  * 
  * Entity signals:
- * [3, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 1, entity_id]: Remove entity
- * [3, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
+ * [3, 0, entity_type, owner, entity_id]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
+ * [3, 1, owner, entity_id]: Remove entity
+ * [3, 2, owner, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
  */
 
 public abstract class Network
@@ -28,9 +29,21 @@ public abstract class Network
 	protected DatagramSocket socket;
 	protected NetworkThread thread;
 	
+	private ArrayList<Packet> packets;
+	
 	public Network(Controller controller)
 	{
 		c = controller;
+		packets = new ArrayList<Packet>();
+	}
+	
+	public void step(double dt)
+	{
+		ArrayList<Packet> packets = getPackets();
+		for (Packet p : packets)
+		{
+			interpretSignal(p.packet, p.sender, p.senderPort);
+		}
 	}
 	
 	public void destroy()
@@ -58,6 +71,7 @@ public abstract class Network
 		NetworkPacket packet = new NetworkPacket(data.length()+1);
 		packet.addByte(0);
 		packet.append(data);
+		if (c.isServer())
 		send(packet, ip, port);
 	}
 	
@@ -65,21 +79,9 @@ public abstract class Network
 	{
 		try
 		{
-//			if (!c.isServer())
-//				System.out.println(packet);
 			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
 		}
 		catch (IOException e) {} //Just act like a failed signal send
-	}
-	
-	protected void handleEntities(NetworkPacket packet, InetAddress sender, int senderPort)
-	{
-		byte subtype = packet.getByte();
-		if (subtype == 0)
-		{
-			World world = c.getCurrentLevel();
-//			world.create();
-		}
 	}
 	
 	public abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
@@ -91,7 +93,8 @@ public abstract class Network
 		int flag = packet.getByte();
 		if (flag == 0)
 		{
-			interpretSignal(packet, sender, senderPort);
+			addPacket(packet, sender, senderPort);
+//			interpretSignal(packet, sender, senderPort);
 		}
 		else if (flag == 1)
 		{
@@ -99,7 +102,9 @@ public abstract class Network
 			relayPacket.addByte(2);
 			relayPacket.addLong(packet.getLong());
 			send(relayPacket, sender, senderPort);
-			interpretSignal(packet, sender, senderPort); //TODO Temporary. Ordering should matter.
+			addPacket(packet, sender, senderPort);
+			
+			//interpretSignal(packet, sender, senderPort); //TODO Temporary. Ordering should matter.
 		}
 		else if (flag == 2)
 		{
@@ -107,8 +112,44 @@ public abstract class Network
 		}
 	}
 	
+	private synchronized void addPacket(NetworkPacket packet, InetAddress sender, int senderPort)
+	{
+		packets.add(new Packet(packet, sender, senderPort));
+	}
+	
+	private synchronized ArrayList<Packet> getPackets()
+	{
+		ArrayList<Packet> packetsClone = new ArrayList<Packet>();
+		
+		for (Packet p : packets)
+		{
+			packetsClone.add(p);
+		}
+		packets.clear();
+		return packetsClone;
+	}
+	
+	private class Packet
+	{
+		public final NetworkPacket packet;
+		public final InetAddress sender;
+		public final int senderPort;
+		
+		public Packet(NetworkPacket packet, InetAddress sender, int senderPort)
+		{
+			this.packet = packet;
+			this.sender = sender;
+			this.senderPort = senderPort;
+		}
+	}
+	
 	private class NetworkThread extends Thread
 	{
+		public NetworkThread()
+		{
+			super("NetworkThread");
+		}
+		
 		public void run()
 		{
 			byte[] buf = new byte[256];
@@ -123,7 +164,7 @@ public abstract class Network
 				try
 				{
 					socket.receive(packet);
-					interpretSignalRaw(new NetworkPacket(buf), packet.getAddress(), packet.getPort());
+					interpretSignalRaw(new NetworkPacket(buf.clone()), packet.getAddress(), packet.getPort());
 				}
 				catch (IOException e) {}
 			}

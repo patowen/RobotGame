@@ -173,7 +173,6 @@ public class EntityPlasmaBolt extends Entity
 		{
 			fireTime = fireFrequency;
 			EntityFade trail = (EntityFade)c.createEntity(w, EI.EntityFade);
-			trail.init();
 			trail.setPosition(x, y, z);
 			trail.setColor(color[0], color[1], color[2]);
 			trail.setRadius(radius2);

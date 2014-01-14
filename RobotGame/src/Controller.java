@@ -190,7 +190,7 @@ public class Controller
 		network = client;
 	}
 	
-	public synchronized void disconnect()
+	public void disconnect()
 	{
 		if (client != null)
 		{
@@ -204,7 +204,7 @@ public class Controller
 		isMultiplayer = false;
 	}
 	
-	public synchronized void forceDisconnect()
+	public void forceDisconnect()
 	{
 		if (network != null)
 		{
@@ -262,7 +262,7 @@ public class Controller
 	/**
 	 * Completes all rendering operations for the whole game.
 	 */
-	public synchronized void render(GL2 gl)
+	public void render(GL2 gl)
 	{
 		GLU glu = new GLU();
 		
@@ -314,8 +314,10 @@ public class Controller
 	 * Runs a step of the game.
 	 * @param dt The reciprocal of the framerate.
 	 */
-	public synchronized void step(double dt)
+	public void step(double dt)
 	{
+		if (network != null)
+			network.step(dt);
 		guaranteedSender.step(dt);
 		
 		if (currentMenu != null)
@@ -383,7 +385,7 @@ public class Controller
 	 * Sets the current game level to the desired input
 	 * @param gm The World to be set as the current level
 	 */
-	public synchronized void setCurrentLevel(String levelName)
+	public void setCurrentLevel(String levelName)
 	{
 		if (levelName.equals("practice.txt"))
 			levelType = 0;
@@ -407,7 +409,7 @@ public class Controller
 	 * Sets the current menu to display to the input GameMenu
 	 * @param menu The menu to display
 	 */
-	public synchronized void setCurrentMenu(Menu menu)
+	public void setCurrentMenu(Menu menu)
 	{
 		pauseMenu = null;
 		hud = null;

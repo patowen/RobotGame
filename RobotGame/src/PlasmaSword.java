@@ -140,7 +140,6 @@ public class PlasmaSword extends Weapon
 						double totalVel = Math.sqrt(xDir*xDir + yDir*yDir + zDir*zDir);
 						entityToDamage.applyDamage(damage, -xDir/totalVel, -yDir/totalVel, -zDir/totalVel, knockback, false);
 						EntityExplosion boom = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-						boom.init();
 						boom.setPosition(x+bladelength*xDir*tTest, y+bladelength*yDir*tTest, z+bladelength*zDir*tTest);
 						boom.setFinalRadius(.2);
 						boom.setDuration(.25);

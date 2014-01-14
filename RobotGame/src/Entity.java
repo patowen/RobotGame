@@ -9,6 +9,7 @@ public class Entity
 	protected Controller c;
 	
 	protected boolean isLocal;
+	protected boolean isActive;
 	protected int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
 	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
@@ -25,26 +26,50 @@ public class Entity
 	{		
 		c = controller;
 		w = world;
+		if (w == null)
+			System.exit(1);
+		isActive = false;
 		
 		xV = 0;
 		yV = 0;
 		zV = 0;
 	}
 	
-	public void init()
+	public void init(int type)
 	{
 		isLocal = true;
+		isActive = true;
+		
 		if (c.isMultiplayer())
 			owner = c.getNetwork().getComputerID();
 		else
 			owner = 0;
 		id = w.generateEntityID();
+		
+		if (c.isMultiplayer() && c.isServer())
+		{
+			NetworkPacket data = new NetworkPacket(256);
+			data.addBytes(3, 0);
+			data.addInts(type, owner, id);
+			c.getServer().sendEntityDataGuaranteed(data);
+		}
 	}
 	
 	public void init(int owner, int id)
-	{
+	{		
+		isActive = false;
 		this.owner = owner;
 		this.id = id;
+	}
+	
+	public int getOwner()
+	{
+		return owner;
+	}
+	
+	public int getID()
+	{
+		return id;
 	}
 	
 	/**
@@ -73,12 +98,17 @@ public class Entity
 		zV = zVel;
 	}
 	
+	public void setActive(boolean active)
+	{
+		isActive = active;
+	}
+	
 	/**
 	 * Returns whether this entity should be ignored by other entities.
 	 */
 	public boolean isGhost()
 	{
-		return false;
+		return !isActive;
 	}
 	
 	/**
@@ -87,32 +117,23 @@ public class Entity
 	 * @param data A byte array holding the data of the signal.
 	 * @param offset Where the array should start being read.
 	 */
-	public void signalReceived(int signalType, NetworkPacket data)
+	public void signalReceived(NetworkPacket data)
 	{
-		switch (signalType)
-		{
-		case 0:
-			double[] p = data.getDoubles(3);
-			double[] v = data.getDoubles(3);
-			setPosition(p[0], p[1], p[2]);
-			setVelocity(v[0], v[1], v[2]);
-			
-			break;
-		}
+		double[] p = data.getDoubles(3);
+		double[] v = data.getDoubles(3);
+		setPosition(p[0], p[1], p[2]);
+		setVelocity(v[0], v[1], v[2]);
+		isActive = true;
 	}
 	
 	public void stepSendSignals()
 	{
-		NetworkPacket packet = new NetworkPacket(6*8);
-		
-		packet.addDoubles(x, y, z, xV, yV, zV);
-		
-		sendSignal(false, 0, packet);
-	}
-	
-	protected void sendSignal(boolean guaranteed, int signalType, NetworkPacket data)
-	{
-		
+		NetworkPacket data = new NetworkPacket(256);
+		data.addBytes(3, 2);
+		data.addInts(owner, id);
+		data.addDoubles(x, y, z, xV, yV, zV);
+		if (c.isServer())
+			c.getServer().sendEntityDataNormal(data);
 	}
 	
 	/**
@@ -168,6 +189,13 @@ public class Entity
 	 */
 	public void delete()
 	{
+		if (c.isMultiplayer() && c.isServer())
+		{
+			NetworkPacket data = new NetworkPacket(256);
+			data.addBytes(3, 1);
+			data.addInts(owner, id);
+			c.getServer().sendEntityDataGuaranteed(data);
+		}
 		w.delete(this);
 	}
 	

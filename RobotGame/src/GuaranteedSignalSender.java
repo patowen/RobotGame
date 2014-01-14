@@ -71,10 +71,7 @@ public class GuaranteedSignalSender
 		signal.signalID = currentSignalID;
 		node.signal = signal;
 		
-		synchronized (this)
-		{
-			addPendingSignal(node);
-		}
+		addPendingSignal(node);
 		
 		currentSignalID++;
 		
@@ -86,7 +83,7 @@ public class GuaranteedSignalSender
 		receivedSignals.add(new RelayedSignal(ip, port, data));
 	}
 	
-	public void step(double dt)
+	public synchronized void step(double dt)
 	{
 		long time = System.currentTimeMillis();
 		
@@ -96,40 +93,35 @@ public class GuaranteedSignalSender
 		
 		for (int i=0; i<pokesRemainingInt; i++)
 		{
-			synchronized (this)
+			if (currentSignal == null)
+				break;
+			
+			RelayedSignal rs = new RelayedSignal(currentSignal.signal);
+			if (receivedSignals.remove(rs))
 			{
-				if (currentSignal == null)
-					break;
-				
-				RelayedSignal rs = new RelayedSignal(currentSignal.signal);
-				if (receivedSignals.remove(rs))
+				removePendingSignal();
+			}
+			else
+			{
+				if (time - currentSignal.signal.timestamp > timeout)
 				{
-					removePendingSignal();
+					if (!c.isServer())
+					{
+						reset();
+						c.forceDisconnect();
+						if (c.isMultiplayer())
+							c.setCurrentMenu(new DisconnectedMenu(c));
+					}
 				}
 				else
-				{
-					if (time - currentSignal.signal.timestamp > timeout)
-					{
-						if (!c.isServer())
-						{
-							reset();
-							c.forceDisconnect();
-							if (c.isMultiplayer())
-								c.setCurrentMenu(new DisconnectedMenu(c));
-						}
-					}
-					else
-						poke();
-				}
-				
-				if (currentSignal == null)
-					break;
+					poke();
 			}
-			synchronized (this)
-			{
-				previousSignal = currentSignal;
-				currentSignal = currentSignal.next;
-			}
+			
+			if (currentSignal == null)
+				break;
+			
+			previousSignal = currentSignal;
+			currentSignal = currentSignal.next;
 		}
 	}
 	
@@ -145,7 +137,7 @@ public class GuaranteedSignalSender
 		send(packet, s.ip, s.port);
 	}
 	
-	private void removePendingSignal()
+	private synchronized void removePendingSignal()
 	{
 		if (previousSignal == currentSignal)
 			previousSignal = currentSignal = null;
@@ -155,11 +147,9 @@ public class GuaranteedSignalSender
 			currentSignal = currentSignal.next;
 		}
 		numSignals--;
-		if (!c.isServer())
-			System.out.println(numSignals);
 	}
 	
-	private void addPendingSignal(Node newSignal)
+	private synchronized void addPendingSignal(Node newSignal)
 	{
 		if (previousSignal == null)
 		{
@@ -169,11 +159,10 @@ public class GuaranteedSignalSender
 		else
 		{
 			previousSignal.next = newSignal;
-			newSignal.next = currentSignal;
+			previousSignal = newSignal;
+			previousSignal.next = currentSignal;
 		}
 		numSignals++;
-		if (!c.isServer())
-			System.out.println(numSignals);
 	}
 	
 	private class Node

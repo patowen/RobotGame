@@ -71,7 +71,6 @@ public class EntityRocket extends Entity implements Damageable
 		{
 			fireTime = fireFrequency;
 			EntityExplosion exhaust = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-			exhaust.init();
 			exhaust.setPosition(x, y, z + height/2);
 			exhaust.setColor(.1f, 0f, 0f);
 			exhaust.setRadius(1.1*radius);
@@ -100,7 +99,6 @@ public class EntityRocket extends Entity implements Damageable
 		isDestroyed = true;
 		
 		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-		blast.init();
 		blast.setColor(.75f, .25f, .1f);
 		blast.setDuration(.5);
 		blast.setPosition(x, y, z + radius/2);

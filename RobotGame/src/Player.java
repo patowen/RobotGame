@@ -48,12 +48,13 @@ public class Player extends Entity implements Damageable
 		inAir = true;
 		
 		weapons = new Weapon[3];
-		weapons[0] = (Weapon)c.createEntity(w, EI.PlasmaRifle);
-		weapons[0].setPlayer(this);
-		weapons[1] = (Weapon)c.createEntity(w, EI.PlasmaSword);
-		weapons[1].setPlayer(this);
-		weapons[2] = (Weapon)c.createEntity(w, EI.PlasmaLauncher);
-		weapons[2].setPlayer(this);
+		weapons[0] = new PlasmaRifle(c, w);
+		weapons[1] = new PlasmaSword(c, w);
+		weapons[2] = new PlasmaLauncher(c, w);
+		
+		for (int i=0; i<weapons.length; i++)
+			weapons[i].setPlayer(this);
+		
 		currentWeapon = weapons[0];
 		
 		terrainTolerance = 0.5;
@@ -106,7 +107,7 @@ public class Player extends Entity implements Damageable
 	
 	public boolean isGhost()
 	{
-		return isDead;
+		return !isActive && isDead;
 	}
 	
 	/**
@@ -266,7 +267,6 @@ public class Player extends Entity implements Damageable
 			if (hp <= 0)
 			{
 				EntityExplosion explosion = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-				explosion.init();
 				explosion.setPosition(x, y, z+height/2);
 				explosion.setDuration(1);
 				explosion.setRadius(0.2f);

@@ -73,48 +73,51 @@ public class EntityBullet extends Entity
 	{
 		super.step(dt);
 		
-		double t = w.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
-		double t2 = 1; //Bullet distance traveled before first detected collision
-		Damageable entityToDamage = null;
-		
-		for (Entity entity : w.getEntities())
+		if (isLocal)
 		{
-			if (entity == owner) continue;
-			if (!(entity instanceof Damageable)) continue;
+			double t = w.getCollision().getBulletCollision(x, y, z, xV*dt, yV*dt, zV*dt);
+			double t2 = 1; //Bullet distance traveled before first detected collision
+			Damageable entityToDamage = null;
 			
-			Damageable e = (Damageable) entity;
-			
-			//tTest must be less than t2 to update it.
-			double tTest = w.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
-			
-			if (tTest < t2)
+			for (Entity entity : w.getEntities())
 			{
-				entityToDamage = e;
-				t2 = tTest;
+				if (entity == owner) continue;
+				if (!(entity instanceof Damageable)) continue;
+				
+				Damageable e = (Damageable) entity;
+				
+				//tTest must be less than t2 to update it.
+				double tTest = w.getCollision().getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
+				
+				if (tTest < t2)
+				{
+					entityToDamage = e;
+					t2 = tTest;
+				}
 			}
-		}
-		
-		//Bullet hits entity.
-		if (entityToDamage != null)
-		{
-			double totalVel = Math.sqrt(xV*xV + yV*yV + zV*zV);
-			entityToDamage.applyDamage(damage, -xV/totalVel, -yV/totalVel, -zV/totalVel, knockBack, false);
-		}
-		
-		//Update bullet location
-		x += xV*t*t2*dt;
-		y += yV*t*t2*dt;
-		z += zV*t*t2*dt;
-		
-		//Bullet hits something.
-		if (t2 < 1 || t < 1)
-		{
-			delete();
 			
-			if (entityToDamage == null)
-				explodeOnWall();
-			else if (!(entityToDamage == w.getPlayer()))
-				explodeOnEntity();
+			//Bullet hits entity.
+			if (entityToDamage != null)
+			{
+				double totalVel = Math.sqrt(xV*xV + yV*yV + zV*zV);
+				entityToDamage.applyDamage(damage, -xV/totalVel, -yV/totalVel, -zV/totalVel, knockBack, false);
+			}
+			
+			//Update bullet location
+			x += xV*t*t2*dt;
+			y += yV*t*t2*dt;
+			z += zV*t*t2*dt;
+			
+			//Bullet hits something.
+			if (t2 < 1 || t < 1)
+			{
+				delete();
+				
+				if (entityToDamage == null)
+					explodeOnWall();
+				else if (!(entityToDamage == w.getPlayer()))
+					explodeOnEntity();
+			}
 		}
 	}
 	
@@ -122,7 +125,6 @@ public class EntityBullet extends Entity
 	private void explodeOnWall()
 	{
 		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-		blast.init();
 		blast.setPosition(x, y, z);
 		blast.setRadius(radius);
 		blast.setFinalRadius(radius*4);
@@ -136,7 +138,6 @@ public class EntityBullet extends Entity
 	private void explodeOnEntity()
 	{
 		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-		blast.init();
 		blast.setPosition(x, y, z);
 		blast.setRadius(radius);
 		blast.setFinalRadius(radius*10);

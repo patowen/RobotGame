@@ -118,7 +118,6 @@ public class SpawningWave
 						}
 						
 						EntityExplosion spark = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
-						spark.init();
 						spark.setColor(0, 1, 1);
 						spark.setDuration(0.5);
 						spark.setRadius(2+1.5*radius);

@@ -104,6 +104,22 @@ public class Server extends Network
 		return 0;
 	}
 	
+	public void sendEntityDataNormal(NetworkPacket data)
+	{
+		for (int i=0; i<numPlayers; i++)
+		{
+			sendNormal(data, clientIP[i], clientPort[i]);
+		}
+	}
+	
+	public void sendEntityDataGuaranteed(NetworkPacket data)
+	{
+		for (int i=0; i<numPlayers; i++)
+		{
+			sendGuaranteed(data, clientIP[i], clientPort[i]);
+		}
+	}
+	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
 		NetworkPacket ret = new NetworkPacket(256);
@@ -126,12 +142,12 @@ public class Server extends Network
 					if (numPlayers < capacity)
 					{
 						//Granted
-						ret.addBytes(0, 1, 1, 0);
-						sendGuaranteed(ret, sender, senderPort);
 						clientIP[numPlayers] = sender;
 						clientPort[numPlayers] = senderPort;
 						clientName[numPlayers] = packet.getString();
 						clientID[numPlayers] = getNextID();
+						ret.addBytes(0, 1, 1, clientID[numPlayers]);
+						sendGuaranteed(ret, sender, senderPort);
 						numPlayers++;
 					}
 					else
@@ -145,7 +161,6 @@ public class Server extends Network
 		}
 		else if (signalType == 3) //Entity information
 		{
-			handleEntities(packet, sender, senderPort);
 		}
 	}
 }

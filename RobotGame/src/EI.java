@@ -19,10 +19,6 @@ public class EI
 	public static final int EntityPlasmaBolt = 0x0103;
 	public static final int EntityRocket = 0x0104;
 	
-	public static final int PlasmaRifle = 0x0200;
-	public static final int PlasmaSword = 0x0201;
-	public static final int PlasmaLauncher = 0x0202;
-	
 	private static Entity constructEntity(Controller c, World world, int type)
 	{
 		switch (type)
@@ -40,10 +36,6 @@ public class EI
 		case EntityFade: return new EntityFade(c, world);
 		case EntityPlasmaBolt: return new EntityPlasmaBolt(c, world);
 		case EntityRocket: return new EntityRocket(c, world);
-		
-		case PlasmaRifle: return new PlasmaRifle(c, world);
-		case PlasmaSword: return new PlasmaSword(c, world);
-		case PlasmaLauncher: return new PlasmaLauncher(c, world);
 		}
 		
 		return null;
@@ -59,7 +51,7 @@ public class EI
 	{
 		Entity e = constructEntity(c, world, type);
 		if (e != null)
-			e.init();
+			e.init(type);
 		return e;
 	}
 	

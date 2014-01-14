@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.media.opengl.GL2;
@@ -27,6 +28,8 @@ public class World
 	private ArrayList<Entity> entities;
 	private ArrayList<Entity> deletionQueue;
 	private ArrayList<Entity> creationQueue;
+	
+	private HashMap<Identification, Entity> entityMap;
 	private int nextEntityID;
 	
 	//Death
@@ -82,6 +85,8 @@ public class World
 		entities = new ArrayList<Entity>();
 		deletionQueue = new ArrayList<Entity>();
 		creationQueue = new ArrayList<Entity>();
+		
+		entityMap = new HashMap<Identification, Entity>(1024);
 		nextEntityID = 0;
 		
 		gravity = 10;
@@ -129,6 +134,8 @@ public class World
 		entities.clear();
 		deletionQueue.clear();
 		creationQueue.clear();
+		entityMap.clear();
+		nextEntityID = 0;
 		
 		deathDuration = 0;
 		
@@ -162,6 +169,11 @@ public class World
 	public ArrayList<Entity> getEntities()
 	{
 		return entities;
+	}
+	
+	public Entity getEntity(int owner, int id)
+	{
+		return entityMap.get(new Identification(owner, id));
 	}
 	
 	/**
@@ -231,16 +243,26 @@ public class World
 		for (Entity e : entities)
 		{
 			e.step(dt);
-		}		
+		}
+		
+		if (c.isMultiplayer())
+		{
+			for (Entity e : entities)
+			{
+				e.stepSendSignals();
+			}
+		}
 		
 		for (Entity e : deletionQueue)
 		{
 			entities.remove(e);
+			entityMap.remove(new Identification(e.getOwner(), e.getID()));
 		}
 		
 		for (Entity e : creationQueue)
 		{
 			entities.add(e);
+			entityMap.put(new Identification(e.getOwner(), e.getID()), e);
 		}
 		
 		deletionQueue.clear();
@@ -359,12 +381,14 @@ public class World
 		//Draw entities
 		for (Entity e : entities)
 		{
-			e.draw(gl);
+			if (!e.isGhost())
+				e.draw(gl);
 		}
 		
 		for (Entity e : entities)
 		{
-			e.draw2(gl);
+			if (!e.isGhost())
+				e.draw2(gl);
 		}
 	}
 	
@@ -392,6 +416,31 @@ public class World
 	public Collision getCollision()
 	{
 		return collision;
+	}
+	
+	private class Identification
+	{
+		public final int owner;
+		public final int id;
+		public final int hashCode;
+		
+		public Identification(int owner, int id)
+		{
+			this.owner = owner;
+			this.id = id;
+			hashCode = owner*29 + id;
+		}
+		
+		public int hashCode()
+		{
+			return hashCode;
+		}
+		
+		public boolean equals(Object o)
+		{
+			Identification i = (Identification)o;
+			return (i.owner == owner && i.id == id);
+		}
 	}
 	
 	//Handles parsing the map data file for level creation.
@@ -439,6 +488,7 @@ public class World
 							e.initializeExtraData(i, getDouble());
 						
 						entities.add(e);
+						entityMap.put(new Identification(e.getOwner(), e.getID()), e);
 					}
 				}
 				

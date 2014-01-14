@@ -81,6 +81,16 @@ public class Client extends Network
 		return computerID;
 	}
 	
+	public void sendEntityDataNormal(NetworkPacket data)
+	{
+		sendNormal(data);
+	}
+	
+	public void sendEntityDataGuaranteed(NetworkPacket data)
+	{
+		sendGuaranteed(data);
+	}
+	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
 //		NetworkPacket ret = new NetworkPacket(256);
@@ -123,7 +133,44 @@ public class Client extends Network
 		}
 		else if (signalType == 3) //Entity information
 		{
-			handleEntities(packet, sender, senderPort);
+			byte subtype = packet.getByte();
+			if (subtype == 0)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					int type = packet.getInt();
+					int owner = packet.getInt();
+					int id = packet.getInt();
+					Entity e = world.getEntity(owner, id);
+					if (e == null)
+					{
+						Entity entity = c.createEntity(world, type, owner, id);
+						world.create(entity);
+					}
+				}
+//				world.create();
+			}
+			else if (subtype == 1)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					Entity e = world.getEntity(packet.getInt(), packet.getInt());
+					if (e != null)
+						world.delete(e);
+				}
+			}
+			else if (subtype == 2)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					Entity e = world.getEntity(packet.getInt(), packet.getInt());
+					if (e != null)
+						e.signalReceived(packet);
+				}
+			}
 		}
 	}
 }
