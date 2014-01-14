@@ -37,6 +37,27 @@ public class EntityBullet extends Entity
 		color[3] = 1;
 	}
 	
+	protected void readState(NetworkPacket data)
+	{
+		super.readState(data);
+		
+		radius = data.getDouble();
+		radius2 = data.getDouble();
+		damage = data.getDouble();
+		knockBack = data.getDouble();
+		color[0] = data.getFloat();
+		color[1] = data.getFloat();
+		color[2] = data.getFloat();
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		super.writeState(data);
+		
+		data.addDoubles(radius, radius2, damage, knockBack);
+		data.addFloats(color[0], color[1], color[2]);
+	}
+	
 	/**
 	 * Sets the owner of the bullet, which determines which entity cannot
 	 * be damaged by the bullet.

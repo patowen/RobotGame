@@ -27,6 +27,27 @@ public class EntityExplosion extends Entity
 		color[3] = 1;
 	}
 	
+	protected void readState(NetworkPacket data)
+	{
+		super.readState(data);
+		
+		radius = data.getDouble();
+		finalRadius = data.getDouble();
+		duration = data.getDouble();
+		radiusStep = data.getDouble();
+		color[0] = data.getFloat();
+		color[1] = data.getFloat();
+		color[2] = data.getFloat();
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		super.writeState(data);
+		
+		data.addDoubles(radius, finalRadius, duration, radiusStep);
+		data.addFloats(color[0], color[1], color[2]);
+	}
+	
 	/**
 	 * Sets the current radius of the explosion
 	 */

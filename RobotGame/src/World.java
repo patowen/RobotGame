@@ -2,7 +2,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.media.opengl.GL2;
 
@@ -30,6 +32,8 @@ public class World
 	private ArrayList<Entity> creationQueue;
 	
 	private HashMap<Identification, Entity> entityMap;
+	private HashSet<Identification> antiEntitySet;
+	private ArrayBlockingQueue<Identification> antiEntityQueue;
 	private int nextEntityID;
 	
 	//Death
@@ -87,6 +91,8 @@ public class World
 		creationQueue = new ArrayList<Entity>();
 		
 		entityMap = new HashMap<Identification, Entity>(1024);
+		antiEntitySet = new HashSet<Identification>(64);
+		antiEntityQueue = new ArrayBlockingQueue<Identification>(64);
 		nextEntityID = 0;
 		
 		gravity = 10;
@@ -130,6 +136,11 @@ public class World
 		tX1 = new ArrayList<Double>(); tY1 = new ArrayList<Double>();
 		tX2 = new ArrayList<Double>(); tY2 = new ArrayList<Double>();
 		tX3 = new ArrayList<Double>(); tY3 = new ArrayList<Double>();
+		
+		for (Entity e : entities)
+		{
+			e.delete();
+		}
 		
 		entities.clear();
 		deletionQueue.clear();
@@ -190,7 +201,33 @@ public class World
 	 */
 	public void delete(Entity e)
 	{
+		Identification identify = new Identification(e.getOwner(), e.getID());
+		
 		deletionQueue.add(e);
+		entityMap.remove(identify);
+	}
+	
+	public void delete(int owner, int id)
+	{
+		Identification identify = new Identification(owner, id);
+		
+		Entity e = getEntity(owner, id);
+		if (e != null)
+		{
+			deletionQueue.add(e);
+			entityMap.remove(identify);
+		}
+		
+		antiEntitySet.add(identify);
+	}
+	
+	public void enqueueTimedIdentification(int owner, int id)
+	{
+		if (antiEntityQueue.remainingCapacity() == 0)
+		{
+			antiEntitySet.remove(antiEntityQueue.remove());
+		}
+		antiEntityQueue.add(new Identification(owner, id));
 	}
 	
 	/**
@@ -199,7 +236,12 @@ public class World
 	 */
 	public void create(Entity e)
 	{
-		creationQueue.add(e);
+		Identification identify = new Identification(e.getOwner(), e.getID());
+		if (!antiEntitySet.contains(identify))
+		{
+			creationQueue.add(e);
+			entityMap.put(new Identification(e.getOwner(), e.getID()), e);
+		}
 	}
 	
 	public int generateEntityID()
@@ -236,7 +278,7 @@ public class World
 	 * @param dt Time step in seconds.
 	 */
 	public void step(double dt)
-	{
+	{		
 		handleSpawning(dt);
 		handleDeath(dt);
 		
@@ -245,7 +287,7 @@ public class World
 			e.step(dt);
 		}
 		
-		if (c.isMultiplayer())
+		if (c.isMultiplayer() && c.isServer())
 		{
 			for (Entity e : entities)
 			{
@@ -256,13 +298,12 @@ public class World
 		for (Entity e : deletionQueue)
 		{
 			entities.remove(e);
-			entityMap.remove(new Identification(e.getOwner(), e.getID()));
 		}
 		
 		for (Entity e : creationQueue)
 		{
-			entities.add(e);
-			entityMap.put(new Identification(e.getOwner(), e.getID()), e);
+			if (!antiEntitySet.contains(new Identification(e.owner, e.id)))
+				entities.add(e);
 		}
 		
 		deletionQueue.clear();

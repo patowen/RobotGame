@@ -42,7 +42,10 @@ public abstract class Network
 		ArrayList<Packet> packets = getPackets();
 		for (Packet p : packets)
 		{
-			interpretSignal(p.packet, p.sender, p.senderPort);
+			if (p.guaranteed)
+				saveSignal(p.packet, p.sender, p.senderPort, p.signalID);
+			else
+				interpretSignal(p.packet, p.sender, p.senderPort);
 		}
 	}
 	
@@ -63,7 +66,7 @@ public abstract class Network
 	
 	public void sendGuaranteed(NetworkPacket data, InetAddress ip, int port)
 	{
-		c.getGuaranteedSender().addGuaranteedSignal(data, ip, port);
+		c.getGuaranteedSender().addGuaranteedSignal(this, data, ip, port);
 	}
 	
 	public void sendNormal(NetworkPacket data, InetAddress ip, int port)
@@ -71,7 +74,6 @@ public abstract class Network
 		NetworkPacket packet = new NetworkPacket(data.length()+1);
 		packet.addByte(0);
 		packet.append(data);
-		if (c.isServer())
 		send(packet, ip, port);
 	}
 	
@@ -80,9 +82,14 @@ public abstract class Network
 		try
 		{
 			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
+			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
 		}
 		catch (IOException e) {} //Just act like a failed signal send
 	}
+	
+	public abstract long createSignalID(InetAddress ip, int port);
+	
+	public abstract void saveSignal(NetworkPacket packet, InetAddress sender, int senderPort, long signalID);
 	
 	public abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
 	
@@ -93,16 +100,17 @@ public abstract class Network
 		int flag = packet.getByte();
 		if (flag == 0)
 		{
-			addPacket(packet, sender, senderPort);
+			addPacket(packet, sender, senderPort, 0, false);
 //			interpretSignal(packet, sender, senderPort);
 		}
 		else if (flag == 1)
 		{
 			NetworkPacket relayPacket = new NetworkPacket(9);
 			relayPacket.addByte(2);
-			relayPacket.addLong(packet.getLong());
+			long signalID = packet.getLong();
+			relayPacket.addLong(signalID);
 			send(relayPacket, sender, senderPort);
-			addPacket(packet, sender, senderPort);
+			addPacket(packet, sender, senderPort, signalID, true);
 			
 			//interpretSignal(packet, sender, senderPort); //TODO Temporary. Ordering should matter.
 		}
@@ -112,9 +120,9 @@ public abstract class Network
 		}
 	}
 	
-	private synchronized void addPacket(NetworkPacket packet, InetAddress sender, int senderPort)
+	private synchronized void addPacket(NetworkPacket packet, InetAddress sender, int senderPort, long signalID, boolean guaranteed)
 	{
-		packets.add(new Packet(packet, sender, senderPort));
+		packets.add(new Packet(packet, sender, senderPort, signalID, guaranteed));
 	}
 	
 	private synchronized ArrayList<Packet> getPackets()
@@ -134,12 +142,16 @@ public abstract class Network
 		public final NetworkPacket packet;
 		public final InetAddress sender;
 		public final int senderPort;
+		public final long signalID;
+		public final boolean guaranteed;
 		
-		public Packet(NetworkPacket packet, InetAddress sender, int senderPort)
+		public Packet(NetworkPacket packet, InetAddress sender, int senderPort, long signalID, boolean guaranteed)
 		{
 			this.packet = packet;
 			this.sender = sender;
 			this.senderPort = senderPort;
+			this.signalID = signalID;
+			this.guaranteed = guaranteed;
 		}
 	}
 	

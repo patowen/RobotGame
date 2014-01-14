@@ -81,7 +81,8 @@ public class Weapon
 	 */
 	public void step(double dt)
 	{
-		handleFiring(dt);
+		if (player.isLocal())
+			handleFiring(dt);
 	}
 	
 	//Recharges the energy of the weapon. This is handled entirely by the Player class

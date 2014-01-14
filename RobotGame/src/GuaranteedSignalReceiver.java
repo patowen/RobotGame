@@ -6,59 +6,53 @@ public class GuaranteedSignalReceiver
 {
 	private Controller c;
 	
-	public GuaranteedSignalReceiver(Controller controller)
+	private PriorityQueue<PendingSignal> receivedSignals;
+	private InetAddress sourceIP;
+	private int sourcePort;
+	
+	private long currentSignalID;
+	
+	public GuaranteedSignalReceiver(Controller controller, InetAddress ip, int port)
 	{
 		c = controller;
+		receivedSignals = new PriorityQueue<PendingSignal>(256);
+		
+		sourceIP = ip;
+		sourcePort = port;
+		
+		currentSignalID = 0;
 	}
 	
-	public void reset()
+	public void addPendingSignal(long signalID, NetworkPacket data)
 	{
-		//TODO reset
+		PendingSignal signal = new PendingSignal();
+		signal.signalID = signalID;
+		signal.setData(data);
+		receivedSignals.add(signal);
 	}
 	
-	private class Source
+	public void step(double dt)
 	{
-		private PriorityQueue<PendingSignal> receivedSignals;
-		private InetAddress sourceIP;
-		private int sourcePort;
-		
-		private long currentSignalID;
-		
-		public Source(InetAddress ip, int port)
+		while (true)
 		{
-			receivedSignals = new PriorityQueue<PendingSignal>(256);
-			
-			sourceIP = ip;
-			sourcePort = port;
-			
-			currentSignalID = 0;
-		}
-		
-		public void step(double dt)
-		{
-			while (true)
+			PendingSignal signal = receivedSignals.peek();
+			if (signal == null)
+				break;
+			else if (signal.signalID < currentSignalID)
+				receivedSignals.remove();
+			else if (signal.signalID == currentSignalID)
 			{
-				PendingSignal signal = receivedSignals.peek();
-				if (signal == null)
-					break;
-				else if (signal.signalID < currentSignalID)
-					receivedSignals.remove();
-				else if (signal.signalID == currentSignalID)
-				{
-					receivedSignals.remove();
-					c.getNetwork().interpretSignal(signal.data, signal.ip, signal.port);
-					currentSignalID++;
-				}
-				else
-					break;
+				receivedSignals.remove();
+				c.getNetwork().interpretSignal(signal.data, sourceIP, sourcePort);
+				currentSignalID++;
 			}
+			else
+				break;
 		}
 	}
 	
 	private class PendingSignal implements Comparable<PendingSignal>
 	{
-		public InetAddress ip;
-		public int port;
 		public long signalID;
 		private NetworkPacket data;
 		

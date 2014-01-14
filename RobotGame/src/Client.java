@@ -11,6 +11,8 @@ import java.net.UnknownHostException;
 public class Client extends Network
 {
 	private int computerID;
+	private long currentSignalID;
+	private GuaranteedSignalReceiver guaranteedReceiver;
 	
 	private InetAddress serverIP;
 	private int serverPort;
@@ -32,6 +34,8 @@ public class Client extends Network
 		}
 		serverPort = 4445;
 		connected = false;
+		currentSignalID = 0;
+		guaranteedReceiver = new GuaranteedSignalReceiver(c, serverIP, serverPort);
 		
 		try
 		{
@@ -44,6 +48,12 @@ public class Client extends Network
 		}
 		
 		startThread();
+	}
+	
+	public void step(double dt)
+	{
+		super.step(dt);
+		guaranteedReceiver.step(dt);
 	}
 	
 	public boolean isConnected()
@@ -63,7 +73,7 @@ public class Client extends Network
 		NetworkPacket packet = new NetworkPacket(256);
 		packet.addBytes(1, 1);
 		packet.addString("SuperLala");
-		sendGuaranteed(packet);
+		sendNormal(packet);
 	}
 	
 	public void sendGuaranteed(NetworkPacket packet)
@@ -81,14 +91,24 @@ public class Client extends Network
 		return computerID;
 	}
 	
-	public void sendEntityDataNormal(NetworkPacket data)
+//	public void sendEntityDataNormal(NetworkPacket data)
+//	{
+//		sendNormal(data);
+//	}
+//	
+//	public void sendEntityDataGuaranteed(NetworkPacket data)
+//	{
+//		sendGuaranteed(data);
+//	}
+	
+	public long createSignalID(InetAddress ip, int port)
 	{
-		sendNormal(data);
+		return currentSignalID++;
 	}
 	
-	public void sendEntityDataGuaranteed(NetworkPacket data)
+	public void saveSignal(NetworkPacket packet, InetAddress sender, int senderPort, long signalID)
 	{
-		sendGuaranteed(data);
+		guaranteedReceiver.addPendingSignal(signalID, packet);
 	}
 	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
@@ -136,6 +156,31 @@ public class Client extends Network
 			byte subtype = packet.getByte();
 			if (subtype == 0)
 			{
+//				World world = c.getCurrentLevel();
+//				if (world != null)
+//				{
+//					int type = packet.getInt();
+//					int owner = packet.getInt();
+//					int id = packet.getInt();
+//					Entity e = world.getEntity(owner, id);
+//					if (e == null)
+//					{
+//						Entity entity = c.createEntity(world, type, owner, id);
+//						world.create(entity);
+//					}
+//				}
+//				world.create();
+			}
+			else if (subtype == 1)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					world.delete(packet.getInt(), packet.getInt());
+				}
+			}
+			else if (subtype == 2)
+			{
 				World world = c.getCurrentLevel();
 				if (world != null)
 				{
@@ -145,30 +190,10 @@ public class Client extends Network
 					Entity e = world.getEntity(owner, id);
 					if (e == null)
 					{
-						Entity entity = c.createEntity(world, type, owner, id);
-						world.create(entity);
+						e = c.createEntity(world, type, owner, id);
+						world.create(e);
 					}
-				}
-//				world.create();
-			}
-			else if (subtype == 1)
-			{
-				World world = c.getCurrentLevel();
-				if (world != null)
-				{
-					Entity e = world.getEntity(packet.getInt(), packet.getInt());
-					if (e != null)
-						world.delete(e);
-				}
-			}
-			else if (subtype == 2)
-			{
-				World world = c.getCurrentLevel();
-				if (world != null)
-				{
-					Entity e = world.getEntity(packet.getInt(), packet.getInt());
-					if (e != null)
-						e.signalReceived(packet);
+					e.signalReceived(packet);
 				}
 			}
 		}

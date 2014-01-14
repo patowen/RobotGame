@@ -10,6 +10,8 @@ public class Entity
 	
 	protected boolean isLocal;
 	protected boolean isActive;
+	
+	protected int type; //The class of the entity.
 	protected int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
 	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
@@ -40,24 +42,26 @@ public class Entity
 		isLocal = true;
 		isActive = true;
 		
+		this.type = type;
 		if (c.isMultiplayer())
 			owner = c.getNetwork().getComputerID();
 		else
 			owner = 0;
 		id = w.generateEntityID();
 		
-		if (c.isMultiplayer() && c.isServer())
-		{
-			NetworkPacket data = new NetworkPacket(256);
-			data.addBytes(3, 0);
-			data.addInts(type, owner, id);
-			c.getServer().sendEntityDataGuaranteed(data);
-		}
+//		if (c.isMultiplayer() && c.isServer())
+//		{
+//			NetworkPacket data = new NetworkPacket(256);
+//			data.addBytes(3, 0);
+//			data.addInts(type, owner, id);
+//			c.getServer().sendEntityDataGuaranteed(data);
+//		}
 	}
 	
-	public void init(int owner, int id)
+	public void init(int type, int owner, int id)
 	{		
 		isActive = false;
+		this.type = type;
 		this.owner = owner;
 		this.id = id;
 	}
@@ -103,12 +107,30 @@ public class Entity
 		isActive = active;
 	}
 	
+	public boolean isLocal()
+	{
+		return isLocal;
+	}
+	
 	/**
 	 * Returns whether this entity should be ignored by other entities.
 	 */
 	public boolean isGhost()
 	{
 		return !isActive;
+	}
+	
+	protected void readState(NetworkPacket data)
+	{
+		double[] p = data.getDoubles(3);
+		double[] v = data.getDoubles(3);
+		setPosition(p[0], p[1], p[2]);
+		setVelocity(v[0], v[1], v[2]);
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		data.addDoubles(x, y, z, xV, yV, zV);
 	}
 	
 	/**
@@ -119,10 +141,7 @@ public class Entity
 	 */
 	public void signalReceived(NetworkPacket data)
 	{
-		double[] p = data.getDoubles(3);
-		double[] v = data.getDoubles(3);
-		setPosition(p[0], p[1], p[2]);
-		setVelocity(v[0], v[1], v[2]);
+		readState(data);
 		isActive = true;
 	}
 	
@@ -130,8 +149,8 @@ public class Entity
 	{
 		NetworkPacket data = new NetworkPacket(256);
 		data.addBytes(3, 2);
-		data.addInts(owner, id);
-		data.addDoubles(x, y, z, xV, yV, zV);
+		data.addInts(type, owner, id);
+		writeState(data);
 		if (c.isServer())
 			c.getServer().sendEntityDataNormal(data);
 	}

@@ -65,7 +65,7 @@ public class EI
 	{
 		Entity e = constructEntity(c, world, type);
 		if (e != null)
-			e.init(owner, id);
+			e.init(type, owner, id);
 		return e;
 	}
 }

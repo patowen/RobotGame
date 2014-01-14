@@ -14,6 +14,10 @@ public class Server extends Network
 	private int[] clientPort;
 	private String[] clientName;
 	private int[] clientID;
+	private long[] currentSignalID;
+	private GuaranteedSignalReceiver[] guaranteedReceiver;
+	
+	private boolean connected;
 	
 	public Server(Controller controller, int cap)
 	{
@@ -26,6 +30,9 @@ public class Server extends Network
 		clientPort = new int[capacity];
 		clientName = new String[capacity];
 		clientID = new int[capacity];
+		currentSignalID = new long[capacity];
+		guaranteedReceiver = new GuaranteedSignalReceiver[capacity];
+		connected = true;
 		
 		try
 		{
@@ -40,6 +47,15 @@ public class Server extends Network
 		startThread();
 	}
 	
+	public void step(double dt)
+	{
+		super.step(dt);
+		for (int i=0; i<numPlayers; i++)
+		{
+			guaranteedReceiver[i].step(dt);
+		}
+	}
+	
 	public void closeServer()
 	{
 		NetworkPacket packet = new NetworkPacket(2);
@@ -48,16 +64,18 @@ public class Server extends Network
 		{
 			sendGuaranteed(packet, clientIP[i], clientPort[i]);
 		}
+		connected = false;
 	}
 	
 	//Returns the next available Client ID to apply
 	private int getNextID()
 	{
-		int currentID;
+		int currentID = 1;
 		boolean idFound = false, idTaken = false;
 		
-		for (currentID=1; !idFound; currentID++)
+		while (!idFound)
 		{
+			idTaken = false;
 			for (int j=0; j<numPlayers && !idTaken; j++)
 			{
 				if (clientID[j] == currentID)
@@ -65,6 +83,8 @@ public class Server extends Network
 			}
 			if (!idTaken)
 				idFound = true;
+			else
+				currentID++;
 		}
 		
 		return currentID;
@@ -94,6 +114,8 @@ public class Server extends Network
 			clientPort[i-1] = clientPort[i];
 			clientName[i-1] = clientName[i];
 			clientID[i-1] = clientID[i];
+			currentSignalID[i-1] = currentSignalID[i];
+			guaranteedReceiver[i-1] = guaranteedReceiver[i];
 		}
 		
 		numPlayers--;
@@ -120,8 +142,27 @@ public class Server extends Network
 		}
 	}
 	
+	public long createSignalID(InetAddress ip, int port)
+	{
+		int client = getClient(ip, port);
+		if (client == -1)
+			return 0;
+		return currentSignalID[client]++;
+	}
+	
+	public void saveSignal(NetworkPacket packet, InetAddress sender, int senderPort, long signalID)
+	{
+		int client = getClient(sender, senderPort);
+		if (client == -1)
+			System.out.println("trouble");
+		guaranteedReceiver[client].addPendingSignal(signalID, packet);
+	}
+	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
+		if (!connected)
+			return;
+		
 		NetworkPacket ret = new NetworkPacket(256);
 		
 		byte signalType = packet.getByte();
@@ -137,7 +178,12 @@ public class Server extends Network
 			{
 				//Check if already logged in
 				int id = getClient(sender, senderPort);
-				if (id == -1)
+				if (id != -1)
+				{
+					ret.addBytes(0, 1, 1, clientID[id]);
+					sendGuaranteed(ret, sender, senderPort);
+				}
+				else
 				{
 					if (numPlayers < capacity)
 					{
@@ -146,6 +192,8 @@ public class Server extends Network
 						clientPort[numPlayers] = senderPort;
 						clientName[numPlayers] = packet.getString();
 						clientID[numPlayers] = getNextID();
+						currentSignalID[numPlayers] = 0;
+						guaranteedReceiver[numPlayers] = new GuaranteedSignalReceiver(c, sender, senderPort);
 						ret.addBytes(0, 1, 1, clientID[numPlayers]);
 						sendGuaranteed(ret, sender, senderPort);
 						numPlayers++;

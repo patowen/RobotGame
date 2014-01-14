@@ -65,7 +65,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 		
 		charge -= dt;
 		
-		if (charge < 0 && noFriendlyFire())
+		if (isLocal && charge < 0 && noFriendlyFire())
 		{
 			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),

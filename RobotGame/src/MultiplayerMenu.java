@@ -47,9 +47,6 @@ public class MultiplayerMenu extends Menu
 		}
 		else if (item == joinButton)
 		{
-			c.startClient();
-			Client client = c.getClient();
-			client.login();
 			c.setCurrentMenu(new ConnectingMenu(c));
 		}
 		else if (item == backButton)

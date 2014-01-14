@@ -30,7 +30,6 @@ public class Controller
 	private boolean isMultiplayer;
 	private boolean isServer;
 	private GuaranteedSignalSender guaranteedSender;
-	private GuaranteedSignalReceiver guaranteedReceiver;
 	private Network network;
 	private Server server;
 	private Client client;
@@ -88,7 +87,6 @@ public class Controller
 		
 		isMultiplayer = false;
 		guaranteedSender = new GuaranteedSignalSender(this);
-		guaranteedReceiver = new GuaranteedSignalReceiver(this);
 		
 		currentMenu = new MainMenu(this);
 		paused = false;
@@ -213,7 +211,6 @@ public class Controller
 			server = null;
 			client = null;
 			guaranteedSender.reset();
-			guaranteedReceiver.reset();
 		}
 	}
 	
@@ -231,14 +228,6 @@ public class Controller
 	public GuaranteedSignalSender getGuaranteedSender()
 	{
 		return guaranteedSender;
-	}
-	
-	/**
-	 * Returns the GuaranteedSignalReceiver object
-	 */
-	public GuaranteedSignalReceiver getGuaranteedReceiver()
-	{
-		return guaranteedReceiver;
 	}
 	
 	/**

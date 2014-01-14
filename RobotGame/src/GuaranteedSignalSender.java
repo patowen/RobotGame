@@ -16,7 +16,6 @@ public class GuaranteedSignalSender
 	private final long timeout; //in milliseconds
 	
 	private double pokesRemaining;
-	private long currentSignalID;
 	
 	public GuaranteedSignalSender(Controller controller)
 	{
@@ -31,7 +30,6 @@ public class GuaranteedSignalSender
 		timeout = 10000;
 		
 		pokesRemaining = 0;
-		currentSignalID = 0;
 	}
 	
 	public void reset()
@@ -41,7 +39,6 @@ public class GuaranteedSignalSender
 		currentSignal = null;
 		numSignals = 0;
 		pokesRemaining = 0;
-		currentSignalID = 0;
 	}
 	
 	private void send(NetworkPacket data, InetAddress ip, int port)
@@ -51,16 +48,11 @@ public class GuaranteedSignalSender
 			net.send(data, ip, port);
 	}
 	
-	public void addGuaranteedSignal(NetworkPacket data, InetAddress ip, int port)
+	public void addGuaranteedSignal(Network network, NetworkPacket data, InetAddress ip, int port)
 	{
 		//This creates the beginning of the packet. It needs to be completed by the
 		//sender of the guaranteed signal
 		long timestamp = System.currentTimeMillis();
-		
-		NetworkPacket packet = new NetworkPacket(data.length() + 9);
-		packet.addByte(1);
-		packet.addLong(currentSignalID);
-		packet.append(data);
 		
 		Node node = new Node();
 		PendingSignal signal = new PendingSignal();
@@ -68,12 +60,15 @@ public class GuaranteedSignalSender
 		signal.ip = ip;
 		signal.timestamp = timestamp;
 		signal.port = port;
-		signal.signalID = currentSignalID;
+		signal.signalID = network.createSignalID(ip, port);
 		node.signal = signal;
 		
-		addPendingSignal(node);
+		NetworkPacket packet = new NetworkPacket(data.length() + 9);
+		packet.addByte(1);
+		packet.addLong(signal.signalID);
+		packet.append(data);
 		
-		currentSignalID++;
+		addPendingSignal(node);
 		
 		send(packet, ip, port);
 	}

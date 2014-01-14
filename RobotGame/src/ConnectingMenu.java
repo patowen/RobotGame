@@ -8,6 +8,9 @@ public class ConnectingMenu extends Menu
 {
 	private MenuButton cancelButton;
 	
+	private double pokesPerSecond, pokesRemaining;
+	private double timeout, timeRemaining;
+	
 	/**
 	 * Creates a new InstructionMenu object
 	 */
@@ -15,6 +18,15 @@ public class ConnectingMenu extends Menu
 	{
 		super(c);
 		loadText();
+		
+		pokesPerSecond = 5;
+		timeout = 10;
+		
+		pokesRemaining = 0;
+		timeRemaining = timeout;
+		
+		c.startClient();
+		c.getClient().login();
 	}
 	
 	/**
@@ -32,12 +44,25 @@ public class ConnectingMenu extends Menu
 	{
 		super.step(dt);
 		
-		if (c.getClient() == null)
-			return;
+		pokesRemaining += pokesPerSecond*dt;
+		timeRemaining -= dt;
+		
+		while (pokesRemaining > 1)
+		{
+			c.getClient().login();
+			pokesRemaining -= 1;
+		}
 		
 		if (c.getClient().isConnected())
 		{
 			c.setCurrentLevel("arena.txt");
+			return;
+		}
+		
+		if (timeRemaining <= 0)
+		{
+			c.disconnect();
+			c.setCurrentMenu(new DisconnectedMenu(c));
 			return;
 		}
 	}
