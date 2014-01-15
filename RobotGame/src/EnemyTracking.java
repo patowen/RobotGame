@@ -26,11 +26,11 @@ public class EnemyTracking extends Enemy implements Damageable
 	/**
 	 * Creates a new EnemyTurret.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EnemyTurret is placed.
+	 * @param world The world where the EnemyTurret is placed.
 	 */
-	public EnemyTracking(Controller controller, GameMap gameMap)
+	public EnemyTracking(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.5;
 		height = 0.8;
@@ -49,7 +49,7 @@ public class EnemyTracking extends Enemy implements Damageable
 		
 		charge = shotDelay;
 		
-		ai = new AITracking(c, map, this);
+		ai = new AITracking(c, w, this);
 		ai.setControls(5, 1, 3, 9, 6, 1, 1, 1, 1, 3, 1);
 		
 		hp = 2;
@@ -88,11 +88,11 @@ public class EnemyTracking extends Enemy implements Damageable
 	{
 		charge -= dt;
 		
-		if (map.getPlayer().isDead()) return;
+		if (w.getPlayer().isDead()) return;
 		
 		if (charge < 0 && noFriendlyFire())
 		{
-			EntityBullet bullet = new EntityBullet(c, map);
+			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
 			bullet.setPosition(x+xDir*shotDistance, y+yDir*shotDistance, z+zDir*shotDistance+shotHeight);
@@ -102,7 +102,7 @@ public class EnemyTracking extends Enemy implements Damageable
 			bullet.setOwner(this);
 			
 			c.getSoundHandler().playSound(0, x, y, z);
-			map.create(bullet);
+			w.create(bullet);
 			
 			charge = shotDelay;
 		}
@@ -118,7 +118,7 @@ public class EnemyTracking extends Enemy implements Damageable
 		 * Based on coordinate differences, find the horizontal and vertical directions from the turret to the player.
 		 * Modify the horizontal and vertical directions of the turret smoothly to face the player.
 		 */
-		Player player = map.getPlayer();
+		Player player = w.getPlayer();
 		if (player.isDead()) return;
 		double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()+player.getHeight()/2-z-height/2;
 		
@@ -156,11 +156,11 @@ public class EnemyTracking extends Enemy implements Damageable
 		double xd = range*Math.cos(horizontalDir)*Math.cos(verticalDir),
 				yd = range*Math.sin(horizontalDir)*Math.cos(verticalDir), zd = range*Math.sin(verticalDir);
 		
-		double t = map.getCollision().getBulletCollision(x, y, z+shotHeight, xd, yd, zd);
+		double t = w.getCollision().getBulletCollision(x, y, z+shotHeight, xd, yd, zd);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == this) continue;
 			if (!(entity instanceof Damageable) || entity == this) continue;
@@ -168,9 +168,7 @@ public class EnemyTracking extends Enemy implements Damageable
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius()+1, e.getHeight());
+			double tTest = w.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t, e);
 			
 			if (tTest < t2)
 			{

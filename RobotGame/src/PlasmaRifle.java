@@ -17,12 +17,12 @@ public class PlasmaRifle extends Weapon
 	/**
 	 * Constructs a PlasmaRifle object.
 	 * @param controller The Controller object.
-	 * @param gameMap The map where the player is.
+	 * @param world The world where the player is.
 	 * @param p The owner player.
 	 */
-	public PlasmaRifle(Controller controller, GameMap gameMap, Player p)
+	public PlasmaRifle(Controller controller, World world)
 	{
-		super(controller, gameMap, p);
+		super(controller, world);
 		name = "Plasma Rifle";
 		
 		shotDelay = 0.25;
@@ -31,24 +31,13 @@ public class PlasmaRifle extends Weapon
 		energyUse = 2;
 	}
 	
-	/**
-	 * Handles the operations of the weapon. This method should be called every frame.
-	 * @param dt
-	 */
-	public void step(double dt)
-	{
-		handleFiring(dt);
-	}
-	
-	
-	
 	//Handles firing the rifle. 
-	private void handleFiring(double dt)
+	protected void handleFiring(double dt)
 	{
 		//Fire if the mouse button is pressed.
 		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)
 		{
-			EntityBullet bullet = new EntityBullet(c, map);
+			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
 			
@@ -60,7 +49,7 @@ public class PlasmaRifle extends Weapon
 			
 			//t is to prevent bullets from spawning through walls.
 			
-			double t = map.getCollision().getBulletCollision(x, y, z, xDisp, yDisp, zDisp);
+			double t = w.getCollision().getBulletCollision(x, y, z, xDisp, yDisp, zDisp);
 			
 			if (t == 1)
 			{
@@ -75,7 +64,7 @@ public class PlasmaRifle extends Weapon
 				
 				bullet.setOwner(player);
 				
-				map.create(bullet);
+				w.create(bullet);
 				
 				charge = shotDelay;
 				

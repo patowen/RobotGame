@@ -8,7 +8,6 @@ import com.jogamp.opengl.util.gl2.GLUT;
  */
 public class EntityExplosion extends Entity
 {
-	private SoundHandler sound;
 	private double radius, finalRadius;
 	private double duration;
 	private double radiusStep;
@@ -16,10 +15,9 @@ public class EntityExplosion extends Entity
 	private float[] color;
 	
 	//Initializes a new EntityExplosion object
-	public EntityExplosion(Controller controller, GameMap gameMap)
+	public EntityExplosion(Controller controller, World world)
 	{
-		super(controller, gameMap);
-		sound = c.getSoundHandler();
+		super(controller, world);
 		radius = 0.0; 
 		finalRadius = 1.0;
 		duration = 5;
@@ -27,7 +25,27 @@ public class EntityExplosion extends Entity
 		
 		color = new float[4];
 		color[3] = 1;
+	}
+	
+	protected void readState(NetworkPacket data)
+	{
+		super.readState(data);
 		
+		radius = data.getDouble();
+		finalRadius = data.getDouble();
+		duration = data.getDouble();
+		radiusStep = data.getDouble();
+		color[0] = data.getFloat();
+		color[1] = data.getFloat();
+		color[2] = data.getFloat();
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		super.writeState(data);
+		
+		data.addDoubles(radius, finalRadius, duration, radiusStep);
+		data.addFloats(color[0], color[1], color[2]);
 	}
 	
 	/**
@@ -67,14 +85,6 @@ public class EntityExplosion extends Entity
 	public void setColor(float red, float green, float blue)
 	{
 		color[0] = red; color[1] = green; color[2] = blue;
-	}
-	
-	/**
-	 * Begins the explosion sound
-	 */
-	public void init()
-	{
-		sound.playSound(1, x, y, z);
 	}
 	
 	public void step(double dt)

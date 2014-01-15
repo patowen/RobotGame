@@ -26,11 +26,11 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 	/**
 	 * Creates a new EnemyTurret.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EnemyTurret is placed.
+	 * @param world The world where the EnemyTurret is placed.
 	 */
-	public EnemyTurret(Controller controller, GameMap gameMap)
+	public EnemyTurret(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.5;
 		height = 0.8;
@@ -65,9 +65,9 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 		
 		charge -= dt;
 		
-		if (charge < 0 && noFriendlyFire())
+		if (isLocal && charge < 0 && noFriendlyFire())
 		{
-			EntityBullet bullet = new EntityBullet(c, map);
+			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
 			bullet.setPosition(x+xDir*shotDistance, y+yDir*shotDistance, z+zDir*shotDistance+shotHeight);
@@ -77,12 +77,12 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 			bullet.setOwner(this);
 			
 			c.getSoundHandler().playSound(0, x, y, z);
-			map.create(bullet);
+			w.create(bullet);
 			
 			charge = shotDelay;
 		}
 		
-		Player player = map.getPlayer();
+		Player player = w.getPlayer();
 		double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()-z;
 		double xyDiff = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
 		
@@ -118,11 +118,11 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 		double xd = range*Math.cos(horizontalDir)*Math.cos(verticalDir),
 				yd = range*Math.sin(horizontalDir)*Math.cos(verticalDir), zd = range*Math.sin(verticalDir);
 		
-		double t = map.getCollision().getBulletCollision(x, y, z+shotHeight, xd, yd, zd);
+		double t = w.getCollision().getBulletCollision(x, y, z+shotHeight, xd, yd, zd);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == this) continue;
 			if (!(entity instanceof Damageable) || entity == this) continue;
@@ -130,9 +130,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = map.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius(), e.getHeight());
+			double tTest = w.getCollision().getEntityBulletCollision(x, y, z+shotHeight, xd*t, yd*t, zd*t, e);
 			
 			if (tTest < t2)
 			{

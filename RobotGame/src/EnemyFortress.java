@@ -29,11 +29,11 @@ public class EnemyFortress extends Enemy implements Damageable
 	/**
 	 * Creates a new EnemyFortress
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the EnemyFortress is placed.
+	 * @param world The world where the EnemyFortress is placed.
 	 */
-	public EnemyFortress(Controller controller, GameMap gameMap)
+	public EnemyFortress(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		
 		radius = 0.8;
 		height = 1.5;
@@ -51,7 +51,7 @@ public class EnemyFortress extends Enemy implements Damageable
 		
 		charge = shotDelay;
 		
-		ai = new AITracking(c, map, this);
+		ai = new AITracking(c, w, this);
 		ai.setControls(3, 1, 8, 9, 6, 1, 1, 1, 1, 3, 1);
 		
 		hp = 10;
@@ -91,7 +91,7 @@ public class EnemyFortress extends Enemy implements Damageable
 	{
 		charge -= dt;
 		
-		if (map.getPlayer().isDead()) return;
+		if (w.getPlayer().isDead()) return;
 		
 		if (charge < 0)
 		{
@@ -103,17 +103,17 @@ public class EnemyFortress extends Enemy implements Damageable
 			double xDir = Math.cos(horizontalDir+boost)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir+boost)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
 			
-			EntityRocket rocket = new EntityRocket(c, map);
+			EntityRocket rocket = (EntityRocket)c.createEntity(w, EI.EntityRocket);
 			
-			if (map.getCollision().getPlayerCollision
+			if (w.getCollision().getPlayerCollision
 					(x, y, z+height/2, xDir*shotDistance, yDir*shotDistance, zDir*shotDistance, rocket.getRadius(), rocket.getHeight()) == 1)
 			{
 				rocket.setPosition(x+xDir*shotDistance, y+yDir*shotDistance, z+zDir*shotDistance+shotHeight);
 				rocket.setVelocity(shotSpeed*xDir, shotSpeed*yDir, shotSpeed*zDir);
-				rocket.setTarget(map.getPlayer());
+				rocket.setTarget(w.getPlayer());
 				rocket.setOwner(this);
 				
-				map.create(rocket);
+				w.create(rocket);
 			}
 			
 			charge = shotDelay;
@@ -193,51 +193,51 @@ public class EnemyFortress extends Enemy implements Damageable
 	{
 		double xDir = Math.cos(horizontalDir) * 1, yDir = Math.sin(horizontalDir) * 1;
 		
-		EntityExplosion blast = new EntityExplosion(c, map);
+		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast.setColor(1f, .5f, 0f);
 		blast.setDuration(1);
 		blast.setRadius(radius/2);
 		blast.setFinalRadius(radius*2);
 		blast.setPosition(x, y, z+height/2);
-		map.create(blast);
+		w.create(blast);
 		
 		double startRadius = .3;
 		double endRadius = .75;
 		double duration = 1;
 		
-		EntityExplosion blast1 = new EntityExplosion(c, map);
+		EntityExplosion blast1 = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast1.setColor(.5f, .25f, 0f);
 		blast1.setDuration(duration);
 		blast1.setRadius(startRadius);
 		blast1.setFinalRadius(endRadius);
 		blast1.setPosition(x + xDir, y + yDir, z+height/2);
-		map.create(blast1);
+		w.create(blast1);
 		
-		EntityExplosion blast2 = new EntityExplosion(c, map);
+		EntityExplosion blast2 = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast2.setColor(.5f, .25f, 0f);
 		blast2.setDuration(duration);
 		blast2.setRadius(startRadius);
 		blast2.setFinalRadius(endRadius);
 		blast2.setPosition(x - xDir, y - yDir, z+height/2);
-		map.create(blast2);
+		w.create(blast2);
 		
 		xDir = Math.cos(horizontalDir + Math.PI/2) * .5; yDir = Math.sin(horizontalDir + Math.PI/2) * .5;
 		
 		
-		EntityExplosion blast3 = new EntityExplosion(c, map);
+		EntityExplosion blast3 = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast3.setColor(.5f, .25f, 0f);
 		blast3.setDuration(duration);
 		blast3.setRadius(startRadius);
 		blast3.setFinalRadius(endRadius);
 		blast3.setPosition(x + xDir, y + yDir, z+height/2);
-		map.create(blast3);
+		w.create(blast3);
 		
-		EntityExplosion blast4 = new EntityExplosion(c, map);
+		EntityExplosion blast4 = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast4.setColor(.5f, .25f, 0f);
 		blast4.setDuration(duration);
 		blast4.setRadius(startRadius);
 		blast4.setFinalRadius(endRadius);
 		blast4.setPosition(x - xDir, y - yDir, z+height/2);
-		map.create(blast4);
+		w.create(blast4);
 	}
 }

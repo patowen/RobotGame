@@ -21,7 +21,7 @@ public class Controller
 	private GLWindow win;
 	private FPSAnimator anim;
 	private HashMap<Integer, Texture> textureInfo;
-	private GameMap currentLevel;
+	private World currentLevel;
 	private int levelType; //0=no score, 1=score
 	
 	private InputHandler input;
@@ -29,6 +29,8 @@ public class Controller
 	
 	private boolean isMultiplayer;
 	private boolean isServer;
+	private GuaranteedSignalSender guaranteedSender;
+	private Network network;
 	private Server server;
 	private Client client;
 	
@@ -85,6 +87,7 @@ public class Controller
 		width = 800; height = 600;
 		
 		isMultiplayer = false;
+		guaranteedSender = new GuaranteedSignalSender(this);
 		
 		currentMenu = new MainMenu(this);
 		paused = false;
@@ -97,11 +100,8 @@ public class Controller
 	 */
 	public void quit()
 	{
+		forceDisconnect();
 		soundHandler.destroy();
-		if (server != null)
-			server.destroy();
-		if (client != null)
-			client.destroy();
 		anim.stop();
 	}
 	
@@ -146,14 +146,6 @@ public class Controller
 	}
 	
 	/**
-	 * Sets whether the network is being utilized for multiplayer gaming.
-	 */
-	public void setMultiplayer(boolean multiplayer)
-	{
-		isMultiplayer = multiplayer;
-	}
-	
-	/**
 	 * Returns whether the current computer is hosting the game.
 	 */
 	public boolean isServer()
@@ -171,7 +163,12 @@ public class Controller
 	
 	public void startServer()
 	{
-		server = new Server(5);
+		forceDisconnect();
+		
+		server = new Server(this, 5);
+		isMultiplayer = true;
+		isServer = true;
+		network = server;
 	}
 	
 	/**
@@ -184,7 +181,54 @@ public class Controller
 	
 	public void startClient()
 	{
-		client = new Client();
+		forceDisconnect();
+		
+		client = new Client(this);
+		isMultiplayer = true;
+		isServer = false;
+		network = client;
+	}
+	
+	public void disconnect()
+	{
+		if (client != null)
+		{
+			client.logout();
+		}
+		if (server != null)
+		{
+			server.closeServer();
+		}
+		
+		isMultiplayer = false;
+	}
+	
+	public void forceDisconnect()
+	{
+		if (network != null)
+		{
+			network.destroy();
+			network = null;
+			server = null;
+			client = null;
+			guaranteedSender.reset();
+		}
+	}
+	
+	/**
+	 * Returns the Network object if the current computer is involved in a network
+	 */
+	public Network getNetwork()
+	{
+		return network;
+	}
+	
+	/**
+	 * Returns the GuaranteedSignalSender object
+	 */
+	public GuaranteedSignalSender getGuaranteedSender()
+	{
+		return guaranteedSender;
 	}
 	
 	/**
@@ -219,7 +263,7 @@ public class Controller
 		gl.glLoadIdentity();
 		if (currentMenu == null)
 		{
-			currentLevel.drawMap(gl);
+			currentLevel.draw(gl);
 			
 			gl.glMatrixMode(GL2.GL_PROJECTION);
 			gl.glLoadIdentity();
@@ -262,10 +306,9 @@ public class Controller
 	 */
 	public void step(double dt)
 	{
-		if (client != null)
-			client.step(dt);
-		if (server != null)
-			server.step(dt);
+		if (network != null)
+			network.step(dt);
+		guaranteedSender.step(dt);
 		
 		if (currentMenu != null)
 		{
@@ -314,7 +357,7 @@ public class Controller
 	}
 	
 	/**
-	 * Handle the death of the player and go to the highscore menu. Should be called by the corresponding GameMap
+	 * Handle the death of the player and go to the highscore menu. Should be called by the corresponding World
 	 */
 	public void handleDeath()
 	{
@@ -330,7 +373,7 @@ public class Controller
 	
 	/**
 	 * Sets the current game level to the desired input
-	 * @param gm The GameMap to be set as the current level
+	 * @param gm The World to be set as the current level
 	 */
 	public void setCurrentLevel(String levelName)
 	{
@@ -340,11 +383,16 @@ public class Controller
 			levelType = 1;
 		pauseMenu = new PauseMenu(this);
 		paused = false;
-		currentLevel = new GameMap(this, new File("maps" + File.separator + levelName)); //levelName
+		currentLevel = new World(this, new File("maps" + File.separator + levelName)); //levelName
 		hud = new HUD(this, currentLevel);
 		currentMenu = null;
 		win.setPointerVisible(false);
 		input.readMouse();
+	}
+	
+	public World getCurrentLevel()
+	{
+		return currentLevel;
 	}
 	
 	/**
@@ -449,34 +497,23 @@ public class Controller
 	
 	/**
 	 * Initializes an entity with the given id and returns it.<br/>
-	 * 0: Player<br/>
-	 * 1: EnemyObstacle<br/>
-	 * 2: EnemyTurret<br/>
-	 * 3: EnemyTracking
-	 * @param gameMap The map where the obstacle is being placed.
+	 * @param world The world where the obstacle is being placed.
 	 * @param id The index of the entity.
 	 * @return An object of the appropriate kind of Entity.
 	 */
-	public Entity createEntity(GameMap gameMap, int id)
+	public Entity createEntity(World world, int type)
 	{
-		switch (id)
-		{
-		case 0:
-			return new Player(this, gameMap);
-		case 1:
-			return new EnemyObstacle(this, gameMap);
-		case 2:
-			return new EnemyTurret(this, gameMap);
-		case 3:
-			return new EnemyShocking(this, gameMap);
-		case 4:
-			return new EnemyTracking(this, gameMap);
-		case 5:
-			return new EnemySplitting(this, gameMap);
-		case 6:
-			return new EnemyFortress(this, gameMap);
-		}
-		
-		return null;
+		return EI.createEntity(this, world, type);
+	}
+	
+	/**
+	 * Initializes an entity with the given id and returns it.<br/>
+	 * @param world The world where the obstacle is being placed.
+	 * @param id The index of the entity.
+	 * @return An object of the appropriate kind of Entity.
+	 */
+	public Entity createEntity(World world, int type, int owner, int id)
+	{
+		return EI.createEntity(this, world, type, owner, id);
 	}
 }

@@ -112,6 +112,35 @@ public class NetworkPacket
 		return buf.getDouble();
 	}
 	
+	public void addFloats(float... values)
+	{
+		for (int i=0; i<values.length; i++)
+		{
+			buf.putFloat(values[i]);
+		}
+	}
+	
+	public void addFloat(float value)
+	{
+		buf.putFloat(value);
+	}
+	
+	public float[] getFloats(int amount)
+	{
+		float[] output = new float[amount];
+		for (int i=0; i<amount; i++)
+		{
+			output[i] = buf.getFloat();
+		}
+		
+		return output;
+	}
+	
+	public float getFloat()
+	{
+		return buf.getFloat();
+	}
+	
 	public void addLongs(long... values)
 	{
 		for (int i=0; i<values.length; i++)
@@ -226,5 +255,15 @@ public class NetworkPacket
 	public byte getByte()
 	{
 		return buf.get();
+	}
+	
+	public String toString()
+	{
+		StringBuilder str = new StringBuilder();
+		for (int i=0; i<length(); i++)
+		{
+			str.append(buf.get(i) + ", ");
+		}
+		return str.toString();
 	}
 }

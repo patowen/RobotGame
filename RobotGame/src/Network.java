@@ -2,13 +2,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 /*
  * Multiplayer notes:
  * 
  * [0, rest_of_signal]: normal signal
- * [1, timestamp, sub_timestamp, rest_of_signal]: guaranteed signal
- * [2, timestamp, sub_timestamp]: relayed signal
+ * [1, signal_id, rest_of_signal]: guaranteed signal
+ * [2, signal_id]: relayed signal
  * 
  * Log in/out signals:
  * [1, 0]: Log out
@@ -16,21 +17,36 @@ import java.net.InetAddress;
  * [1, 2]: Server closed
  * 
  * Entity signals:
- * [3, 0, 0, entity_type, entity_id, x, y, z, xV, yV, zV, appendix]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
- * [3, 0, 1, entity_id]: Remove entity
- * [3, 0, 2, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
+ * [3, 0, entity_type, owner, entity_id]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
+ * [3, 1, owner, entity_id]: Remove entity
+ * [3, 2, owner, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
  */
 
 public abstract class Network
 {
+	protected Controller c;
+	
 	protected DatagramSocket socket;
 	protected NetworkThread thread;
 	
-	private GuaranteedSignalSender guaranteedSender;
+	private ArrayList<Packet> packets;
 	
-	public Network()
+	public Network(Controller controller)
 	{
-		guaranteedSender = new GuaranteedSignalSender(this);
+		c = controller;
+		packets = new ArrayList<Packet>();
+	}
+	
+	public void step(double dt)
+	{
+		ArrayList<Packet> packets = getPackets();
+		for (Packet p : packets)
+		{
+			if (p.guaranteed)
+				saveSignal(p.packet, p.sender, p.senderPort, p.signalID);
+			else
+				interpretSignal(p.packet, p.sender, p.senderPort);
+		}
 	}
 	
 	public void destroy()
@@ -48,14 +64,9 @@ public abstract class Network
 		thread.start();
 	}
 	
-	public void step(double dt)
-	{
-		guaranteedSender.step(dt);
-	}
-	
 	public void sendGuaranteed(NetworkPacket data, InetAddress ip, int port)
 	{
-		guaranteedSender.addGuaranteedSignal(data, ip, port);
+		c.getGuaranteedSender().addGuaranteedSignal(this, data, ip, port);
 	}
 	
 	public void sendNormal(NetworkPacket data, InetAddress ip, int port)
@@ -71,36 +82,86 @@ public abstract class Network
 		try
 		{
 			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
+			socket.send(new DatagramPacket(packet.array(), packet.length(), ip, port));
 		}
 		catch (IOException e) {} //Just act like a failed signal send
 	}
 	
-	protected abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
+	public abstract long createSignalID(InetAddress ip, int port);
+	
+	public abstract void saveSignal(NetworkPacket packet, InetAddress sender, int senderPort, long signalID);
+	
+	public abstract void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort);
+	
+	public abstract int getComputerID();
 	
 	private void interpretSignalRaw(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
 		int flag = packet.getByte();
 		if (flag == 0)
 		{
-			interpretSignal(packet, sender, senderPort);
+			addPacket(packet, sender, senderPort, 0, false);
+//			interpretSignal(packet, sender, senderPort);
 		}
 		else if (flag == 1)
 		{
-			NetworkPacket relayPacket = new NetworkPacket(17);
+			NetworkPacket relayPacket = new NetworkPacket(9);
 			relayPacket.addByte(2);
-			relayPacket.addLong(packet.getLong());
-			relayPacket.addLong(packet.getLong());
+			long signalID = packet.getLong();
+			relayPacket.addLong(signalID);
 			send(relayPacket, sender, senderPort);
-			interpretSignal(packet, sender, senderPort); //Temporary. Ordering should matter.
+			addPacket(packet, sender, senderPort, signalID, true);
+			
+			//interpretSignal(packet, sender, senderPort); //TODO Temporary. Ordering should matter.
 		}
 		else if (flag == 2)
 		{
-			guaranteedSender.addRelayedSignal(sender, senderPort, packet);
+			c.getGuaranteedSender().addRelayedSignal(sender, senderPort, packet);
+		}
+	}
+	
+	private synchronized void addPacket(NetworkPacket packet, InetAddress sender, int senderPort, long signalID, boolean guaranteed)
+	{
+		packets.add(new Packet(packet, sender, senderPort, signalID, guaranteed));
+	}
+	
+	private synchronized ArrayList<Packet> getPackets()
+	{
+		ArrayList<Packet> packetsClone = new ArrayList<Packet>();
+		
+		for (Packet p : packets)
+		{
+			packetsClone.add(p);
+		}
+		packets.clear();
+		return packetsClone;
+	}
+	
+	private class Packet
+	{
+		public final NetworkPacket packet;
+		public final InetAddress sender;
+		public final int senderPort;
+		public final long signalID;
+		public final boolean guaranteed;
+		
+		public Packet(NetworkPacket packet, InetAddress sender, int senderPort, long signalID, boolean guaranteed)
+		{
+			this.packet = packet;
+			this.sender = sender;
+			this.senderPort = senderPort;
+			this.signalID = signalID;
+			this.guaranteed = guaranteed;
 		}
 	}
 	
 	private class NetworkThread extends Thread
 	{
+		public NetworkThread()
+		{
+			super("NetworkThread");
+		}
+		
 		public void run()
 		{
 			byte[] buf = new byte[256];
@@ -115,7 +176,7 @@ public abstract class Network
 				try
 				{
 					socket.receive(packet);
-					interpretSignalRaw(new NetworkPacket(buf), packet.getAddress(), packet.getPort());
+					interpretSignalRaw(new NetworkPacket(buf.clone()), packet.getAddress(), packet.getPort());
 				}
 				catch (IOException e) {}
 			}

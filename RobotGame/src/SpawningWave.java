@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class SpawningWave
 {
 	private Controller c;
-	private GameMap map;
+	private World w;
 	
 	private boolean isRunning;
 	
@@ -27,12 +27,12 @@ public class SpawningWave
 	/**
 	 * Constructs the SpawningWave class.
 	 * @param controller The Controller object of the game.
-	 * @param gameMap The GameMap that the SpawningWave acts on.
+	 * @param world The World that the SpawningWave acts on.
 	 */
-	public SpawningWave(Controller controller, GameMap gameMap)
+	public SpawningWave(Controller controller, World world)
 	{
 		c = controller;
-		map = gameMap;
+		w = world;
 		
 		isRunning = false;
 		
@@ -98,45 +98,48 @@ public class SpawningWave
 		if (isRunning)
 		{
 			//Handle waves
-			timeLeft -= dt;
-			
-			if (timeLeft <= 0)
+			if (!c.isMultiplayer() || c.isServer())
 			{
-				while (currentIndex < entity.size() && entity.get(currentIndex) != -1)
+				timeLeft -= dt;
+				
+				if (timeLeft <= 0)
 				{
-					Entity e = c.createEntity(map, entity.get(currentIndex));
-					
-					int spawn = spawnPoint.get(currentIndex);
-					e.setPosition(map.getSpawnX(spawn), map.getSpawnY(spawn), map.getSpawnZ(spawn));
-					double height = 0, radius = 0;
-					if (e instanceof Damageable)
+					while (currentIndex < entity.size() && entity.get(currentIndex) != -1)
 					{
-						radius = ((Damageable)e).getRadius();
-						height = ((Damageable)e).getHeight()/2;
+						Entity e = c.createEntity(w, entity.get(currentIndex));
+						
+						int spawn = spawnPoint.get(currentIndex);
+						e.setPosition(w.getSpawnX(spawn), w.getSpawnY(spawn), w.getSpawnZ(spawn));
+						double height = 0, radius = 0;
+						if (e instanceof Damageable)
+						{
+							radius = ((Damageable)e).getRadius();
+							height = ((Damageable)e).getHeight()/2;
+						}
+						
+						EntityExplosion spark = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
+						spark.setColor(0, 1, 1);
+						spark.setDuration(0.5);
+						spark.setRadius(2+1.5*radius);
+						spark.setFinalRadius(0);
+						spark.setPosition(e.getX(), e.getY(), e.getZ()+height);
+						w.create(spark);
+						waitingList.add(e);
+						waitLength.add(0.3);
+						
+						currentIndex++;
 					}
 					
-					EntityExplosion spark = new EntityExplosion(c, map);
-					spark.setColor(0, 1, 1);
-					spark.setDuration(0.5);
-					spark.setRadius(2+1.5*radius);
-					spark.setFinalRadius(0);
-					spark.setPosition(e.getX(), e.getY(), e.getZ()+height);
-					map.create(spark);
-					waitingList.add(e);
-					waitLength.add(0.3);
-					
-					currentIndex++;
-				}
-				
-				if (currentIndex >= entity.size())
-				{
-					if (waitingList.isEmpty())
-						isRunning = false;
-				}
-				else
-				{
-					timeLeft = delay.get(currentIndex);
-					currentIndex++;
+					if (currentIndex >= entity.size())
+					{
+						if (waitingList.isEmpty())
+							isRunning = false;
+					}
+					else
+					{
+						timeLeft = delay.get(currentIndex);
+						currentIndex++;
+					}
 				}
 			}
 			
@@ -148,7 +151,7 @@ public class SpawningWave
 				if (d < 0)
 				{
 					waitLength.remove(i);
-					map.create(waitingList.get(i));
+					w.create(waitingList.get(i));
 					waitingList.remove(i);
 					i--;
 				}

@@ -6,7 +6,7 @@
  * @author Patrick Owen
  */
 public interface Damageable
-{
+{	
 	/**
 	 * Returns the radius of the Entity.
 	 */

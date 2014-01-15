@@ -31,11 +31,11 @@ public class EntityRocket extends Entity implements Damageable
 	/**
 	 * Creates a new EnemyRocket object. 
 	 * @param c Controller object, passed to superclass
-	 * @param gm GameMap object, passed to superclass
+	 * @param world World object, passed to superclass
 	 */
-	public EntityRocket(Controller c, GameMap gm)
+	public EntityRocket(Controller c, World world)
 	{
-		super(c, gm);
+		super(c, world);
 		
 		radius = .15;
 		height = .3;
@@ -70,13 +70,13 @@ public class EntityRocket extends Entity implements Damageable
 		if (fireTime <=0)
 		{
 			fireTime = fireFrequency;
-			EntityExplosion exhaust = new EntityExplosion(c, map);
+			EntityExplosion exhaust = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 			exhaust.setPosition(x, y, z + height/2);
 			exhaust.setColor(.1f, 0f, 0f);
 			exhaust.setRadius(1.1*radius);
 			exhaust.setFinalRadius(2*radius);
 			exhaust.setDuration(.25);
-			map.create(exhaust);
+			w.create(exhaust);
 		}
 	}
 
@@ -92,39 +92,42 @@ public class EntityRocket extends Entity implements Damageable
 	/**
 	 * called to remove the EntityRocket. No score should be given.
 	 */
-	public void destroy()
+	public void destroy(boolean applyDamage)
 	{
 		if (isDestroyed) return;
 		
 		isDestroyed = true;
 		
-		EntityExplosion blast = new EntityExplosion(c, map);
+		EntityExplosion blast = (EntityExplosion)c.createEntity(w, EI.EntityExplosion);
 		blast.setColor(.75f, .25f, .1f);
 		blast.setDuration(.5);
 		blast.setPosition(x, y, z + radius/2);
 		blast.setRadius(radius);
 		blast.setFinalRadius(range);
-		map.create(blast);
+		w.create(blast);
 		
-		for (Entity entity : map.getEntities())
+		if (applyDamage)
 		{
-			if (entity == owner || entity == this) continue;
-			if (!(entity instanceof Damageable)) continue;
-			
-			Damageable e = (Damageable) entity;
-			
-			double xDiff = x-e.getX();
-			double yDiff = y-e.getY();
-			double zDiff = z-e.getZ();
-			double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
-			
-			if (distSqr < range*range)
+			for (Entity entity : w.getEntities())
 			{
-				double dist = Math.sqrt(distSqr);
-				double totalDamage = damage/distSqr;
+				if (entity == owner || entity == this) continue;
+				if (!(entity instanceof Damageable)) continue;
 				
-				if (totalDamage > maxDamage) totalDamage = maxDamage;
-				e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, knockback/distSqr, false);
+				Damageable e = (Damageable) entity;
+				
+				double xDiff = x-e.getX();
+				double yDiff = y-e.getY();
+				double zDiff = z-e.getZ();
+				double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
+				
+				if (distSqr < range*range)
+				{
+					double dist = Math.sqrt(distSqr);
+					double totalDamage = damage/distSqr;
+					
+					if (totalDamage > maxDamage) totalDamage = maxDamage;
+					e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, knockback/distSqr, false);
+				}
 			}
 		}
 		
@@ -165,13 +168,13 @@ public class EntityRocket extends Entity implements Damageable
 	private void handleCollision(double dt)
 	{
 		super.step(dt);
-		Collision col = map.getCollision();
+		Collision col = w.getCollision();
 		
 		double t = col.getPlayerCollision(x, y, z, xV*dt, yV*dt, zV*dt, radius, height);
 		double t2 = 1; //Bullet distance traveled before first detected collision
 		Damageable entityToDamage = null;
 		
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			if (entity == owner || entity == this) continue;
 			if (!(entity instanceof Damageable)) continue;
@@ -179,9 +182,7 @@ public class EntityRocket extends Entity implements Damageable
 			Damageable e = (Damageable) entity;
 			
 			//tTest must be less than t2 to update it.
-			double tTest = col.getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt,
-					e.getXPrevious(), e.getYPrevious(), e.getZPrevious()-height,
-					e.getX()-e.getXPrevious(), e.getY()-e.getYPrevious(), e.getZ() - e.getZPrevious(), e.getRadius()+radius, e.getHeight()+height);
+			double tTest = col.getEntityBulletCollision(x, y, z, xV*t*dt, yV*t*dt, zV*t*dt, e);
 			
 			if (tTest < t2)
 			{
@@ -204,7 +205,7 @@ public class EntityRocket extends Entity implements Damageable
 		
 		//Rocket hits anything
 		if (t2 < 1 || t < 1)
-			destroy();
+			destroy(true);
 	}
 	
 	public void draw(GL2 gl)
@@ -254,6 +255,6 @@ public class EntityRocket extends Entity implements Damageable
 
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
-		destroy();
+		destroy(false);
 	}
 }

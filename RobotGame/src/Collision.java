@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class Collision
 {
-	private GameMap map;
+	private World w;
 	
 	private double normalX, normalY, normalZ;
 	private double normalXFinal, normalYFinal, normalZFinal;
@@ -19,7 +19,7 @@ public class Collision
 	/**
 	 * Initializes the Collision class.
 	 */
-	public Collision(GameMap gameMap)
+	public Collision(World world)
 	{
 		//Initialize all data arrays
 		colData = 0;
@@ -27,7 +27,7 @@ public class Collision
 		cX2 = new ArrayList<Double>(); cY2 = new ArrayList<Double>(); cZ2 = new ArrayList<Double>();
 		cX3 = new ArrayList<Double>(); cY3 = new ArrayList<Double>(); cZ3 = new ArrayList<Double>();
 		
-		map = gameMap;
+		w = world;
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class Collision
 		}
 		
 		//Check for collision with entities.
-		for (Entity entity : map.getEntities())
+		for (Entity entity : w.getEntities())
 		{
 			/*
 			 * ALGORITHM 2b:
@@ -216,7 +216,7 @@ public class Collision
 			 * 
 			 * Return the shortest distance and store the normals of the wall with the shortest distance.
 			 */
-			if (!(entity instanceof Collidable)) continue;
+			if (entity.isGhost() || !(entity instanceof Collidable)) continue;
 			
 			Collidable e = (Collidable)entity;
 			
@@ -267,12 +267,16 @@ public class Collision
 	 * @param radius
 	 * @param height Player dimensions.
 	 */
-	public double getEntityBulletCollision(double bx1, double by1, double bz1, double bxd, double byd, double bzd,
-			double px1, double py1, double pz1, double pxd, double pyd, double pzd, double radius, double height)
+	public double getEntityBulletCollision(double bx1, double by1, double bz1, double bxd, double byd, double bzd, Damageable e)
 	{
-		if ((bx1-px1)*(bx1-px1) + (by1-py1)*(by1-py1) <= radius*radius && bz1 >= pz1 && bz1 <= pz1+height)
+		if (((Entity)e).isGhost())
+			return 1;
+		
+		if ((bx1-e.getXPrevious())*(bx1-e.getXPrevious()) + (by1-e.getYPrevious())*(by1-e.getYPrevious())
+				<= e.getRadius()*e.getRadius() && bz1 >= e.getZPrevious() && bz1 <= e.getZPrevious()+e.getHeight())
 			return 0;
-		return getPPointCollision(px1, py1, pz1, pxd-bxd, pyd-byd, pzd-bzd, radius, height, bx1, by1, bz1);
+		return getPPointCollision(e.getXPrevious(), e.getYPrevious(), e.getZPrevious(),
+				e.getXPrevious()-e.getX()-bxd, e.getYPrevious()-e.getY()-byd, e.getZPrevious()-e.getZ()-bzd, e.getRadius(), e.getHeight(), bx1, by1, bz1);
 	}
 	
 	//Returns the value from 0 to 1 for the bullet collision with a plane.

@@ -8,25 +8,72 @@ public class Entity
 {
 	protected Controller c;
 	
+	protected boolean isLocal;
+	protected boolean isActive;
+	
+	protected int type; //The class of the entity.
+	protected int owner; //Which computer controls the entity. 0=server, 1=client0, 2=client1, ...
 	protected int id; //An identification of the entity that remains consistent throughout its lifetime.
 	protected double x, y, z;
 	protected double xV, yV, zV;
 	protected double xPrevious, yPrevious, zPrevious;
-	protected GameMap map;
+	protected World w;
 	
 	/**
 	 * Creates a new Entity.
 	 * @param controller The active Controller object.
-	 * @param gameMap The map where the Entity is placed.
+	 * @param world The world where the Entity is placed.
 	 */
-	public Entity(Controller controller, GameMap gameMap)
+	public Entity(Controller controller, World world)
 	{		
 		c = controller;
-		map = gameMap;
+		w = world;
+		if (w == null)
+			System.exit(1);
+		isActive = false;
 		
 		xV = 0;
 		yV = 0;
 		zV = 0;
+	}
+	
+	public void init(int type)
+	{
+		isLocal = true;
+		isActive = true;
+		
+		this.type = type;
+		if (c.isMultiplayer())
+			owner = c.getNetwork().getComputerID();
+		else
+			owner = 0;
+		id = w.generateEntityID();
+		
+//		if (c.isMultiplayer() && c.isServer())
+//		{
+//			NetworkPacket data = new NetworkPacket(256);
+//			data.addBytes(3, 0);
+//			data.addInts(type, owner, id);
+//			c.getServer().sendEntityDataGuaranteed(data);
+//		}
+	}
+	
+	public void init(int type, int owner, int id)
+	{		
+		isActive = false;
+		this.type = type;
+		this.owner = owner;
+		this.id = id;
+	}
+	
+	public int getOwner()
+	{
+		return owner;
+	}
+	
+	public int getID()
+	{
+		return id;
 	}
 	
 	/**
@@ -55,38 +102,57 @@ public class Entity
 		zV = zVel;
 	}
 	
+	public void setActive(boolean active)
+	{
+		isActive = active;
+	}
+	
+	public boolean isLocal()
+	{
+		return isLocal;
+	}
+	
+	/**
+	 * Returns whether this entity should be ignored by other entities.
+	 */
+	public boolean isGhost()
+	{
+		return !isActive;
+	}
+	
+	protected void readState(NetworkPacket data)
+	{
+		double[] p = data.getDoubles(3);
+		double[] v = data.getDoubles(3);
+		setPosition(p[0], p[1], p[2]);
+		setVelocity(v[0], v[1], v[2]);
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		data.addDoubles(x, y, z, xV, yV, zV);
+	}
+	
 	/**
 	 * Handles changes to the entity based on signals received by it.
 	 * @param signalType The kind of signal being sent.
 	 * @param data A byte array holding the data of the signal.
 	 * @param offset Where the array should start being read.
 	 */
-	public void signalReceived(int signalType, NetworkPacket data)
+	public void signalReceived(NetworkPacket data)
 	{
-		switch (signalType)
-		{
-		case 0:
-			double[] p = data.getDoubles(3);
-			double[] v = data.getDoubles(3);
-			setPosition(p[0], p[1], p[2]);
-			setVelocity(v[0], v[1], v[2]);
-			
-			break;
-		}
+		readState(data);
+		isActive = true;
 	}
 	
 	public void stepSendSignals()
 	{
-		NetworkPacket packet = new NetworkPacket(6*8);
-		
-		packet.addDoubles(x, y, z, xV, yV, zV);
-		
-		sendSignal(false, 0, packet);
-	}
-	
-	protected void sendSignal(boolean guaranteed, int signalType, NetworkPacket data)
-	{
-		
+		NetworkPacket data = new NetworkPacket(256);
+		data.addBytes(3, 2);
+		data.addInts(type, owner, id);
+		writeState(data);
+		if (c.isServer())
+			c.getServer().sendEntityDataNormal(data);
 	}
 	
 	/**
@@ -142,7 +208,14 @@ public class Entity
 	 */
 	public void delete()
 	{
-		map.delete(this);
+		if (c.isMultiplayer() && c.isServer())
+		{
+			NetworkPacket data = new NetworkPacket(256);
+			data.addBytes(3, 1);
+			data.addInts(owner, id);
+			c.getServer().sendEntityDataGuaranteed(data);
+		}
+		w.delete(this);
 	}
 	
 	/**

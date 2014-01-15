@@ -1,7 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.media.opengl.GL2;
 
@@ -11,7 +14,7 @@ import com.jogamp.opengl.util.texture.Texture;
  * Stores visual and physical data for a 3D level.
  * @author Patrick Owen
  */
-public class GameMap
+public class World
 {
 	//Allows data to be saved between levels
 	private Controller c;
@@ -27,6 +30,11 @@ public class GameMap
 	private ArrayList<Entity> entities;
 	private ArrayList<Entity> deletionQueue;
 	private ArrayList<Entity> creationQueue;
+	
+	private HashMap<Identification, Entity> entityMap;
+	private HashSet<Identification> antiEntitySet;
+	private ArrayBlockingQueue<Identification> antiEntityQueue;
+	private int nextEntityID;
 	
 	//Death
 	private double deathWait;
@@ -57,7 +65,7 @@ public class GameMap
 	 * @param controller The active Controller object
 	 * @param fName The name of the file containing the data.
 	 */
-	public GameMap(Controller controller, File fName)
+	public World(Controller controller, File fName)
 	{
 		c = controller;
 		mapFile = fName;
@@ -81,6 +89,11 @@ public class GameMap
 		entities = new ArrayList<Entity>();
 		deletionQueue = new ArrayList<Entity>();
 		creationQueue = new ArrayList<Entity>();
+		
+		entityMap = new HashMap<Identification, Entity>(1024);
+		antiEntitySet = new HashSet<Identification>(64);
+		antiEntityQueue = new ArrayBlockingQueue<Identification>(64);
+		nextEntityID = 0;
 		
 		gravity = 10;
 		
@@ -124,9 +137,16 @@ public class GameMap
 		tX2 = new ArrayList<Double>(); tY2 = new ArrayList<Double>();
 		tX3 = new ArrayList<Double>(); tY3 = new ArrayList<Double>();
 		
+		for (Entity e : entities)
+		{
+			e.delete();
+		}
+		
 		entities.clear();
 		deletionQueue.clear();
 		creationQueue.clear();
+		entityMap.clear();
+		nextEntityID = 0;
 		
 		deathDuration = 0;
 		
@@ -154,7 +174,7 @@ public class GameMap
 	}
 	
 	/**
-	 * Returns an ArrayList of the entities held by the GameMap.
+	 * Returns an ArrayList of the entities held by the World.
 	 * Do not modify this ArrayList.
 	 */
 	public ArrayList<Entity> getEntities()
@@ -162,8 +182,13 @@ public class GameMap
 		return entities;
 	}
 	
+	public Entity getEntity(int owner, int id)
+	{
+		return entityMap.get(new Identification(owner, id));
+	}
+	
 	/**
-	 * Returns the current gravity of the map
+	 * Returns the current gravity of the world
 	 */
 	public double getGravity()
 	{
@@ -176,7 +201,33 @@ public class GameMap
 	 */
 	public void delete(Entity e)
 	{
+		Identification identify = new Identification(e.getOwner(), e.getID());
+		
 		deletionQueue.add(e);
+		entityMap.remove(identify);
+	}
+	
+	public void delete(int owner, int id)
+	{
+		Identification identify = new Identification(owner, id);
+		
+		Entity e = getEntity(owner, id);
+		if (e != null)
+		{
+			deletionQueue.add(e);
+			entityMap.remove(identify);
+		}
+		
+		antiEntitySet.add(identify);
+	}
+	
+	public void enqueueTimedIdentification(int owner, int id)
+	{
+		if (antiEntityQueue.remainingCapacity() == 0)
+		{
+			antiEntitySet.remove(antiEntityQueue.remove());
+		}
+		antiEntityQueue.add(new Identification(owner, id));
 	}
 	
 	/**
@@ -185,7 +236,17 @@ public class GameMap
 	 */
 	public void create(Entity e)
 	{
-		creationQueue.add(e);
+		Identification identify = new Identification(e.getOwner(), e.getID());
+		if (!antiEntitySet.contains(identify))
+		{
+			creationQueue.add(e);
+			entityMap.put(new Identification(e.getOwner(), e.getID()), e);
+		}
+	}
+	
+	public int generateEntityID()
+	{
+		return nextEntityID++;
 	}
 	
 	/**
@@ -217,14 +278,22 @@ public class GameMap
 	 * @param dt Time step in seconds.
 	 */
 	public void step(double dt)
-	{
+	{		
 		handleSpawning(dt);
 		handleDeath(dt);
 		
 		for (Entity e : entities)
 		{
 			e.step(dt);
-		}		
+		}
+		
+		if (c.isMultiplayer() && c.isServer())
+		{
+			for (Entity e : entities)
+			{
+				e.stepSendSignals();
+			}
+		}
 		
 		for (Entity e : deletionQueue)
 		{
@@ -233,7 +302,8 @@ public class GameMap
 		
 		for (Entity e : creationQueue)
 		{
-			entities.add(e);
+			if (!antiEntitySet.contains(new Identification(e.owner, e.id)))
+				entities.add(e);
 		}
 		
 		deletionQueue.clear();
@@ -297,10 +367,10 @@ public class GameMap
 	}
 	
 	/**
-	 * Uses drawing data to draw the map
+	 * Uses drawing data to draw the world
 	 * @param gl
 	 */
-	public void drawMap(GL2 gl)
+	public void draw(GL2 gl)
 	{
 		//Set the view
 		if (player.isDead())
@@ -313,7 +383,7 @@ public class GameMap
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, new float[] {0.4f, 0.4f, 0.4f, 0}, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, new float[] {0.4f, 0.4f, 0.4f, 0}, 0);
 		
-		//Set material properties to what is set for the map
+		//Set material properties to what is set for the world
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {1, 1, 1, 1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, new float[] {0, 0, 0, 1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_EMISSION, new float[] {0, 0, 0, 1}, 0);
@@ -352,12 +422,14 @@ public class GameMap
 		//Draw entities
 		for (Entity e : entities)
 		{
-			e.draw(gl);
+			if (!e.isGhost())
+				e.draw(gl);
 		}
 		
 		for (Entity e : entities)
 		{
-			e.draw2(gl);
+			if (!e.isGhost())
+				e.draw2(gl);
 		}
 	}
 	
@@ -380,11 +452,36 @@ public class GameMap
 	}
 	
 	/**
-	 * Returns the Collision object that handles collisions in this map.
+	 * Returns the Collision object that handles collisions in this world.
 	 */
 	public Collision getCollision()
 	{
 		return collision;
+	}
+	
+	private class Identification
+	{
+		public final int owner;
+		public final int id;
+		public final int hashCode;
+		
+		public Identification(int owner, int id)
+		{
+			this.owner = owner;
+			this.id = id;
+			hashCode = owner*29 + id;
+		}
+		
+		public int hashCode()
+		{
+			return hashCode;
+		}
+		
+		public boolean equals(Object o)
+		{
+			Identification i = (Identification)o;
+			return (i.owner == owner && i.id == id);
+		}
 	}
 	
 	//Handles parsing the map data file for level creation.
@@ -417,18 +514,23 @@ public class GameMap
 				//1- Entity placement (id, x, y, z)
 				if (command == 1)
 				{
-					Entity e = c.createEntity(GameMap.this, getInt());
+					Entity e = c.createEntity(World.this, getInt());
+					
 					if (e instanceof Player)
 						player = (Player)e;
 					
-					//Move the entity to the proper location.
-					e.setPosition(getDouble(), getDouble(), getDouble()+0.0001);
-					
-					int extra = e.getAmountExtraData();
-					for (int i=0; i<extra; i++)
-						e.initializeExtraData(i, getDouble());
-					
-					entities.add(e);
+					if (!c.isMultiplayer() || c.isServer() || e instanceof Player)
+					{						
+						//Move the entity to the proper location.
+						e.setPosition(getDouble(), getDouble(), getDouble()+0.0001);
+						
+						int extra = e.getAmountExtraData();
+						for (int i=0; i<extra; i++)
+							e.initializeExtraData(i, getDouble());
+						
+						entities.add(e);
+						entityMap.put(new Identification(e.getOwner(), e.getID()), e);
+					}
 				}
 				
 				//2- Surface placement
@@ -532,7 +634,7 @@ public class GameMap
 		//Adds a spawning wave based on the file.
 		public void addWave(int difficulty)
 		{
-			SpawningWave wave = new SpawningWave(c, GameMap.this);
+			SpawningWave wave = new SpawningWave(c, World.this);
 			
 			//Parse the data
 			while (data.hasNextLine())

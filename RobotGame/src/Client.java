@@ -10,17 +10,18 @@ import java.net.UnknownHostException;
  */
 public class Client extends Network
 {
+	private int computerID;
+	private long currentSignalID;
+	private GuaranteedSignalReceiver guaranteedReceiver;
+	
 	private InetAddress serverIP;
 	private int serverPort;
 	
-	private boolean connected, loggingIn, loggingOut;
+	private boolean connected;
 	
-//	private int capacity, numPlayers;
-//	private String[] clientName;
-	
-	public Client()
+	public Client(Controller controller)
 	{
-		super();
+		super(controller);
 		
 		try
 		{
@@ -33,6 +34,8 @@ public class Client extends Network
 		}
 		serverPort = 4445;
 		connected = false;
+		currentSignalID = 0;
+		guaranteedReceiver = new GuaranteedSignalReceiver(c, serverIP, serverPort);
 		
 		try
 		{
@@ -47,6 +50,12 @@ public class Client extends Network
 		startThread();
 	}
 	
+	public void step(double dt)
+	{
+		super.step(dt);
+		guaranteedReceiver.step(dt);
+	}
+	
 	public boolean isConnected()
 	{
 		return connected;
@@ -54,7 +63,6 @@ public class Client extends Network
 	
 	public void logout()
 	{
-		loggingOut = true;
 		NetworkPacket packet = new NetworkPacket(2);
 		packet.addBytes(1, 0);
 		sendGuaranteed(packet);
@@ -62,11 +70,10 @@ public class Client extends Network
 	
 	public void login()
 	{
-		loggingIn = true;
 		NetworkPacket packet = new NetworkPacket(256);
 		packet.addBytes(1, 1);
 		packet.addString("SuperLala");
-		sendGuaranteed(packet);
+		sendNormal(packet);
 	}
 	
 	public void sendGuaranteed(NetworkPacket packet)
@@ -74,14 +81,39 @@ public class Client extends Network
 		sendGuaranteed(packet, serverIP, serverPort);
 	}
 	
-	public void send(NetworkPacket packet)
+	public void sendNormal(NetworkPacket packet)
 	{
-		send(packet, serverIP, serverPort);
+		sendNormal(packet, serverIP, serverPort);
+	}
+	
+	public int getComputerID()
+	{
+		return computerID;
+	}
+	
+//	public void sendEntityDataNormal(NetworkPacket data)
+//	{
+//		sendNormal(data);
+//	}
+//	
+//	public void sendEntityDataGuaranteed(NetworkPacket data)
+//	{
+//		sendGuaranteed(data);
+//	}
+	
+	public long createSignalID(InetAddress ip, int port)
+	{
+		return currentSignalID++;
+	}
+	
+	public void saveSignal(NetworkPacket packet, InetAddress sender, int senderPort, long signalID)
+	{
+		guaranteedReceiver.addPendingSignal(signalID, packet);
 	}
 	
 	public void interpretSignal(NetworkPacket packet, InetAddress sender, int senderPort)
 	{
-		NetworkPacket ret = new NetworkPacket(256);
+//		NetworkPacket ret = new NetworkPacket(256);
 		
 		if (!sender.equals(serverIP) || senderPort != serverPort)
 			return;
@@ -96,26 +128,73 @@ public class Client extends Network
 				if (subtype == 1)
 				{
 					byte id = packet.getByte();
-					loggingIn = false;
 					if (id < 0)
 					{
-						connected = false;
+						c.forceDisconnect();
+						c.setCurrentMenu(new DisconnectedMenu(c));
 					}
 					else
 					{
 						connected = true;
+						computerID = id;
 					}
 				}
 			}
 		}
-		else if (signalType == 1) //Standard client signal (not a relay)
+		else if (signalType == 1)
 		{
 			byte subtype = packet.getByte();
 			if (subtype == 2)
 			{
-				loggingIn = false;
-				loggingOut = false;
-				connected = false;
+				//Server closed
+				c.forceDisconnect();
+				c.setCurrentMenu(new DisconnectedMenu(c));
+			}
+		}
+		else if (signalType == 3) //Entity information
+		{
+			byte subtype = packet.getByte();
+			if (subtype == 0)
+			{
+//				World world = c.getCurrentLevel();
+//				if (world != null)
+//				{
+//					int type = packet.getInt();
+//					int owner = packet.getInt();
+//					int id = packet.getInt();
+//					Entity e = world.getEntity(owner, id);
+//					if (e == null)
+//					{
+//						Entity entity = c.createEntity(world, type, owner, id);
+//						world.create(entity);
+//					}
+//				}
+//				world.create();
+			}
+			else if (subtype == 1)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					world.delete(packet.getInt(), packet.getInt());
+				}
+			}
+			else if (subtype == 2)
+			{
+				World world = c.getCurrentLevel();
+				if (world != null)
+				{
+					int type = packet.getInt();
+					int owner = packet.getInt();
+					int id = packet.getInt();
+					Entity e = world.getEntity(owner, id);
+					if (e == null)
+					{
+						e = c.createEntity(world, type, owner, id);
+						world.create(e);
+					}
+					e.signalReceived(packet);
+				}
 			}
 		}
 	}

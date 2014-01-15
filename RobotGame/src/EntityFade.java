@@ -15,9 +15,9 @@ public class EntityFade extends Entity
 	private float[] color;
 	
 	//Initializes a new EntityExplosion object
-	public EntityFade(Controller controller, GameMap gameMap)
+	public EntityFade(Controller controller, World world)
 	{
-		super(controller, gameMap);
+		super(controller, world);
 		radius = 0.0;
 		duration = 5;
 		life = duration;

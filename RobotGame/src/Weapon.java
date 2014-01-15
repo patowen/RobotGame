@@ -11,7 +11,8 @@ import javax.media.opengl.GL2;
 public class Weapon
 {
 	protected Controller c;
-	protected GameMap map;
+	protected World w;
+	
 	protected Player player;
 	protected InputHandler input;
 	
@@ -31,18 +32,23 @@ public class Weapon
 	/**
 	 * Constructs a Weapon object.
 	 * @param controller The Controller object.
-	 * @param gameMap The map where the player is.
+	 * @param world The world where the player is.
 	 * @param p The owner player.
 	 */
-	public Weapon(Controller controller, GameMap gameMap, Player p)
+	public Weapon(Controller controller, World world)
 	{
 		c = controller;
-		map = gameMap;
-		player = p;
+		w = world;
+		
 		input = c.getInputHandler();
 		maxEnergy = 100;
 		energy = maxEnergy;
 		energyRegen = 2.5;
+	}
+	
+	public void setPlayer(Player p)
+	{
+		player = p;
 	}
 	
 	//returns the current energy of the weapon
@@ -75,7 +81,8 @@ public class Weapon
 	 */
 	public void step(double dt)
 	{
-		
+		if (player.isLocal())
+			handleFiring(dt);
 	}
 	
 	//Recharges the energy of the weapon. This is handled entirely by the Player class
@@ -104,8 +111,7 @@ public class Weapon
 	}
 	
 	//Handles firing the weapon
-	@SuppressWarnings("unused")
-	private void handleFiring(double dt)
+	protected void handleFiring(double dt)
 	{
 		
 	}

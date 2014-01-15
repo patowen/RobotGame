@@ -4,32 +4,55 @@ import java.util.PriorityQueue;
 
 public class GuaranteedSignalReceiver
 {
-	private Network network;
+	private Controller c;
 	
 	private PriorityQueue<PendingSignal> receivedSignals;
-	private int numSignals;
 	private InetAddress sourceIP;
 	private int sourcePort;
 	
 	private long currentSignalID;
 	
-	public GuaranteedSignalReceiver(Network net, InetAddress ip, int port)
+	public GuaranteedSignalReceiver(Controller controller, InetAddress ip, int port)
 	{
-		network = net;
+		c = controller;
+		receivedSignals = new PriorityQueue<PendingSignal>(256);
+		
 		sourceIP = ip;
 		sourcePort = port;
-		
-		receivedSignals = new PriorityQueue<PendingSignal>(256);
-		numSignals = receivedSignals.size();
 		
 		currentSignalID = 0;
 	}
 	
-	private class PendingSignal
+	public void addPendingSignal(long signalID, NetworkPacket data)
 	{
-		public InetAddress ip;
-		public int port;
-		public long timestamp;
+		PendingSignal signal = new PendingSignal();
+		signal.signalID = signalID;
+		signal.setData(data);
+		receivedSignals.add(signal);
+	}
+	
+	public void step(double dt)
+	{
+		while (true)
+		{
+			PendingSignal signal = receivedSignals.peek();
+			if (signal == null)
+				break;
+			else if (signal.signalID < currentSignalID)
+				receivedSignals.remove();
+			else if (signal.signalID == currentSignalID)
+			{
+				receivedSignals.remove();
+				c.getNetwork().interpretSignal(signal.data, sourceIP, sourcePort);
+				currentSignalID++;
+			}
+			else
+				break;
+		}
+	}
+	
+	private class PendingSignal implements Comparable<PendingSignal>
+	{
 		public long signalID;
 		private NetworkPacket data;
 		
@@ -41,6 +64,11 @@ public class GuaranteedSignalReceiver
 		public void setData(NetworkPacket data)
 		{
 			this.data = data;
+		}
+		
+		public int compareTo(PendingSignal signal)
+		{
+			return (int)(signalID - signal.signalID);
 		}
 	}
 }

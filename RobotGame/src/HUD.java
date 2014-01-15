@@ -13,7 +13,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 public class HUD
 {
 	private Controller c;
-	private GameMap map;
+	private World w;
 	
 	private TextRenderer scoreRenderer;
 	private TextRenderer[] weaponsRenderers;
@@ -31,15 +31,15 @@ public class HUD
 	 * Initializes the HUD.
 	 * @param controller
 	 */
-	public HUD(Controller controller, GameMap gameMap)
+	public HUD(Controller controller, World world)
 	{
 		c = controller;
-		map = gameMap;
+		w = world;
 		
 		equivalent12 = Math.min(c.getWidth(), c.getHeight())/55;
 		
 		scoreRenderer = new TextRenderer(new Font("Time New Roman", Font.PLAIN, (int)(2*equivalent12)), true, true);
-		weaponsRenderers = new TextRenderer[map.getPlayer().getWeapons().length];
+		weaponsRenderers = new TextRenderer[w.getPlayer().getWeapons().length];
 		for(int i = 0; i < weaponsRenderers.length; i++)
 			weaponsRenderers[i] = new TextRenderer(new Font("Time New Roman", Font.PLAIN, (int)(2*equivalent12)), true, true);
 		
@@ -94,7 +94,7 @@ public class HUD
 			hitMark.step(dt);
 		}
 		
-		if (map.getPlayer().isDead() && !hitMarks.isEmpty())
+		if (w.getPlayer().isDead() && !hitMarks.isEmpty())
 			clearHitMarks();
 		
 		for (HitMark hitMark : deletionQueue)
@@ -110,7 +110,7 @@ public class HUD
 		deletionQueue.clear();
 		creationQueue.clear();
 		
-		double hp = map.getPlayer().getHP();
+		double hp = w.getPlayer().getHP();
 		if (slowHP < hp)
 			slowHP = Math.min(hp, slowHP+8*dt);
 		else if (slowHP > hp)
@@ -154,7 +154,7 @@ public class HUD
 	//Displays the health in the upper left-hand corner of the screen
 	private void drawHealthbar(GL2 gl, double width, double height)
 	{
-		double hp = map.getPlayer().getHP(), maxHP = map.getPlayer().getMaxHP();
+		double hp = w.getPlayer().getHP(), maxHP = w.getPlayer().getMaxHP();
 		double barWidth = width/9;
 		double barHeight = height/40;
 		double barSpace = width/120;
@@ -214,7 +214,7 @@ public class HUD
 	//Draws the current weapon's energy storage
 	private void drawEnergyBar(GL2 gl, double width, double height)
 	{
-		Weapon weapon = map.getPlayer().getCurrentWeapon();
+		Weapon weapon = w.getPlayer().getCurrentWeapon();
 		double energy = weapon.getEnergy();
 		double max = weapon.getMaxEnergy();
 		double shot = weapon.getEnergyUse();
@@ -282,7 +282,7 @@ public class HUD
 	//Loads the list of weapons into the weaponsList String
 	private void loadWeaponsList()
 	{
-		Weapon[] list = map.getPlayer().getWeapons();
+		Weapon[] list = w.getPlayer().getWeapons();
 		for(int i = 0; i < list.length; i++)
 		{
 			weaponsList[i] = i+1 + " "  + list[i].getName() + " ";
@@ -293,8 +293,8 @@ public class HUD
 	//Draws the weapons list to the screen and highlights the current weapon
 	private void drawWeaponsList(GL2 gl, double width, double height)
 	{
-		Weapon[] list = map.getPlayer().getWeapons();
-		Weapon current = map.getPlayer().getCurrentWeapon();
+		Weapon[] list = w.getPlayer().getWeapons();
+		Weapon current = w.getPlayer().getCurrentWeapon();
 
 		
 		for(int i = 0; i < weaponsRenderers.length; i++)

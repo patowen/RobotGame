@@ -12,9 +12,9 @@ public class AIBasic
 	protected Controller c;
 	
 	/**
-	 * The map where the enemy who holds the AI object is.
+	 * The world where the enemy who holds the AI object is.
 	 */
-	protected GameMap map;
+	protected World w;
 	
 	/**
 	 * The enemy controlled by the AI
@@ -34,13 +34,13 @@ public class AIBasic
 	/**
 	 * Constructs an AIBasic object tied to an enemy.
 	 * @param controller The controller object.
-	 * @param gameMap The map where the enemy is.
+	 * @param world The world where the enemy is.
 	 * @param e The parent enemy.
 	 */
-	public AIBasic(Controller controller, GameMap gameMap, Enemy e)
+	public AIBasic(Controller controller, World world, Enemy e)
 	{
 		c = controller;
-		map = gameMap;
+		w = world;
 		enemy = e;
 	}
 }
