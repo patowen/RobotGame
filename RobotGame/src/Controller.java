@@ -78,6 +78,7 @@ public class Controller
 		
 		initTextures(gl);
 		ModelTurret.init(gl);
+		ModelPlasmaRifle.init(gl);
 		
 		soundHandler = new SoundHandler();
 		
