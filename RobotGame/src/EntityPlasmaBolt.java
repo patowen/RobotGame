@@ -41,7 +41,7 @@ public class EntityPlasmaBolt extends Entity
 		
 		color = new float[4];
 		isDestroyed = false;
-		range = 2;
+		range = 6;
 		maxDamage = 5;
 	}
 	
@@ -140,14 +140,14 @@ public class EntityPlasmaBolt extends Entity
 		
 		for (Entity entity : w.getEntities())
 		{
-			if (entity == owner || entity == this) continue;
+			if (entity == this) continue;
 			if (!(entity instanceof Damageable)) continue;
 			
 			Damageable e = (Damageable) entity;
 			
 			double xDiff = x-e.getX();
 			double yDiff = y-e.getY();
-			double zDiff = z-e.getZ();
+			double zDiff = z+radius/2-e.getZ()-e.getRadius()/2;
 			double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
 			
 			if (distSqr < range*range)

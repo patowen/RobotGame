@@ -208,5 +208,6 @@ public class EnemyTracking extends Enemy implements Damageable
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
 		hp -= amount;
+		xV -= 4*knockBack*x/radius; yV -= 4*knockBack*y/radius; zV -= 4*knockBack*z/radius;
 	}
 }

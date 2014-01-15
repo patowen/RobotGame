@@ -17,6 +17,11 @@ public class Player extends Entity implements Damageable
 	private boolean inAir; //Flag that stores whether the player is in the air or on the ground.
 	private double floorNormX, floorNormY, floorNormZ;
 	
+	//Temporary invincibility
+	private double hpLost;
+	private double invincibilityTime;
+	private double invincibilityLeft;
+	
 	private double hp;
 	private boolean isDead;
 	
@@ -46,6 +51,10 @@ public class Player extends Entity implements Damageable
 		input = c.getInputHandler();
 		w = world;
 		inAir = true;
+		
+		invincibilityTime = 0.5;
+		invincibilityLeft = 0;
+		hpLost = 0;
 		
 		weapons = new Weapon[3];
 		weapons[0] = new PlasmaRifle(c, w);
@@ -137,7 +146,17 @@ public class Player extends Entity implements Damageable
 		
 		inAir = true;
 		
-		hp -= amount;
+		if (invincibilityLeft <= 0)
+		{
+			hp -= amount;
+			invincibilityLeft = invincibilityTime;
+			hpLost = amount;
+		}
+		else if (amount > hpLost)
+		{
+			hp -= amount-hpLost;
+			hpLost = amount;
+		}
 		
 		//Calculate hit mark angle
 		double temp = x*Math.cos(horizontalDir) + y*Math.sin(horizontalDir);
@@ -248,6 +267,7 @@ public class Player extends Entity implements Damageable
 		
 		if (!isDead)
 		{
+			invincibilityLeft -= dt;
 			handleLooking();
 			handleJumping(dt);
 			handleMovement(dt);

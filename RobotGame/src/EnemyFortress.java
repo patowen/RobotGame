@@ -184,6 +184,7 @@ public class EnemyFortress extends Enemy implements Damageable
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
 		hp -= amount;
+		xV -= 0.5*knockBack*x/radius; yV -= 0.5*knockBack*y/radius; zV -= 0.5*knockBack*z/radius;
 	}
 	
 	/**

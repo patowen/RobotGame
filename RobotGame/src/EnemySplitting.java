@@ -5,6 +5,8 @@
 public class EnemySplitting extends EnemyShocking
 {
 	private double stage;
+	private double xDir = 0;
+	private double yDir = 0;
 	
 	/**
 	 * Standard constructor, uses 8 as a default size
@@ -14,7 +16,7 @@ public class EnemySplitting extends EnemyShocking
 	public EnemySplitting(Controller c, World world)
 	{
 		super(c, world);
-		setStage(3.5);
+		setStage(1/.7/.7);
 	}
 	
 	public void setStage(double stage)
@@ -23,17 +25,17 @@ public class EnemySplitting extends EnemyShocking
 		setRadius(0.2*stage);
 		double maxSpeed;
 		
-		if (stage == 3.5)
+		if (stage > 1.6)
 		{
-			maxSpeed = 3.9;
+			maxSpeed = 4;
 		}
-		else if (stage < 1.5)
+		else if (stage > 1.3)
 		{
-			maxSpeed = 7;
+			maxSpeed = 5;
 		}
 		else
 		{
-			maxSpeed = 4;
+			maxSpeed = 7;
 		}
 		
 		ai.setControls(maxSpeed, 2, 0, 0, 6, 1, 0.4, 1, 0, 0, 1);
@@ -45,24 +47,28 @@ public class EnemySplitting extends EnemyShocking
 		
 	}
 	
+	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
+	{
+		super.applyDamage(amount, x, y, z, knockBack, absolute);
+		xDir = x; yDir = y;
+	}
+	
 	public void destroy()
 	{
-		if (stage > 1)
+		if (stage > 1.1)
 		{
 			EnemySplitting temp1 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
 			EnemySplitting temp2 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
-			temp1.setPosition(x, y, z);
-			temp2.setPosition(x, y, z);
 			temp1.setStage(stage*.7);
 			temp2.setStage(stage*.7);
-			Player target = w.getPlayer();
-			double xDir = target.getX() - x;
-			double yDir = target.getY() - y;
+			temp1.setPosition(x, y, z+height/2 - temp1.getHeight()/2);
+			temp2.setPosition(x, y, z+height/2 - temp2.getHeight()/2);
+			
 			double mag = Math.sqrt(xDir*xDir + yDir*yDir);
 			xDir/=mag; yDir/=mag; 
-			double vel = 2;
-			temp1.setVelocity(xDir*vel, -yDir*vel, 0);
-			temp2.setVelocity(-xDir*vel, yDir*vel, 0);
+			double vel = 4;
+			temp1.setVelocity(xV + yDir*vel, yV - xDir*vel, 0);
+			temp2.setVelocity(xV - yDir*vel, yV + xDir*vel, 0);
 			
 			w.create(temp1);
 			w.create(temp2);

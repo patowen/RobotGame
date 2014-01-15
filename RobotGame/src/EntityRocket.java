@@ -117,7 +117,7 @@ public class EntityRocket extends Entity implements Damageable
 				
 				double xDiff = x-e.getX();
 				double yDiff = y-e.getY();
-				double zDiff = z-e.getZ();
+				double zDiff = z+height/2-e.getZ()-e.getHeight()/2;
 				double distSqr = xDiff*xDiff + yDiff*yDiff + zDiff*zDiff;
 				
 				if (distSqr < range*range)

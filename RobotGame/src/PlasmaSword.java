@@ -87,10 +87,7 @@ public class PlasmaSword extends Weapon
 			horizontalDir+= ht;
 			verticalDir+=vt;
 			ht-=hstep;
-			vt-=vstep;
-			
-			
-			
+			vt-=vstep;			
 			
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);

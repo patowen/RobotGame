@@ -108,7 +108,7 @@ public class World
 		for (int i=0; i<NUM_DIFFICULTIES; i++)
 			waves.add(new ArrayList<SpawningWave>());
 		
-		difficulty = 0;
+		difficulty = 3;
 		currentWave = null;
 		
 		FileReader reader = new FileReader();
