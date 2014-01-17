@@ -81,7 +81,6 @@ public class PlasmaLauncher extends Weapon
 	{
 		spin += 1+ Math.max(charge+1, 0)*5;
 		
-		//Gamejolt.com
 		//Color
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {.7f, .8f, .8f,1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, new float[] {0,0,0,1}, 0);
