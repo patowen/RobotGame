@@ -27,7 +27,7 @@ public class GuaranteedSignalReceiver
 	{
 		PendingSignal signal = new PendingSignal();
 		signal.signalID = signalID;
-		signal.setData(data);
+		signal.data = data;
 		receivedSignals.add(signal);
 	}
 	
@@ -54,17 +54,7 @@ public class GuaranteedSignalReceiver
 	private class PendingSignal implements Comparable<PendingSignal>
 	{
 		public long signalID;
-		private NetworkPacket data;
-		
-		public NetworkPacket getData()
-		{
-			return data.duplicate();
-		}
-		
-		public void setData(NetworkPacket data)
-		{
-			this.data = data;
-		}
+		public NetworkPacket data;
 		
 		public int compareTo(PendingSignal signal)
 		{

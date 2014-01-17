@@ -13,7 +13,6 @@ public class GuaranteedSignalSender
 	private int numSignals;
 	
 	private final double pokesPerSecond;
-	private final long timeout; //in milliseconds
 	
 	private double pokesRemaining;
 	
@@ -27,7 +26,6 @@ public class GuaranteedSignalSender
 		numSignals = 0;
 		
 		pokesPerSecond = 5;
-		timeout = 10000;
 		
 		pokesRemaining = 0;
 	}
@@ -49,16 +47,11 @@ public class GuaranteedSignalSender
 	}
 	
 	public void addGuaranteedSignal(Network network, NetworkPacket data, InetAddress ip, int port)
-	{
-		//This creates the beginning of the packet. It needs to be completed by the
-		//sender of the guaranteed signal
-		long timestamp = System.currentTimeMillis();
-		
+	{		
 		Node node = new Node();
 		PendingSignal signal = new PendingSignal();
 		signal.setData(data);
 		signal.ip = ip;
-		signal.timestamp = timestamp;
 		signal.port = port;
 		signal.signalID = network.createSignalID(ip, port);
 		node.signal = signal;
@@ -79,9 +72,7 @@ public class GuaranteedSignalSender
 	}
 	
 	public synchronized void step(double dt)
-	{
-		long time = System.currentTimeMillis();
-		
+	{		
 		pokesRemaining += numSignals*pokesPerSecond*dt;
 		int pokesRemainingInt = (int)pokesRemaining;
 		pokesRemaining -= pokesRemainingInt;
@@ -98,18 +89,7 @@ public class GuaranteedSignalSender
 			}
 			else
 			{
-				if (time - currentSignal.signal.timestamp > timeout)
-				{
-					if (!c.isServer())
-					{
-						reset();
-						c.forceDisconnect();
-						if (c.isMultiplayer())
-							c.setCurrentMenu(new DisconnectedMenu(c));
-					}
-				}
-				else
-					poke();
+				poke();
 			}
 			
 			if (currentSignal == null)
@@ -170,7 +150,6 @@ public class GuaranteedSignalSender
 	{
 		public InetAddress ip;
 		public int port;
-		public long timestamp;
 		public long signalID;
 		private NetworkPacket data;
 		

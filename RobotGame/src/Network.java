@@ -17,9 +17,9 @@ import java.util.ArrayList;
  * [1, 2]: Server closed
  * 
  * Entity signals:
- * [3, 0, entity_type, owner, entity_id]: Spawn entity (Relayed with [0, 3, 0, 0, entity_id])
  * [3, 1, owner, entity_id]: Remove entity
- * [3, 2, owner, entity_id, x, y, z, xV, yV, zV, appendix]: Move entity, not relayed
+ * [3, 2, entity_type, owner, entity_id, data]: Move entity (or spawn)
+ * [3, 3, owner, entity_id, data]: Entity event (to be sent to local entity)
  */
 
 public abstract class Network

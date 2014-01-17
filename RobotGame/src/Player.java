@@ -36,7 +36,7 @@ public class Player extends Entity implements Damageable
 	private double stepDownHeight;
 	private double maxHp;
 	
-	private Weapon currentWeapon;
+	private int currentWeapon;
 	private Weapon[] weapons;
 	
 	/**
@@ -64,7 +64,7 @@ public class Player extends Entity implements Damageable
 		for (int i=0; i<weapons.length; i++)
 			weapons[i].setPlayer(this);
 		
-		currentWeapon = weapons[0];
+		currentWeapon = 0;
 		
 		terrainTolerance = 0.5;
 		radius = 0.2;
@@ -83,6 +83,31 @@ public class Player extends Entity implements Damageable
 		isDead = false;
 	}
 	
+	protected void readState(NetworkPacket data)
+	{
+		super.readState(data);
+		
+		horizontalDir = data.getDouble();
+		verticalDir = data.getDouble();
+		currentWeapon = data.getInt();
+		hp = data.getDouble();
+		isDead = data.getByte() != 0;
+		
+		weapons[currentWeapon].readState(data);
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		super.writeState(data);
+		
+		data.addDoubles(horizontalDir, verticalDir);
+		data.addInt(currentWeapon);
+		data.addDouble(hp);
+		data.addByte(isDead?1:0);
+		
+		weapons[currentWeapon].writeState(data);
+	}
+	
 	/**
 	 * Draws the player
 	 * @param gl
@@ -99,7 +124,7 @@ public class Player extends Entity implements Damageable
 				glut.glutSolidCylinder(radius, height, 12, 1);
 				gl.glPopMatrix();
 			}
-			currentWeapon.draw(gl);
+			weapons[currentWeapon].draw(gl);
 		}
 	}
 	
@@ -111,7 +136,7 @@ public class Player extends Entity implements Damageable
 	public void draw2(GL2 gl)
 	{
 		if(!isDead)
-			currentWeapon.draw2(gl);
+			weapons[currentWeapon].draw2(gl);
 	}
 	
 	public boolean isGhost()
@@ -131,6 +156,9 @@ public class Player extends Entity implements Damageable
 	 */
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
+		if (!isLocal)
+			return;
+		
 		if (absolute)
 		{
 			xV = -knockBack*x;
@@ -217,7 +245,7 @@ public class Player extends Entity implements Damageable
 	 */
 	public Weapon getCurrentWeapon()
 	{
-		return currentWeapon;
+		return weapons[currentWeapon];
 	}
 	
 	/**
@@ -323,17 +351,17 @@ public class Player extends Entity implements Damageable
 	{
 		if (isLocal)
 		{
-			if (input.getKey(InputHandler.WEAPON1) && currentWeapon != weapons[0])
-				currentWeapon = weapons[0];
-			if (input.getKey(InputHandler.WEAPON2) && currentWeapon != weapons[1])
-				currentWeapon = weapons[1];
-			if (input.getKey(InputHandler.WEAPON3) && currentWeapon != weapons[2])
-				currentWeapon = weapons[2];
+			if (input.getKey(InputHandler.WEAPON1) && currentWeapon != 0)
+				currentWeapon = 0;
+			if (input.getKey(InputHandler.WEAPON2) && currentWeapon != 1)
+				currentWeapon = 1;
+			if (input.getKey(InputHandler.WEAPON3) && currentWeapon != 2)
+				currentWeapon = 2;
 		}
 		for(Weapon w : weapons)
 			w.recharge(dt);
-		currentWeapon.setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
-		currentWeapon.step(dt);
+		weapons[currentWeapon].setPosition(x, y, z+eyeHeight, horizontalDir, verticalDir);
+		weapons[currentWeapon].step(dt);
 	}
 	
 	

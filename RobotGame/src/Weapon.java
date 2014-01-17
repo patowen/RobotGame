@@ -46,6 +46,16 @@ public class Weapon
 		energyRegen = 2.5;
 	}
 	
+	protected void readState(NetworkPacket data)
+	{
+		energy = data.getDouble();
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		data.addDouble(energy);
+	}
+	
 	public void setPlayer(Player p)
 	{
 		player = p;

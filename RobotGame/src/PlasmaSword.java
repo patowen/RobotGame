@@ -49,6 +49,23 @@ public class PlasmaSword extends Weapon
 		energyUse = 5;
 	}
 	
+	protected void readState(NetworkPacket data)
+	{
+		super.readState(data);
+		
+		ht = data.getDouble();
+		vt = data.getDouble();
+		currentstep = data.getInt();
+	}
+	
+	protected void writeState(NetworkPacket data)
+	{
+		super.writeState(data);
+		
+		data.addDoubles(ht, vt);
+		data.addInt(currentstep);
+	}
+	
 	/**
 	 * Calls Weapon's setPosition but slightly decrements Z so that the sword is swung below eye level
 	 */
@@ -62,6 +79,9 @@ public class PlasmaSword extends Weapon
 	//Handles sword swing
 	protected void handleFiring(double dt)
 	{
+		if (!player.isLocal())
+			return;
+		
 		//Fire if the mouse button is pressed.
 		if (input.getMouseButton(InputHandler.FIRE) && charge <= 0 && energy >= energyUse)
 		{
@@ -158,10 +178,16 @@ public class PlasmaSword extends Weapon
 	 * @param gl
 	 */
 	public void draw(GL2 gl)
-	{
+	{		
 		if(currentstep < steps)
 		{
 			GLUT glut = new GLUT();
+			
+			if (!player.isLocal())
+			{
+				horizontalDir += ht;
+				verticalDir += vt;
+			}
 			
 			//Color
 			gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {1,1,1,1}, 0);

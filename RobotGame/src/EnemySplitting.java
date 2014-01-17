@@ -55,27 +55,30 @@ public class EnemySplitting extends EnemyShocking
 	
 	public void destroy()
 	{
-		if (stage > 1.1)
+		if (isLocal)
 		{
-			EnemySplitting temp1 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
-			EnemySplitting temp2 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
-			temp1.setStage(stage*.7);
-			temp2.setStage(stage*.7);
-			temp1.setPosition(x, y, z+height/2 - temp1.getHeight()/2);
-			temp2.setPosition(x, y, z+height/2 - temp2.getHeight()/2);
-			
-			double mag = Math.sqrt(xDir*xDir + yDir*yDir);
-			xDir/=mag; yDir/=mag; 
-			double vel = 4;
-			temp1.setVelocity(xV + yDir*vel, yV - xDir*vel, 0);
-			temp2.setVelocity(xV - yDir*vel, yV + xDir*vel, 0);
-			
-			w.create(temp1);
-			w.create(temp2);
-		}
-		else
-		{
-			c.addScore(50);
+			if (stage > 1.1)
+			{
+				EnemySplitting temp1 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
+				EnemySplitting temp2 = (EnemySplitting)c.createEntity(w, EI.EnemySplitting);
+				temp1.setStage(stage*.7);
+				temp2.setStage(stage*.7);
+				temp1.setPosition(x, y, z+height/2 - temp1.getHeight()/2);
+				temp2.setPosition(x, y, z+height/2 - temp2.getHeight()/2);
+				
+				double mag = Math.sqrt(xDir*xDir + yDir*yDir);
+				xDir/=mag; yDir/=mag; 
+				double vel = 4;
+				temp1.setVelocity(xV + yDir*vel, yV - xDir*vel, 0);
+				temp2.setVelocity(xV - yDir*vel, yV + xDir*vel, 0);
+				
+				w.create(temp1);
+				w.create(temp2);
+			}
+			else
+			{
+				c.addScore(50);
+			}
 		}
 		
 		delete();

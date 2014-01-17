@@ -83,7 +83,8 @@ public class EnemyShocking extends Enemy implements Damageable
 			anger = 0;
 		}
 		
-		handleShocking(dt);
+		if (isLocal)
+			handleShocking(dt);
 		ai.performAI(dt);
 		
 		if (hp <= 0)

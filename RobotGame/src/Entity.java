@@ -19,6 +19,8 @@ public class Entity
 	protected double xPrevious, yPrevious, zPrevious;
 	protected World w;
 	
+	private int lastUpdated;
+	
 	/**
 	 * Creates a new Entity.
 	 * @param controller The active Controller object.
@@ -49,6 +51,8 @@ public class Entity
 			owner = 0;
 		id = w.generateEntityID();
 		
+		lastUpdated = 0;
+		
 //		if (c.isMultiplayer() && c.isServer())
 //		{
 //			NetworkPacket data = new NetworkPacket(256);
@@ -64,6 +68,8 @@ public class Entity
 		this.type = type;
 		this.owner = owner;
 		this.id = id;
+		
+		lastUpdated = -1;
 	}
 	
 	public int getOwner()
@@ -133,6 +139,17 @@ public class Entity
 		data.addDoubles(x, y, z, xV, yV, zV);
 	}
 	
+	protected void interpretEvent(NetworkPacket data)
+	{
+		
+	}
+	
+	protected void sendEvent(NetworkPacket data)
+	{
+		NetworkPacket packet = new NetworkPacket(data.length()+3);
+		packet.addBytes(3, 3);
+	}
+	
 	/**
 	 * Handles changes to the entity based on signals received by it.
 	 * @param signalType The kind of signal being sent.
@@ -141,7 +158,12 @@ public class Entity
 	 */
 	public void signalReceived(NetworkPacket data)
 	{
-		readState(data);
+		int updateNumber = data.getInt();
+		if (updateNumber > lastUpdated)
+		{
+			updateNumber = lastUpdated;
+			readState(data);
+		}
 		isActive = true;
 	}
 	
@@ -150,6 +172,7 @@ public class Entity
 		NetworkPacket data = new NetworkPacket(256);
 		data.addBytes(3, 2);
 		data.addInts(type, owner, id);
+		data.addInt(lastUpdated++);
 		writeState(data);
 		if (c.isServer())
 			c.getServer().sendEntityDataNormal(data);

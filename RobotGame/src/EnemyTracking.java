@@ -90,7 +90,7 @@ public class EnemyTracking extends Enemy implements Damageable
 		
 		if (w.getPlayer().isDead()) return;
 		
-		if (charge < 0 && noFriendlyFire())
+		if (isLocal && charge < 0 && noFriendlyFire())
 		{
 			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
