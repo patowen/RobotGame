@@ -82,7 +82,7 @@ public class PlasmaRifle extends Weapon
 	{
 		//Color
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {.7f, .8f, .8f,1}, 0);
-		//gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, new float[] {0,0,0,1}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, new float[] {0,0,0,1}, 0);
 
 		double xDisp = shotX*Math.cos(verticalDir) - shotZ*Math.sin(verticalDir);
 		double zDisp = shotX*Math.sin(verticalDir) + shotZ*Math.cos(verticalDir);
@@ -94,8 +94,7 @@ public class PlasmaRifle extends Weapon
 		gl.glTranslated(x+ xDisp, y + yDisp, z+ zDisp);
 		gl.glRotated(horizontalDir*180/Math.PI + 180, 0, 0, 1);
 		gl.glRotated(verticalDir*180/Math.PI + 90, 0, 1, 0);
-		gl.glTranslated(0,  0, .5);
-		gl.glTranslated(0, 0, .1);
+		gl.glTranslated(0,  0, .6);
 		gl.glRotated(270, 0, 1, 0);
 		
 		ModelPlasmaRifle.draw(gl);
@@ -122,7 +121,7 @@ public class PlasmaRifle extends Weapon
 		gl.glRotated(horizontalDir*180/Math.PI + 180, 0, 0, 1);
 		gl.glRotated(verticalDir*180/Math.PI + 90, 0, 1, 0);
 		gl.glTranslated(0, 0, .5);
-		glut.glutSolidSphere(.02*Math.min((shotDelay-charge), shotDelay)/shotDelay, 24, 8);
+		glut.glutSolidSphere(.02*Math.min(energy, energyUse)/energyUse, 24, 8);
 		
 		gl.glPopMatrix();
 	}
