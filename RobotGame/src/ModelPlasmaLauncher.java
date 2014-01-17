@@ -12,7 +12,7 @@ import com.jogamp.common.nio.Buffers;
  * @author Michael Ekstrom
  * @author Patrick Owen
  */
-public class ModelPlasmaRifle
+public class ModelPlasmaLauncher
 {
 	//Gun Barrel constants
 	private static int stacks;
@@ -30,6 +30,7 @@ public class ModelPlasmaRifle
 	private static int hslices;
 	private static float hbigrad;
 	private static float hsmallrad;
+	private static float harc;
 	
 	private static FloatBuffer hookpts;
 	private static FloatBuffer hooknormals;
@@ -57,7 +58,7 @@ public class ModelPlasmaRifle
 		gl.glDepthFunc(GL2.GL_LEQUAL);
 		
 		stacks = 20; orbStacks = 10;
-		slices = 20; phiCutoff = .8;
+		slices = 20; phiCutoff = .775;
 		
 		length = .2f;//length of the ellipse
 		width = 0.045f;//maximum width of the ellipse
@@ -103,6 +104,7 @@ public class ModelPlasmaRifle
 		hslices = 20;
 		hbigrad = .04f;
 		hsmallrad = .01f;
+		harc = .75f;
 		
 		hookpts = Buffers.newDirectFloatBuffer(6*hstacks*hslices);
 		hooknormals = Buffers.newDirectFloatBuffer(6*hstacks*hslices);
@@ -110,7 +112,7 @@ public class ModelPlasmaRifle
 		
 		for(int i = 0; i < hstacks; i++)
 		{
-			double ttheta = i* Math.PI/hstacks; //theta around the torus semicircle
+			double ttheta = i* Math.PI/hstacks*harc; //theta around the torus semicircle
 			
 			for(int j = 0; j < hslices; j++)
 			{
@@ -125,7 +127,7 @@ public class ModelPlasmaRifle
 	//Creates and stores a point for the hook
 	private static void storePointHook(double ttheta, double htheta, GL2 gl)
 	{
-		double small = (ttheta-Math.PI)/-Math.PI * hsmallrad;
+		double small = (ttheta/(harc*1.025)-Math.PI)/-Math.PI * hsmallrad;
 		float x = (float)((hbigrad+small*Math.cos(htheta))*Math.cos(ttheta));
 		float y = (float)((hbigrad+small*Math.cos(htheta))*Math.sin(ttheta));
 		float z = (float)(small*Math.sin(htheta));
@@ -214,17 +216,30 @@ public class ModelPlasmaRifle
 		gl.glNormalPointer(GL2.GL_FLOAT, 0, normals);
 		gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, 2 * (stacks+orbStacks) * (slices+1));
 		
-		gl.glRotated(40, 1, 0, 0);
+		gl.glRotated(220, 1, 0, 0);
 		gl.glTranslated(-.09, 0, 0);
+		drawHook(gl);
+		gl.glRotated(120, 1, 0, 0);
+		drawHook(gl);
+		gl.glRotated(120, 1, 0, 0);
+		drawHook(gl);
 		
+		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glPopMatrix();
+	}
+	
+	/**
+	 * Draws a hook with the FloatBuffer. Assumes float and normal client states
+	 * are enabled
+	 * @param gl
+	 */
+	public static void drawHook(GL2 gl)
+	{
 		hookpts.rewind();
 		hooknormals.rewind();
 		gl.glVertexPointer(3, GL.GL_FLOAT, 0, hookpts);
 		gl.glNormalPointer(GL.GL_FLOAT, 0, hooknormals);
 		gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, 2*hslices*hstacks);
-		
-		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-		gl.glPopMatrix();
 	}
 }
