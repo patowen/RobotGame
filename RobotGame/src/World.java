@@ -36,6 +36,9 @@ public class World
 	private ArrayBlockingQueue<Identification> antiEntityQueue;
 	private int nextEntityID;
 	
+	//Entity Creation Listener objects
+	private ArrayList<EntityCreationListener> eclisteners;
+	
 	//Death
 	private double deathWait;
 	private double deathDuration;
@@ -89,6 +92,8 @@ public class World
 		entities = new ArrayList<Entity>();
 		deletionQueue = new ArrayList<Entity>();
 		creationQueue = new ArrayList<Entity>();
+		
+		eclisteners = new ArrayList<EntityCreationListener>();
 		
 		entityMap = new HashMap<Identification, Entity>(1024);
 		antiEntitySet = new HashSet<Identification>(64);
@@ -188,6 +193,15 @@ public class World
 	}
 	
 	/**
+	 * Adds a new ECL object to the World's ArrayList
+	 * @param ecl
+	 */
+	public void addEntityCreationListener(EntityCreationListener ecl)
+	{
+		eclisteners.add(ecl);
+	}
+	
+	/**
 	 * Returns the current gravity of the world
 	 */
 	public double getGravity()
@@ -242,6 +256,9 @@ public class World
 			creationQueue.add(e);
 			entityMap.put(new Identification(e.getOwner(), e.getID()), e);
 		}
+		
+		for(EntityCreationListener ecl: eclisteners)
+			ecl.entityCreated(e);
 	}
 	
 	public int generateEntityID()

@@ -59,7 +59,7 @@ public class PlasmaRifle extends Weapon
 				int vel = 60;
 				
 				bullet.setVelocity(vel*xDir, vel*yDir, vel*zDir);
-				bullet.setDamage(1, 2);
+				bullet.setDamage(1, 1);//damage, knockback
 				bullet.setColor(0, 1, 0);
 				
 				bullet.setOwner(player);

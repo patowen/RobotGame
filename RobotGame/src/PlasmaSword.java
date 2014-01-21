@@ -11,7 +11,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
  * @author Michael Ekstrom
  * @author Patrick Owen
  */
-public class PlasmaSword extends Weapon
+public class PlasmaSword extends Weapon implements EntityCreationListener
 {
 	private ArrayList<Damageable> hit = new ArrayList<Damageable>();//List of entities the sword has already hit
 	
@@ -36,6 +36,8 @@ public class PlasmaSword extends Weapon
 	public PlasmaSword(Controller controller, World world)
 	{
 		super(controller, world);
+		world.addEntityCreationListener(this);
+		
 		name = "Laser Sword";
 		
 		shotDelay = .4;
@@ -43,7 +45,7 @@ public class PlasmaSword extends Weapon
 		steps = 15;
 		currentstep = steps;
 		bladelength = 3;
-		knockback = 10;
+		knockback = 1;
 		damage = 2;
 		arclength = .4;
 		energyUse = 5;
@@ -74,6 +76,18 @@ public class PlasmaSword extends Weapon
 		super.setPosition(xPos, yPos, zPos, hDir, vDir);
 		z-=.1;
 		verticalDir+=.05;
+	}
+	
+	/**
+	 * Implements entityCreated from EntityCreationListener interface.
+	 * Adds the new entity to the hit list if and only if the sword
+	 * is currently being swung and the entity can be damaged
+	 * @param e new entity object
+	 */
+	public void entityCreated(Entity e)
+	{
+		if(currentstep < steps && e instanceof Damageable)
+			hit.add((Damageable) e);
 	}
 	
 	//Handles sword swing

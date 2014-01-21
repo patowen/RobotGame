@@ -79,7 +79,7 @@ public class PlasmaLauncher extends Weapon
 	//Draws the gun
 	public void draw(GL2 gl)
 	{
-		spin += 1+ Math.max(charge+1, 0)*5;
+		spin += 1+ Math.max(charge+1, 0)*7.5;
 		
 		//Color
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {.7f, .8f, .8f,1}, 0);

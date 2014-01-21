@@ -34,7 +34,7 @@ public class EntityPlasmaBolt extends Entity
 		
 		radius = 0.1; radius2 = 0.2;
 		damage = 5;
-		knockback = 20;
+		knockback = 5;
 		xV = 0;
 		yV = 0;
 		zV = 0;
