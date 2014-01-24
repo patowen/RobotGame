@@ -238,8 +238,8 @@ public class ModelPlasmaLauncher
 	{
 		hookpts.rewind();
 		hooknormals.rewind();
-		gl.glVertexPointer(3, GL.GL_FLOAT, 0, hookpts);
-		gl.glNormalPointer(GL.GL_FLOAT, 0, hooknormals);
+		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, hookpts);
+		gl.glNormalPointer(GL2.GL_FLOAT, 0, hooknormals);
 		gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, 2*hslices*hstacks);
 	}
 }
