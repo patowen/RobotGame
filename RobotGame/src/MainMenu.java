@@ -51,8 +51,7 @@ public class MainMenu extends Menu
 	{
 		if (item == startButton)
 		{
-			//c.setCurrentLevel("arena.txt");
-			c.setCurrentLevel("testingmap.txt");
+			c.setCurrentLevel("arena.txt");
 		}
 		else if (item == multiplayerButton)
 			c.setCurrentMenu(new MultiplayerMenu(c));
