@@ -127,7 +127,7 @@ public class EntityRocket extends Entity implements Damageable
 					double totalKB = knockback/distSqr;
 					
 					if (totalDamage > maxDamage) totalDamage = maxDamage;
-					if (totalKB > knockback) totalKB = knockback;
+					if(Math.abs(totalKB) > Math.abs(knockback)) totalKB = knockback;
 					e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, totalKB, false);
 				}
 			}

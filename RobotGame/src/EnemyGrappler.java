@@ -1,8 +1,11 @@
 import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.gl2.GLUT;
+
 /**
- * The tracking enemy: it floats at a preferred distance from the player and shoots at him/her, tracking
- * velocity as well as position.
+ * Crowd Control Enemy. Fires Plasmabolts from two guns that have negative knockback,
+ * drawing entities towards the explosion. Does very low damage, but can slow down the 
+ * player and draw other enemies towards them.
  * @author Patrick Owen
  */
 public class EnemyGrappler extends Enemy implements Damageable
@@ -16,12 +19,18 @@ public class EnemyGrappler extends Enemy implements Damageable
 	private double shotDelay;
 	private double range;
 	
+	private double shotX;
+	private double shotY;
+	private double shotZ;
+	
 	//Controls
 	private double horizontalDir;
 	private double verticalDir;
 	private double charge;
 	
 	private AITracking ai;
+	private boolean flip;
+	private double spin = 0;
 	
 	/**
 	 * Creates a new EnemyTurret.
@@ -33,15 +42,19 @@ public class EnemyGrappler extends Enemy implements Damageable
 		super(controller, world);
 		
 		radius = 0.5;
-		height = 0.8;
+		height = 1;
 		
 		horizontalDir = 3*Math.PI/2;
 		verticalDir = 0;
 		xV = 0;
 		yV = 0;
 		zV = 0;
+		shotX = .15;
+		shotY = 0;
+		shotZ = -.25;
+		flip = true;
 		
-		shotDelay = 1.0/2;
+		shotDelay = 2;
 		shotHeight = 0.4;
 		shotDistance = 0.4;
 		shotSpeed = 20;
@@ -50,9 +63,9 @@ public class EnemyGrappler extends Enemy implements Damageable
 		charge = shotDelay;
 		
 		ai = new AITracking(c, w, this);
-		ai.setControls(5, 1, 3, 9, 6, 1, 1, 1, 1, 3, 1);
+		ai.setControls(5, 1, 6, 9, 6, 1, 1, 1, 1, 3, 1);
 		
-		hp = 2;
+		hp = 10;
 	}
 	
 	public double getRadius()
@@ -71,16 +84,28 @@ public class EnemyGrappler extends Enemy implements Damageable
 	public void step(double dt)
 	{
 		super.step(dt);
-		
 		handleShooting(dt);
 		handleLooking(dt);
 		ai.performAI(dt);
 		
 		if (hp <= 0)
 		{
-			c.addScore(500);
+			c.addScore(1000);
 			delete();
 		}
+	}
+	
+	/**
+	 * Modifies the shotX, shotY, and shotZ values so that the 
+	 * weapon switches positions each shot
+	 */
+	private void handleShotOrigin()
+	{
+		if(flip)
+			shotY = .475;
+		else
+			shotY = -.475;
+		flip = !flip;
 	}
 	
 	//Handles the turret firing its bullets
@@ -92,19 +117,32 @@ public class EnemyGrappler extends Enemy implements Damageable
 		
 		if (charge < 0 && noFriendlyFire())
 		{
-			EntityBullet bullet = (EntityBullet)c.createEntity(w, EI.EntityBullet);
+			handleShotOrigin();
+			EntityPlasmaBolt beam = (EntityPlasmaBolt)c.createEntity(w, EI.EntityPlasmaBolt);
 			double xDir = Math.cos(horizontalDir)*Math.cos(verticalDir),
 					yDir = Math.sin(horizontalDir)*Math.cos(verticalDir), zDir = Math.sin(verticalDir);
-			bullet.setPosition(x+xDir*shotDistance, y+yDir*shotDistance, z+zDir*shotDistance+shotHeight);
-			bullet.setVelocity(shotSpeed*xDir, shotSpeed*yDir, shotSpeed*zDir);
-			bullet.setDamage(1, 4);
-			bullet.setColor(1, 0.5f, 0f);
-			bullet.setOwner(this);
 			
-			c.getSoundHandler().playSound(0, x, y, z);
-			w.create(bullet);
+			double xDisp = shotX*Math.cos(verticalDir) - shotZ*Math.sin(verticalDir);
+			double zDisp = shotX*Math.sin(verticalDir) + shotZ*Math.cos(verticalDir);
 			
-			charge = shotDelay;
+			double yDisp = xDisp*Math.sin(horizontalDir) - shotY*Math.cos(horizontalDir);
+			xDisp = xDisp*Math.cos(horizontalDir) + shotY*Math.sin(horizontalDir);
+			
+			double t = w.getCollision().getBulletCollision(x, y, z, xDisp, yDisp, zDisp);
+			
+			if(t == 1)
+			{
+				beam.setPosition(x+xDir*shotDistance+xDisp, y+yDir*shotDistance+yDisp, z+zDir*shotDistance+shotHeight+zDisp);
+				beam.setVelocity(shotSpeed*xDir, shotSpeed*yDir, shotSpeed*zDir);
+				beam.setColor(.75f, 0.75f, 1f);
+				beam.setDamage(.25, -20);
+				beam.setOwner(this);
+				
+				c.getSoundHandler().playSound(0, x, y, z);
+				w.create(beam);
+			
+				charge = shotDelay;
+			}
 		}
 	}
 	
@@ -186,28 +224,52 @@ public class EnemyGrappler extends Enemy implements Damageable
 	
 	public void draw(GL2 gl)
 	{
+		GLUT glut = new GLUT();
+		spin+=3;
 		//Color
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {0.9f,0.8f,0.8f,1}, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {0.6f,0.7f,0.9f,1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[] {0.4f,0.4f,0.4f,1}, 0);
 		gl.glMaterialf(GL2.GL_FRONT, GL2.GL_SHININESS, 8);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_EMISSION, new float[] {0,0,0,1}, 0);
 		
 		gl.glPushMatrix();
 		
-		gl.glTranslated(x, y, z+shotHeight);
+		gl.glTranslated(x, y, z+height*.65);
 		gl.glRotated(horizontalDir*180/Math.PI + 180, 0, 0, 1);
 		gl.glRotated(verticalDir*180/Math.PI, 0, 1, 0);
 		
-		ModelTurret.draw(gl);
+		glut.glutSolidSphere(radius/1.5, 24, 8);
+		gl.glTranslated(.1, 0, 0);
+		
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {0.5f,0.5f,0.6f,1}, 0);
+		
+		gl.glPushMatrix();
+		gl.glRotated(-45, 1, 0, 0);
+		gl.glTranslated(0, radius/2.4, 0);
+		ModelSawHook.draw(gl);
+		gl.glTranslated(-.55, .46, 0);
+		gl.glRotated(spin, 1, 0, 0);
+		ModelPlasmaLauncherBig.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		gl.glRotated(-135, 1, 0, 0);
+		gl.glTranslated(0, radius/2.4, 0);
+		ModelSawHook.draw(gl);
+		gl.glTranslated(-.55, .46, 0);
+		gl.glRotated(-spin, 1, 0, 0);
+		ModelPlasmaLauncherBig.draw(gl);
+		gl.glPopMatrix();
 		
 		gl.glPopMatrix();
 		
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[] {0,0,0,1}, 0);
 	}
-
+	
+	//Apply damage and knockback. EnemyGrappler is highly resistant to knockback effects
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)
 	{
 		hp -= amount;
-		xV -= 4*knockBack*x/radius; yV -= 4*knockBack*y/radius; zV -= 4*knockBack*z/radius;
+		xV -= .4*knockBack*x/radius; yV -= .4*knockBack*y/radius; zV -= .4*knockBack*z/radius;
 	}
 }

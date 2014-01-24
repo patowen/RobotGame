@@ -42,7 +42,7 @@ public class EntityPlasmaBolt extends Entity
 		color = new float[4];
 		isDestroyed = false;
 		range = 6;
-		maxDamage = 5;
+		maxDamage = damage;
 	}
 	
 	/**
@@ -63,6 +63,7 @@ public class EntityPlasmaBolt extends Entity
 	public void setDamage(double newDamage, double newKnockBack)
 	{
 		damage = newDamage;
+		maxDamage = damage;
 		knockback = newKnockBack;
 	}
 	
@@ -132,7 +133,7 @@ public class EntityPlasmaBolt extends Entity
 		isDestroyed = true;
 		
 		EntityFade blast = (EntityFade)c.createEntity(w, EI.EntityFade);
-		blast.setColor(.2f, .8f, 1f);
+		blast.setColor(color[0], color[1], color[2]);
 		blast.setDuration(1);
 		blast.setPosition(x, y, z + radius/2);
 		blast.setRadius(range);
@@ -156,7 +157,7 @@ public class EntityPlasmaBolt extends Entity
 				double totalDamage = damage/distSqr;
 				double totalKB = knockback/distSqr;
 				
-				if(totalKB > knockback) totalKB = knockback;
+				if(Math.abs(totalKB) > Math.abs(knockback)) totalKB = knockback;
 				if (totalDamage > maxDamage) totalDamage = maxDamage;
 				e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, totalKB, false);
 			}

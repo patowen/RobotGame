@@ -12,7 +12,7 @@ import com.jogamp.common.nio.Buffers;
  * @author Michael Ekstrom
  * @author Patrick Owen
  */
-public class ModelPlasmaLauncher
+public class ModelPlasmaLauncherBig
 {
 	//Gun Barrel constants
 	private static int stacks;
@@ -60,8 +60,8 @@ public class ModelPlasmaLauncher
 		stacks = 20; orbStacks = 10;
 		slices = 20; phiCutoff = .775;
 		
-		length = .2f;//length of the ellipse
-		width = 0.045f;//maximum width of the ellipse
+		length = 1f;//length of the ellipse
+		width = 0.3f;//maximum width of the ellipse
 		
 		xyzpts = Buffers.newDirectFloatBuffer(6*(stacks+orbStacks)*(slices+1));
 		normals = Buffers.newDirectFloatBuffer(6*(stacks+orbStacks)*(slices+1));
@@ -102,8 +102,8 @@ public class ModelPlasmaLauncher
 		
 		hstacks = 20;
 		hslices = 20;
-		hbigrad = .04f;
-		hsmallrad = .01f;
+		hbigrad = .225f;
+		hsmallrad = .05f;
 		harc = .75f;
 		
 		hookpts = Buffers.newDirectFloatBuffer(6*hstacks*hslices);
@@ -217,7 +217,7 @@ public class ModelPlasmaLauncher
 		gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, 2 * (stacks+orbStacks) * (slices+1));
 		
 		gl.glRotated(220, 1, 0, 0);
-		gl.glTranslated(-.09, 0, 0);
+		gl.glTranslated(-.425, 0, 0);
 		drawHook(gl);
 		gl.glRotated(120, 1, 0, 0);
 		drawHook(gl);
