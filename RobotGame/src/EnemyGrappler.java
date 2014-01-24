@@ -30,7 +30,8 @@ public class EnemyGrappler extends Enemy implements Damageable
 	
 	private AITracking ai;
 	private boolean flip;
-	private double spin = 0;
+	private double speedspin = 0;//Increased spin of gun arms prior to firing
+	private double spin = 0;//Constant spin of gun arms
 	
 	/**
 	 * Creates a new EnemyTurret.
@@ -57,7 +58,7 @@ public class EnemyGrappler extends Enemy implements Damageable
 		shotDelay = 2;
 		shotHeight = 0.4;
 		shotDistance = 0.4;
-		shotSpeed = 20;
+		shotSpeed = 100;
 		range = 100;
 		
 		charge = shotDelay;
@@ -65,7 +66,7 @@ public class EnemyGrappler extends Enemy implements Damageable
 		ai = new AITracking(c, w, this);
 		ai.setControls(5, 1, 6, 9, 6, 1, 1, 1, 1, 3, 1);
 		
-		hp = 10;
+		hp = 5;
 	}
 	
 	public double getRadius()
@@ -128,19 +129,21 @@ public class EnemyGrappler extends Enemy implements Damageable
 			double yDisp = xDisp*Math.sin(horizontalDir) - shotY*Math.cos(horizontalDir);
 			xDisp = xDisp*Math.cos(horizontalDir) + shotY*Math.sin(horizontalDir);
 			
-			double t = w.getCollision().getBulletCollision(x, y, z, xDisp, yDisp, zDisp);
+			double t = w.getCollision().getBulletCollision(x, y, z, xDir*shotDistance+xDisp, yDir*shotDistance+yDisp, zDir*shotDistance+shotHeight+zDisp);
 			
 			if(t == 1)
 			{
 				beam.setPosition(x+xDir*shotDistance+xDisp, y+yDir*shotDistance+yDisp, z+zDir*shotDistance+shotHeight+zDisp);
 				beam.setVelocity(shotSpeed*xDir, shotSpeed*yDir, shotSpeed*zDir);
+				beam.setRange(3);
 				beam.setColor(.75f, 0.75f, 1f);
 				beam.setDamage(.25, -20);
 				beam.setOwner(this);
 				
 				c.getSoundHandler().playSound(0, x, y, z);
 				w.create(beam);
-			
+				
+				speedspin = 0;
 				charge = shotDelay;
 			}
 		}
@@ -225,7 +228,8 @@ public class EnemyGrappler extends Enemy implements Damageable
 	public void draw(GL2 gl)
 	{
 		GLUT glut = new GLUT();
-		spin+=3;
+		speedspin+=(shotDelay-charge)/shotDelay*20;
+		spin++;
 		//Color
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {0.6f,0.7f,0.9f,1}, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[] {0.4f,0.4f,0.4f,1}, 0);
@@ -238,7 +242,7 @@ public class EnemyGrappler extends Enemy implements Damageable
 		gl.glRotated(horizontalDir*180/Math.PI + 180, 0, 0, 1);
 		gl.glRotated(verticalDir*180/Math.PI, 0, 1, 0);
 		
-		glut.glutSolidSphere(radius/1.5, 24, 8);
+		glut.glutSolidSphere(radius/1.5, 24, 16);
 		gl.glTranslated(.1, 0, 0);
 		
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT_AND_DIFFUSE, new float[] {0.5f,0.5f,0.6f,1}, 0);
@@ -249,6 +253,8 @@ public class EnemyGrappler extends Enemy implements Damageable
 		ModelSawHook.draw(gl);
 		gl.glTranslated(-.55, .46, 0);
 		gl.glRotated(spin, 1, 0, 0);
+		if(flip)
+			gl.glRotated(speedspin, 1, 0, 0);
 		ModelPlasmaLauncherBig.draw(gl);
 		gl.glPopMatrix();
 		
@@ -258,6 +264,8 @@ public class EnemyGrappler extends Enemy implements Damageable
 		ModelSawHook.draw(gl);
 		gl.glTranslated(-.55, .46, 0);
 		gl.glRotated(-spin, 1, 0, 0);
+		if(!flip)
+			gl.glRotated(-speedspin, 1, 0, 0);
 		ModelPlasmaLauncherBig.draw(gl);
 		gl.glPopMatrix();
 		
@@ -265,6 +273,7 @@ public class EnemyGrappler extends Enemy implements Damageable
 		
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, new float[] {0,0,0,1}, 0);
 	}
+	
 	
 	//Apply damage and knockback. EnemyGrappler is highly resistant to knockback effects
 	public void applyDamage(double amount, double x, double y, double z, double knockBack, boolean absolute)

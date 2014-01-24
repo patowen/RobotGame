@@ -68,6 +68,15 @@ public class EntityPlasmaBolt extends Entity
 	}
 	
 	/**
+	 * Sets the range of the blast of the PlasmaBolt
+	 * @param newRange range
+	 */
+	public void setRange(double newRange)
+	{
+		range = newRange;
+	}
+	
+	/**
 	 * Sets the color of the bullet
 	 * @param red
 	 * @param green
