@@ -154,9 +154,11 @@ public class EntityPlasmaBolt extends Entity
 			{
 				double dist = Math.sqrt(distSqr);
 				double totalDamage = damage/distSqr;
+				double totalKB = knockback/distSqr;
 				
+				if(totalKB > knockback) totalKB = knockback;
 				if (totalDamage > maxDamage) totalDamage = maxDamage;
-				e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, knockback/distSqr, false);
+				e.applyDamage(totalDamage, xDiff/dist, yDiff/dist, zDiff/dist, totalKB, false);
 			}
 		}
 		

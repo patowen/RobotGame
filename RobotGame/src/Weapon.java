@@ -43,7 +43,7 @@ public class Weapon
 		input = c.getInputHandler();
 		maxEnergy = 100;
 		energy = maxEnergy;
-		energyRegen = 2.5;
+		energyRegen = 200.5;
 	}
 	
 	public void setPlayer(Player p)
