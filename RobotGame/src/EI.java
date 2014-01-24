@@ -12,6 +12,8 @@ public class EI
 	public static final int EnemyTracking = 0x0004;
 	public static final int EnemySplitting = 0x0005;
 	public static final int EnemyFortress = 0x0006;
+	public static final int EnemyRipper = 0x0007;
+	public static final int EnemyGrappler = 0x0008;
 	
 	public static final int EntityBullet = 0x0100;
 	public static final int EntityExplosion = 0x0101;
@@ -30,6 +32,8 @@ public class EI
 		case EnemyTracking: return new EnemyTracking(c, world);
 		case EnemySplitting: return new EnemySplitting(c, world);
 		case EnemyFortress: return new EnemyFortress(c, world);
+		case EnemyRipper: return new EnemyRipper(c, world);
+		case EnemyGrappler: return new EnemyGrappler(c, world);
 		
 		case EntityBullet: return new EntityBullet(c, world);
 		case EntityExplosion: return new EntityExplosion(c, world);

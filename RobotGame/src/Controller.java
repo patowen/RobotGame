@@ -82,6 +82,8 @@ public class Controller
 		ModelTurret.init(gl);
 		ModelPlasmaRifle.init(gl);
 		ModelPlasmaLauncher.init(gl);
+		ModelPlasmaLauncherBig.init(gl);
+		ModelSawHook.init(gl);
 		
 		soundHandler = new SoundHandler();
 		
