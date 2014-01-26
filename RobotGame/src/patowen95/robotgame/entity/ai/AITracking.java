@@ -1,7 +1,10 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.ai;
 import patowen95.robotgame.Collision;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Damageable;
+import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.enemy.Enemy;
 
 
 /**

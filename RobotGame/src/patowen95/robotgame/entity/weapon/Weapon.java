@@ -1,10 +1,11 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.weapon;
 import javax.media.opengl.GL2;
 
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.InputHandler;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Player;
 
 
 /**
@@ -52,12 +53,12 @@ public class Weapon
 		energyRegen = 2.5;
 	}
 	
-	protected void readState(NetworkPacket data)
+	public void readState(NetworkPacket data)
 	{
 		energy = data.getDouble();
 	}
 	
-	protected void writeState(NetworkPacket data)
+	public void writeState(NetworkPacket data)
 	{
 		data.addDouble(energy);
 	}

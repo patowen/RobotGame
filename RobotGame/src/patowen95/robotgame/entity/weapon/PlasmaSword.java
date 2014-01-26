@@ -1,4 +1,4 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.weapon;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
@@ -7,6 +7,12 @@ import patowen95.robotgame.Controller;
 import patowen95.robotgame.InputHandler;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Damageable;
+import patowen95.robotgame.entity.EI;
+import patowen95.robotgame.entity.Entity;
+import patowen95.robotgame.entity.EntityCreationListener;
+import patowen95.robotgame.entity.effect.EntityExplosion;
+import patowen95.robotgame.entity.effect.EntityFade;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
@@ -57,7 +63,7 @@ public class PlasmaSword extends Weapon implements EntityCreationListener
 		energyUse = 5;
 	}
 	
-	protected void readState(NetworkPacket data)
+	public void readState(NetworkPacket data)
 	{
 		super.readState(data);
 		
@@ -66,7 +72,7 @@ public class PlasmaSword extends Weapon implements EntityCreationListener
 		currentstep = data.getInt();
 	}
 	
-	protected void writeState(NetworkPacket data)
+	public void writeState(NetworkPacket data)
 	{
 		super.writeState(data);
 		

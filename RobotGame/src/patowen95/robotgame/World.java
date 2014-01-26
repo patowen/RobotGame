@@ -9,10 +9,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.media.opengl.GL2;
 
-import patowen95.robotgame.entity.Enemy;
 import patowen95.robotgame.entity.Entity;
 import patowen95.robotgame.entity.EntityCreationListener;
 import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.enemy.Enemy;
 import patowen95.robotgame.menu.MainMenu;
 
 import com.jogamp.opengl.util.texture.Texture;

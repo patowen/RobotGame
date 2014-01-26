@@ -1,6 +1,19 @@
 package patowen95.robotgame.entity;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.effect.EntityExplosion;
+import patowen95.robotgame.entity.effect.EntityFade;
+import patowen95.robotgame.entity.enemy.EnemyFortress;
+import patowen95.robotgame.entity.enemy.EnemyGrappler;
+import patowen95.robotgame.entity.enemy.EnemyObstacle;
+import patowen95.robotgame.entity.enemy.EnemyRipper;
+import patowen95.robotgame.entity.enemy.EnemyShocking;
+import patowen95.robotgame.entity.enemy.EnemySplitting;
+import patowen95.robotgame.entity.enemy.EnemyTracking;
+import patowen95.robotgame.entity.enemy.EnemyTurret;
+import patowen95.robotgame.entity.weapon.EntityBullet;
+import patowen95.robotgame.entity.weapon.EntityPlasmaBolt;
+import patowen95.robotgame.entity.weapon.EntityRocket;
 
 
 /**

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import patowen95.robotgame.entity.Damageable;
 import patowen95.robotgame.entity.EI;
 import patowen95.robotgame.entity.Entity;
-import patowen95.robotgame.entity.EntityExplosion;
+import patowen95.robotgame.entity.effect.EntityExplosion;
 
 
 /**

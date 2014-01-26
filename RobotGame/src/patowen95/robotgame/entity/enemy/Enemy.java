@@ -1,6 +1,7 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.enemy;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Entity;
 
 /**
  * Superclass for all enemies in the game.

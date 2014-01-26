@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
-import patowen95.robotgame.entity.Weapon;
+import patowen95.robotgame.entity.weapon.Weapon;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 

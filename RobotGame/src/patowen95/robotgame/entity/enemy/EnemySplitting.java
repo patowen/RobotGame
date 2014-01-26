@@ -1,6 +1,7 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.enemy;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.EI;
 
 /**
  * This enemy is similar in behavior to EnemyShocking, except that it divides when hit into two smaller entities

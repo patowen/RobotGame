@@ -1,8 +1,12 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.weapon;
 import javax.media.opengl.GL2;
 
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Damageable;
+import patowen95.robotgame.entity.EI;
+import patowen95.robotgame.entity.Entity;
+import patowen95.robotgame.entity.effect.EntityFade;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 

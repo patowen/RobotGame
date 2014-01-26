@@ -7,6 +7,11 @@ import patowen95.robotgame.Controller;
 import patowen95.robotgame.InputHandler;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.effect.EntityExplosion;
+import patowen95.robotgame.entity.weapon.PlasmaLauncher;
+import patowen95.robotgame.entity.weapon.PlasmaRifle;
+import patowen95.robotgame.entity.weapon.PlasmaSword;
+import patowen95.robotgame.entity.weapon.Weapon;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 

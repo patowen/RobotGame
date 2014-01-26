@@ -1,8 +1,9 @@
-package patowen95.robotgame.entity;
+package patowen95.robotgame.entity.effect;
 import javax.media.opengl.GL2;
 
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
+import patowen95.robotgame.entity.Entity;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
