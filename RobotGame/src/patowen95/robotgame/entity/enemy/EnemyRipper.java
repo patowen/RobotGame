@@ -5,7 +5,8 @@ import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
 import patowen95.robotgame.entity.Damageable;
 import patowen95.robotgame.entity.Entity;
-import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.EntityPlayer;
+import patowen95.robotgame.entity.EntityPlayerBasic;
 import patowen95.robotgame.entity.ai.AITracking;
 import patowen95.robotgame.model.ModelSawHook;
 
@@ -147,9 +148,9 @@ public class EnemyRipper extends Enemy implements Damageable
 		{
 			for (Entity e : w.getEntities())
 			{
-				if (!(e instanceof Player))
+				if (!(e instanceof EntityPlayer))
 					continue;
-				Player player = (Player)e;
+				EntityPlayer player = (EntityPlayer)e;
 				if (player.isGhost()) continue;
 				double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()+player.getHeight()/2 - z - height/2;
 				
@@ -177,9 +178,9 @@ public class EnemyRipper extends Enemy implements Damageable
 		 * Based on coordinate differences, find the horizontal and vertical directions from the turret to the player.
 		 * Modify the horizontal and vertical directions of the turret smoothly to face the player.
 		 */
-		Player player = w.getPlayer();
+		EntityPlayerBasic player = w.getPlayer();
 		if (player.isDead()) return;
-		double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()+player.getHeight()/2-z-height/2;
+		double xDiff = player.getTargetX()-x, yDiff = player.getTargetY()-y, zDiff = player.getTargetZ()-z-height/2;
 		
 		double xyDiff = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
 		
@@ -233,7 +234,7 @@ public class EnemyRipper extends Enemy implements Damageable
 		
 		if (t2 == 1) return false;
 		
-		if (entityToDamage instanceof Player) return true;
+		if (entityToDamage instanceof EntityPlayer) return true;
 		
 		return false;
 	}

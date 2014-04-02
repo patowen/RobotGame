@@ -42,7 +42,7 @@ public class EI
 	{
 		switch (type)
 		{
-		case Player: return new Player(c, world);
+		case Player: return new EntityPlayer(c, world);
 		case EnemyObstacle: return new EnemyObstacle(c, world);
 		case EnemyTurret: return new EnemyTurret(c, world);
 		case EnemyShocking: return new EnemyShocking(c, world);

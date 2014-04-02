@@ -1,7 +1,12 @@
 package patowen95.robotgame.entity;
+import java.io.IOException;
+
 import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.math.Quaternion;
+
 import patowen95.robotgame.Controller;
+import patowen95.robotgame.ImportStream;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
 
@@ -9,7 +14,7 @@ import patowen95.robotgame.World;
  * Represents any in-game object that can be encountered by the player, including the player. 
  * @author Patrick Owen
  */
-public class Entity
+public abstract class Entity
 {
 	protected Controller c;
 	
@@ -32,7 +37,7 @@ public class Entity
 	 * @param world The world where the Entity is placed.
 	 */
 	public Entity(Controller controller, World world)
-	{		
+	{
 		c = controller;
 		w = world;
 		if (w == null)
@@ -184,21 +189,18 @@ public class Entity
 	}
 	
 	/**
-	 * Initializes data not common to all entities.
+	 * Initializes data as imported in a file.
 	 * @param index The index of the data that must be initialized
 	 * @param data The value of the data.
 	 */
-	public void initializeExtraData(int index, double data)
+	public void initializeData(ImportStream input) throws IOException
 	{
-		
-	}
-	
-	/**
-	 * Returns how many pieces of data there need to be other than location to fully initialize the entity.
-	 */
-	public int getAmountExtraData()
-	{
-		return 0;
+		x = input.getDouble();
+		y = input.getDouble();
+		z = input.getDouble();
+		xV = input.getDouble();
+		yV = input.getDouble();
+		zV = input.getDouble();
 	}
 	
 	/**

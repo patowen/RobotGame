@@ -4,7 +4,7 @@ import javax.media.opengl.GL2;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
 import patowen95.robotgame.entity.Damageable;
-import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.EntityPlayer;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
@@ -37,24 +37,24 @@ public class EnemyObstacle extends Enemy implements Damageable
 	{
 		super.step(dt);
 		
-		Player player = w.getPlayer();
-		double pX = player.getX(), pY = player.getY(), pZ = player.getZ(), pR = player.getRadius(), pH = player.getHeight();
-		
-		if (z+height >= pZ && z <= pZ+pH) //Check for z being in bounds
-		{
-			if ((x-pX)*(x-pX) + (y-pY)*(y-pY) < radius+pR) //Check for x and y being in bounds
-			{
-				double xFrom, yFrom, zFrom, fromMag;
-				
-				xFrom = x-pX; yFrom = y-pY; zFrom = (z+height/2)-(pZ+pH/2);
-				fromMag = Math.sqrt(xFrom*xFrom + yFrom*yFrom + zFrom*zFrom);
-				xFrom /= fromMag; yFrom /= fromMag; zFrom /= fromMag;
-				
-				player.applyDamage(1, xFrom, yFrom, zFrom, 4, true);
-			}
-		}
-		
-		if (hp <= 0) delete();
+//		EntityPlayer player = w.getPlayer();
+//		double pX = player.getX(), pY = player.getY(), pZ = player.getZ(), pR = player.getRadius(), pH = player.getHeight();
+//		
+//		if (z+height >= pZ && z <= pZ+pH) //Check for z being in bounds
+//		{
+//			if ((x-pX)*(x-pX) + (y-pY)*(y-pY) < radius+pR) //Check for x and y being in bounds
+//			{
+//				double xFrom, yFrom, zFrom, fromMag;
+//				
+//				xFrom = x-pX; yFrom = y-pY; zFrom = (z+height/2)-(pZ+pH/2);
+//				fromMag = Math.sqrt(xFrom*xFrom + yFrom*yFrom + zFrom*zFrom);
+//				xFrom /= fromMag; yFrom /= fromMag; zFrom /= fromMag;
+//				
+//				player.applyDamage(1, xFrom, yFrom, zFrom, 4, true);
+//			}
+//		}
+//		
+//		if (hp <= 0) delete();
 	}
 	
 	public void draw(GL2 gl)

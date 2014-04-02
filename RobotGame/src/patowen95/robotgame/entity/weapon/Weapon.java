@@ -5,7 +5,7 @@ import patowen95.robotgame.Controller;
 import patowen95.robotgame.InputHandler;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
-import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.EntityPlayer;
 
 
 /**
@@ -20,7 +20,7 @@ public class Weapon
 	protected Controller c;
 	protected World w;
 	
-	protected Player player;
+	protected EntityPlayer player;
 	protected InputHandler input;
 	
 	protected String name;
@@ -63,7 +63,7 @@ public class Weapon
 		data.addDouble(energy);
 	}
 	
-	public void setPlayer(Player p)
+	public void setPlayer(EntityPlayer p)
 	{
 		player = p;
 	}

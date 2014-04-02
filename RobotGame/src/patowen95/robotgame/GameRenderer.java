@@ -5,6 +5,8 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 
+import patowen95.robotgame.utilities.MapArenaGenerator;
+
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
@@ -31,6 +33,8 @@ public class GameRenderer implements GLEventListener
 	 */
 	public GameRenderer()
 	{
+		(new MapArenaGenerator()).generateMap();
+		
 		GLProfile glp = GLProfile.getDefault();
 		GLCapabilities caps = new GLCapabilities(glp);
 		

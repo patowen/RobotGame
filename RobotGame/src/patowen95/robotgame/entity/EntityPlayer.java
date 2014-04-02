@@ -1,9 +1,12 @@
 package patowen95.robotgame.entity;
+import java.io.IOException;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 
 import patowen95.robotgame.Controller;
+import patowen95.robotgame.ImportStream;
 import patowen95.robotgame.InputHandler;
 import patowen95.robotgame.NetworkPacket;
 import patowen95.robotgame.World;
@@ -19,9 +22,9 @@ import com.jogamp.opengl.util.gl2.GLUT;
  * Handles the controls and situation of the player. This class represents the player of the game.
  * @author Patrick Owen
  */
-public class Player extends Entity implements Damageable
+public class EntityPlayer extends EntityPlayerBasic implements Damageable
 {
-	private InputHandler input;
+	private HUD hud;
 	
 	private double horizontalDir, verticalDir;
 	
@@ -34,7 +37,6 @@ public class Player extends Entity implements Damageable
 	private double invincibilityLeft;
 	
 	private double hp;
-	private boolean isDead;
 	
 	//Constants
 	private double radius, height;
@@ -55,7 +57,7 @@ public class Player extends Entity implements Damageable
 	 * @param controller The active Controller object.
 	 * @param world Level where the player is placed.
 	 */
-	public Player(Controller controller, World world)
+	public EntityPlayer(Controller controller, World world)
 	{
 		super(controller, world);
 		
@@ -92,6 +94,9 @@ public class Player extends Entity implements Damageable
 		
 		hp = maxHp;
 		isDead = false;
+		
+		hud = new HUD(c, world, this);
+		c.setHUD(hud);
 	}
 	
 	protected void readState(NetworkPacket data)
@@ -102,7 +107,6 @@ public class Player extends Entity implements Damageable
 		verticalDir = data.getDouble();
 		currentWeapon = data.getInt();
 		hp = data.getDouble();
-		isDead = data.getByte() != 0;
 		
 		weapons[currentWeapon].readState(data);
 	}
@@ -114,9 +118,33 @@ public class Player extends Entity implements Damageable
 		data.addDoubles(horizontalDir, verticalDir);
 		data.addInt(currentWeapon);
 		data.addDouble(hp);
-		data.addByte(isDead?1:0);
 		
 		weapons[currentWeapon].writeState(data);
+	}
+	
+	public double getTargetX()
+	{
+		return x;
+	}
+	
+	public double getTargetY()
+	{
+		return y;
+	}
+	
+	public double getTargetZ()
+	{
+		return z+height/2;
+	}
+	
+	public void setHorizontalDir(double dir)
+	{
+		horizontalDir = dir;
+	}
+	
+	public void setVerticalDir(double dir)
+	{
+		verticalDir = dir;
 	}
 	
 	/**
@@ -148,11 +176,6 @@ public class Player extends Entity implements Damageable
 	{
 		if(!isDead)
 			weapons[currentWeapon].draw2(gl);
-	}
-	
-	public boolean isGhost()
-	{
-		return !isActive && isDead;
 	}
 	
 	/**
@@ -207,7 +230,7 @@ public class Player extends Entity implements Damageable
 		x = temp;
 		
 		if (isLocal)
-			c.getHUD().addHitMark(Math.atan2(z, -y));
+			hud.addHitMark(Math.atan2(z, -y));
 	}
 	
 	/**
@@ -272,20 +295,10 @@ public class Player extends Entity implements Damageable
 	 * 0: Horizontal facing direction<br/>
 	 * 1: Vertical facing direction
 	 */
-	public void initializeExtraData(int index, double data)
+	public void initializeData(ImportStream input) throws IOException
 	{
-		switch (index)
-		{
-		case 0:
-			horizontalDir = data;
-		case 1:
-			verticalDir = data;
-		}
-	}
-	
-	public int getAmountExtraData()
-	{
-		return 2;
+		horizontalDir = input.getDouble();
+		verticalDir = input.getDouble();
 	}
 	
 	/**
@@ -336,6 +349,8 @@ public class Player extends Entity implements Damageable
 				isDead = true;
 			}
 		}
+		
+		hud.step(dt);
 	}
 	
 	/**

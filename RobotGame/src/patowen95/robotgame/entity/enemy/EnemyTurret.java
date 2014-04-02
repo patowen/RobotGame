@@ -7,7 +7,8 @@ import patowen95.robotgame.entity.Collidable;
 import patowen95.robotgame.entity.Damageable;
 import patowen95.robotgame.entity.EI;
 import patowen95.robotgame.entity.Entity;
-import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.EntityPlayer;
+import patowen95.robotgame.entity.EntityPlayerBasic;
 import patowen95.robotgame.entity.weapon.EntityBullet;
 import patowen95.robotgame.model.ModelTurret;
 
@@ -93,7 +94,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 			charge = shotDelay;
 		}
 		
-		Player player = w.getPlayer();
+		EntityPlayerBasic player = w.getPlayer();
 		double xDiff = player.getX()-x, yDiff = player.getY()-y, zDiff = player.getZ()-z;
 		double xyDiff = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
 		
@@ -152,7 +153,7 @@ public class EnemyTurret extends Enemy implements Collidable, Damageable
 		
 		if (t2 == 1) return true;
 		
-		if (entityToDamage instanceof Player) return true;
+		if (entityToDamage instanceof EntityPlayer) return true;
 		
 		return false;
 	}

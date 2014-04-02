@@ -32,7 +32,7 @@ public class EntityRocket extends Entity implements Damageable
 	private double maxDamage;
 	private double knockback;
 	
-	private Damageable target;
+	private Entity target;
 	private Entity owner;
 	
 	private boolean isDestroyed;
@@ -65,7 +65,7 @@ public class EntityRocket extends Entity implements Damageable
 	 * Sets the target that the rocket is aiming for to the specified entity.
 	 * @param newTarget
 	 */
-	public void setTarget(Damageable newTarget)
+	public void setTarget(Entity newTarget)
 	{
 		target = newTarget;
 	}
@@ -163,7 +163,9 @@ public class EntityRocket extends Entity implements Damageable
 		{
 			double xDiff = target.getX()-x;
 			double yDiff = target.getY()-y;
-			double zDiff = (target.getZ()+target.getHeight()/2)-(z+height/2);
+			double zDiff = target.getZ()-(z+height/2);
+			if (target instanceof Damageable)
+				zDiff += ((Damageable)target).getHeight()/2;
 			double diff = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
 			
 			if (diff != 0)

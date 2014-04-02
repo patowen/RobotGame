@@ -10,6 +10,7 @@ import javax.media.opengl.glu.GLU;
 
 import patowen95.robotgame.entity.EI;
 import patowen95.robotgame.entity.Entity;
+import patowen95.robotgame.entity.HUD;
 import patowen95.robotgame.menu.MainMenu;
 import patowen95.robotgame.menu.Menu;
 import patowen95.robotgame.menu.PauseMenu;
@@ -84,7 +85,6 @@ public class Controller
 		gl.glClearColor(0, 0, 0, 1);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glEnable(GL2.GL_CULL_FACE);
-		gl.glEnable(GL2.GL_TEXTURE_2D);
 		
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
@@ -291,7 +291,8 @@ public class Controller
 			gl.glDisable(GL2.GL_LIGHTING);
 			gl.glDisable(GL2.GL_DEPTH_TEST);		
 			
-			hud.draw(gl, width, height);
+			if (hud != null)
+				hud.draw(gl, width, height);
 			
 			if (paused)
 				pauseMenu.draw(gl);
@@ -350,9 +351,7 @@ public class Controller
 				input.setInputEnabled(true);
 			
 			if (currentLevel != null)
-			{
-				hud.step(dt);
-				
+			{				
 				if (input.getKeyPressed(InputHandler.PAUSE))
 				{
 					setPaused(true);
@@ -401,10 +400,14 @@ public class Controller
 		pauseMenu = new PauseMenu(this);
 		paused = false;
 		currentLevel = new World(this, new File("maps" + File.separator + levelName)); //levelName
-		hud = new HUD(this, currentLevel);
 		currentMenu = null;
 		win.setPointerVisible(false);
 		input.readMouse();
+	}
+	
+	public void setHUD(HUD hud)
+	{
+		this.hud = hud;
 	}
 	
 	public World getCurrentLevel()

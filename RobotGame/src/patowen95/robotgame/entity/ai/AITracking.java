@@ -3,7 +3,8 @@ import patowen95.robotgame.Collision;
 import patowen95.robotgame.Controller;
 import patowen95.robotgame.World;
 import patowen95.robotgame.entity.Damageable;
-import patowen95.robotgame.entity.Player;
+import patowen95.robotgame.entity.EntityPlayer;
+import patowen95.robotgame.entity.EntityPlayerBasic;
 import patowen95.robotgame.entity.enemy.Enemy;
 
 
@@ -98,7 +99,7 @@ public class AITracking extends AIBasic
 	//Handles the AI-decided movement of the turret; pays no attention to terrain
 	private void handleMovement(double dt)
 	{
-		Player player = w.getPlayer();
+		EntityPlayerBasic player = w.getPlayer();
 		if (!player.isDead())
 		{
 			/*
@@ -166,7 +167,7 @@ public class AITracking extends AIBasic
 	
 	private boolean canGoToPlayer()
 	{
-		Player p = w.getPlayer();
+		EntityPlayerBasic p = w.getPlayer();
 		double px = (p.getX())-(x);
 		double py = (p.getY())-(y);
 		double pz = (p.getZ())-(z)+preferredHeight;
