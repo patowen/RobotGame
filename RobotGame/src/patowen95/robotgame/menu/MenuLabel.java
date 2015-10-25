@@ -1,7 +1,7 @@
 package patowen95.robotgame.menu;
 import java.awt.Font;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 

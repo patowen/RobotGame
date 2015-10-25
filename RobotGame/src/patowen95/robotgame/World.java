@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import patowen95.robotgame.entity.Entity;
 import patowen95.robotgame.entity.EntityCreationListener;

@@ -2,7 +2,7 @@ package patowen95.robotgame.menu;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import patowen95.robotgame.InputHandler;
 

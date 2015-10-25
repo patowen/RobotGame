@@ -1,5 +1,5 @@
 package patowen95.robotgame.menu;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 
