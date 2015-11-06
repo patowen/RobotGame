@@ -50,7 +50,7 @@ public class GameRenderer implements GLEventListener
 		
 		fps = 60;
 		
-		anim = new FPSAnimator(win, fps);
+		anim = new FPSAnimator(win, fps, true);
 		anim.start();
 		
 		c = new Controller(win, anim);
